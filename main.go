@@ -95,7 +95,7 @@ var (
 func main() {
 	cmd.Execute()
 
-	if true {
+	if false {
 		return
 	}
 
@@ -124,6 +124,11 @@ func main() {
 	//fmt.Println("•••\n•••\n•••") // create tailscale logo???
 	fmt.Printf(ui.Styles.Faint.Render("\nTailnet Query: "))
 	fmt.Println(ui.Styles.Bold.Render("tips blade*"))
+
+	if len(enrichedResults) > 0 {
+		fmt.Printf(ui.Styles.Faint.Render(fmt.Sprintf("Self (%d): ", 2)))
+		fmt.Println(ui.Styles.Bold.Render(pkg.SelfDevice(enrichedResults).DNSName))
+	}
 
 	client, err := tailscale.NewClient(
 		api_key, // When doing oauth, this field must be blank!!!

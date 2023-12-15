@@ -36,7 +36,9 @@ const (
 )
 
 type DeviceInfo struct {
-	Online bool
+	DNSName string
+	IsSelf  bool
+	Online  bool
 }
 
 func TailScaleVersion() (string, error) {
@@ -77,14 +79,16 @@ func GetDevicesStatuses() (map[string]DeviceInfo, error) {
 	// Grab the Self info.
 	selfNodeKey := gjson.Get(jo, "Self.PublicKey").String()
 	selfOnline := gjson.Get(jo, "Self.Online").Bool()
-	results[selfNodeKey] = DeviceInfo{Online: selfOnline}
+	selfDNSName := gjson.Get(jo, "Self.DNSName").String()
+	results[selfNodeKey] = DeviceInfo{DNSName: selfDNSName, Online: selfOnline, IsSelf: true}
 
 	// Grab the peers
 	peers := gjson.Get(jo, "Peer")
 	peers.ForEach(func(key, value gjson.Result) bool {
 		peerNodeKey := value.Get("PublicKey").String()
 		peerOnline := value.Get("Online").Bool()
-		results[peerNodeKey] = DeviceInfo{Online: peerOnline}
+		dnsName := value.Get("DNSName").String()
+		results[peerNodeKey] = DeviceInfo{DNSName: dnsName, Online: peerOnline, IsSelf: false}
 		return true
 	})
 
