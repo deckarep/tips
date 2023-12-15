@@ -1,0 +1,9 @@
+[settings.cli]
+cache_enabled = true
+cache_duration = "5m"
+cache_location = "$HOME/.tips.cache"
+
+[settings.api]
+use_oauth_authentication = false
+timeout_duration = "5s"
+
