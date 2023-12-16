@@ -35,10 +35,13 @@ func renderProlog(ctx context.Context, tableView *GeneralTableView, w io.Writer)
 	fmt.Fprintf(w, ui.Styles.Faint.Render("\nTailnet: "))
 	fmt.Fprintln(w, ui.Styles.Bold.Render(tableView.Tailnet))
 
-	// Show user's query:
-	//fmt.Println("•••\n•••\n•••") // create tailscale logo???
 	fmt.Fprintf(w, ui.Styles.Faint.Render("Tailnet Query: "))
-	fmt.Fprintln(w, ui.Styles.Bold.Render("tips blade*"))
+	fmt.Fprintln(w, ui.Styles.Bold.Render(tableView.Query))
+
+	if len(tableView.DNSName) > 0 {
+		fmt.Fprintf(w, ui.Styles.Faint.Render(fmt.Sprintf("Self (%d): ", tableView.SelfView.Index)))
+		fmt.Fprintln(w, ui.Styles.Bold.Render(tableView.SelfView.DNSName))
+	}
 
 	return nil
 }
@@ -97,10 +100,10 @@ func renderBody(ctx context.Context, tableView *GeneralTableView, w io.Writer) e
 func renderEpilog(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
 	// Render machine count and elapsed secs.
 	fmt.Fprint(w, ui.Styles.Faint.Render("Total Machines: "))
-	fmt.Fprint(w, ui.Styles.Bold.Render(fmt.Sprintf("%d", -1))) //len(devList))))
+	fmt.Fprint(w, ui.Styles.Bold.Render(fmt.Sprintf("%d", tableView.TotalMachines)))
 
 	fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed (secs): "))
-	fmt.Fprintln(w, ui.Styles.Bold.Render("-2.33"))
+	fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2f", tableView.APIElapsed.Seconds())))
 
 	return nil
 }

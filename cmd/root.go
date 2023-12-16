@@ -36,7 +36,6 @@ import (
 	"os"
 	"time"
 	"tips/app"
-	"tips/pkg"
 )
 
 var (
@@ -48,17 +47,22 @@ var (
 	sortOrder     string
 	tailnet       string
 	useCSSHX      bool
+	useOauth      bool
 	useSSH        bool
+
+	foo string
 )
 
 func init() {
 	//cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVarP(&foo, "foo", "", "blah", "foo is a test flag")
 	rootCmd.PersistentFlags().StringVarP(&sortOrder, "sort", "s", "", "overrides the default/configured sort order --sort 'machine,addresss'")
 	rootCmd.PersistentFlags().StringVarP(&tailnet, "tailnet", "t", "", "the tailnet to operate on")
 	rootCmd.PersistentFlags().IntVarP(&concurrency, "concurrency", "c", 5, "concurrency level when executing requests")
 	rootCmd.PersistentFlags().StringVarP(&filter, "filter", "f", "", "if provided, applies filtering logic: --filter 'tag:tunnel'")
 	rootCmd.PersistentFlags().BoolVar(&useCSSHX, "csshx", false, "if csshx is installed, opens a multi-window session over all matching hosts")
 	rootCmd.PersistentFlags().BoolVar(&useSSH, "ssh", false, "ssh into a matching single host")
+	rootCmd.PersistentFlags().BoolVar(&useOauth, "oauth", false, "use oauth when flag is provided.")
 	rootCmd.PersistentFlags().DurationVarP(&clientTimeout, "client_timeout", "", time.Second*5, "timeout duration for the Tailscale api")
 	// Note: Not sure if this flag is useful.
 	rootCmd.PersistentFlags().DurationVarP(&cliTimeout, "cli_timeout", "", time.Second*5, "timeout duration for the Tailscale cli")
@@ -67,6 +71,8 @@ func init() {
 	//rootCmd.PersistentFlags().StringP("author", "a", "Ralph Caraveo <deckarep@gmail.com>", "Author name for copyright attribution")
 	//rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "Name of license for the project (can provide `licensetext` in config)")
 	//rootCmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
+	viper.BindPFlag("foo", rootCmd.PersistentFlags().Lookup("foo"))
+	//viper.SetDefault("foo", "barf")
 	//viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
 	//viper.BindPFlag("projectbase", rootCmd.PersistentFlags().Lookup("projectbase"))
 	//viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
@@ -84,23 +90,23 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
+		log.Warnf("foo=%s", viper.GetString("foo"))
+
 		// TODO: make this configurable
 		api_key := os.Getenv("tips_api_key")
 		// TODO: make this configurable
 		tailnet = "deckarep@gmail.com"
 
-		client := func() *tailscale.Client {
-			client, err := tailscale.NewClient(
-				api_key, // When doing oauth, this field must be blank!!!
-				tailnet,
-				//tailscale.WithOAuthClientCredentials(oauthClientID, oauthClientSecret, nil),
-				tailscale.WithUserAgent(pkg.UserAgent),
-			)
-			if err != nil {
-				log.Fatal("failed to create client with err: ", err)
-			}
-			return client
-		}()
+		// Populate context key/values as needed
+		ctx = context.WithValue(ctx, app.CtxKeyUserQuery, "tips blade*")
+
+		var client *tailscale.Client
+		if !useOauth {
+			client = app.NewClient(api_key, tailnet)
+		} else {
+			// TODO: populate these values correctly.
+			client = app.NewOauthClient("", "", tailnet)
+		}
 
 		devList, devEnriched, err := app.DevicesResource(ctx, client)
 		if err != nil {

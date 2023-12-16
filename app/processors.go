@@ -5,6 +5,7 @@ import (
 	"context"
 	"github.com/tailscale/tailscale-client-go/tailscale"
 	"slices"
+	"time"
 	"tips/pkg/tailscale_cli"
 )
 
@@ -26,12 +27,26 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 
 	// 3. Massage - final transformations here.
 	return &GeneralTableView{
+		ContextView: ContextView{
+			Query:      CtxAsString(ctx, CtxKeyUserQuery),
+			APIElapsed: time.Duration(time.Second * 2),
+			CLIElapsed: time.Duration(time.Second * 3),
+		},
 		TailnetView: TailnetView{
-			Tailnet: "deckarep@gmail.com",
+			Tailnet:       "deckarep@gmail.com",
+			TotalMachines: 15,
+		},
+		SelfView: SelfView{
+			Index:   0,
+			DNSName: "foo.bar.3234.dns.name.",
 		},
 		Headers: []string{"No", "Bar", "Baz"},
 		Rows: [][]string{
 			{"0", "foo1", "foo2"},
+			{"1", "foo1", "foo2"},
+			{"2", "foo1", "foo2"},
+			{"3", "foo1", "foo2"},
+			{"4", "foo1", "foo2"},
 		},
 	}, nil
 }

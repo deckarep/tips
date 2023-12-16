@@ -1,8 +1,22 @@
 package app
 
+import "time"
+
 // TailnetView has everything known about a Tailnet
 type TailnetView struct {
-	Tailnet string
+	Tailnet       string
+	TotalMachines int
+}
+
+type ContextView struct {
+	Query      string
+	APIElapsed time.Duration
+	CLIElapsed time.Duration
+}
+
+type SelfView struct {
+	Index   int
+	DNSName string
 }
 
 // DevicesView has everything needed to be rendered.
@@ -15,7 +29,9 @@ type DevicesTable struct {
 }
 
 type GeneralTableView struct {
+	ContextView
 	TailnetView
+	SelfView
 	Headers []string
 	Rows    [][]string
 }
