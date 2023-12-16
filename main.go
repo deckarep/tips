@@ -31,10 +31,10 @@ import (
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
+	"github.com/charmbracelet/log"
 	"github.com/dustin/go-humanize"
 	"github.com/spf13/viper"
 	"github.com/tailscale/tailscale-client-go/tailscale"
-	"log"
 	"os"
 	"slices"
 	"strconv"
@@ -60,6 +60,7 @@ TODO: nail down the default table header/columns, provide config to enable disab
 TODO: themify for TailScale, or enable theming feature
 TODO: allow for easy filtering
 TODO: ssh into node
+TODO: similar to ssh, what about curl/http requests to all selected nodes?
 TODO: default client timeout, configurable
 TODO: support --ssh (single) or --csshx all hosts!
 	- brew install parera10/csshx/csshx (original csshx is broken on recent macos)
@@ -90,12 +91,25 @@ var (
 	oauthClientSecret = os.Getenv("tips_secret")
 
 	api_key = os.Getenv("tips_api_key")
+
+	client = func() *tailscale.Client {
+		client, err := tailscale.NewClient(
+			api_key, // When doing oauth, this field must be blank!!!
+			tailnet,
+			//tailscale.WithOAuthClientCredentials(oauthClientID, oauthClientSecret, nil),
+			tailscale.WithUserAgent(pkg.UserAgent),
+		)
+		if err != nil {
+			log.Fatal("failed to create client with err: ", err)
+		}
+		return client
+	}()
 )
 
 func main() {
 	cmd.Execute()
 
-	if false {
+	if true {
 		return
 	}
 
@@ -104,7 +118,7 @@ func main() {
 	viper.SetConfigType("toml")        // Look for specific type
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Println("config file was not found, falling back to defaults.")
+			log.Warn("config file was not found, falling back to defaults.")
 		} else {
 			log.Fatal("issue reading viper config file exiting with err: ", err)
 		}
@@ -120,24 +134,18 @@ func main() {
 
 	startTime := time.Now()
 
+	// Show tailnet inspecting:
+	fmt.Printf(ui.Styles.Faint.Render("\nTailnet: "))
+	fmt.Println(ui.Styles.Bold.Render(tailnet))
+
 	// Show user's query:
 	//fmt.Println("•••\n•••\n•••") // create tailscale logo???
-	fmt.Printf(ui.Styles.Faint.Render("\nTailnet Query: "))
+	fmt.Printf(ui.Styles.Faint.Render("Tailnet Query: "))
 	fmt.Println(ui.Styles.Bold.Render("tips blade*"))
 
 	if len(enrichedResults) > 0 {
 		fmt.Printf(ui.Styles.Faint.Render(fmt.Sprintf("Self (%d): ", 2)))
 		fmt.Println(ui.Styles.Bold.Render(pkg.SelfDevice(enrichedResults).DNSName))
-	}
-
-	client, err := tailscale.NewClient(
-		api_key, // When doing oauth, this field must be blank!!!
-		tailnet,
-		//tailscale.WithOAuthClientCredentials(oauthClientID, oauthClientSecret, nil),
-		tailscale.WithUserAgent(pkg.UserAgent),
-	)
-	if err != nil {
-		log.Fatal("failed to create client with err: ", err)
 	}
 
 	ctx := context.Background()
@@ -224,13 +232,6 @@ func main() {
 	fmt.Println(ui.Styles.Bold.Render(fmt.Sprintf("%.2f", elapsedTime.Seconds())))
 }
 
-func getHeaders(enrichedResults map[string]tailscale_cli.DeviceInfo) []string {
-	if len(enrichedResults) > 0 {
-		return []string{"No", "Machine", "Address", "Tags", "User", "Version", "LastSeen"}
-	}
-	return []string{"No", "Machine", "Address", "Tags", "User", "Version", "LastSeen"}
-}
-
 func getRowField(enrichedResults map[string]tailscale_cli.DeviceInfo, idx int, d tailscale.Device) []string {
 	// You can also add tables row-by-row
 
@@ -255,4 +256,11 @@ func getRowField(enrichedResults map[string]tailscale_cli.DeviceInfo, idx int, d
 		return []string{strconv.Itoa(idx), d.Hostname, d.Addresses[0], tags, d.User, version, seenAgo}
 	}
 	return []string{strconv.Itoa(idx), d.Hostname, d.Addresses[0], tags, d.User, version, seenAgo}
+}
+
+func getHeaders(enrichedResults map[string]tailscale_cli.DeviceInfo) []string {
+	if len(enrichedResults) > 0 {
+		return []string{"No", "Machine", "Address", "Tags", "User", "Version", "LastSeen"}
+	}
+	return []string{"No", "Machine", "Address", "Tags", "User", "Version", "LastSeen"}
 }

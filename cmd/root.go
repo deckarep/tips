@@ -26,28 +26,42 @@ SOFTWARE.
 package cmd
 
 import (
+	"context"
 	"fmt"
-	"os"
-
+	"github.com/charmbracelet/log"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tailscale/tailscale-client-go/tailscale"
+	"os"
+	"time"
+	"tips/app"
+	"tips/pkg"
 )
 
 var (
-	cfgFile     string
-	concurrency int
-	filter      string
-	useCSSHX    bool
-	useSSH      bool
+	cfgFile       string
+	clientTimeout time.Duration
+	cliTimeout    time.Duration
+	concurrency   int
+	filter        string
+	sortOrder     string
+	tailnet       string
+	useCSSHX      bool
+	useSSH        bool
 )
 
 func init() {
 	//cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVarP(&sortOrder, "sort", "s", "", "overrides the default/configured sort order --sort 'machine,addresss'")
+	rootCmd.PersistentFlags().StringVarP(&tailnet, "tailnet", "t", "", "the tailnet to operate on")
 	rootCmd.PersistentFlags().IntVarP(&concurrency, "concurrency", "c", 5, "concurrency level when executing requests")
 	rootCmd.PersistentFlags().StringVarP(&filter, "filter", "f", "", "if provided, applies filtering logic: --filter 'tag:tunnel'")
 	rootCmd.PersistentFlags().BoolVar(&useCSSHX, "csshx", false, "if csshx is installed, opens a multi-window session over all matching hosts")
 	rootCmd.PersistentFlags().BoolVar(&useSSH, "ssh", false, "ssh into a matching single host")
+	rootCmd.PersistentFlags().DurationVarP(&clientTimeout, "client_timeout", "", time.Second*5, "timeout duration for the Tailscale api")
+	// Note: Not sure if this flag is useful.
+	rootCmd.PersistentFlags().DurationVarP(&cliTimeout, "cli_timeout", "", time.Second*5, "timeout duration for the Tailscale cli")
 	//rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
 	//rootCmd.PersistentFlags().StringVarP(&projectBase, "projectbase", "b", "", "base project directory eg. github.com/spf13/")
 	//rootCmd.PersistentFlags().StringP("author", "a", "Ralph Caraveo <deckarep@gmail.com>", "Author name for copyright attribution")
@@ -61,22 +75,46 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "hugo",
-	Short: "Hugo is a very fast static site generator",
-	Long: `A Fast and Flexible Static Site Generator built with
-                love by spf13 and friends in Go.
-                Complete documentation is available at http://hugo.spf13.com`,
+	Use:   "tips",
+	Short: "tips: The command-line tool to wrangle your Tailscale/tailnet cluster whether large or small.",
+	Long: `tips is a robust command-line tool to help you inspect, query, manage and execute commands on your 
+				tailnet cluster created by deckarep.
+                Complete documentation is available at: github.com/deckarep/tips`,
 	Args: cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Run() of rootCmd")
-		fmt.Println(args)
+		ctx := context.Background()
 
-		fmt.Println("concurrency:", concurrency)
-		if len(filter) > 0 {
-			fmt.Println("filter requested:", filter)
+		// TODO: make this configurable
+		api_key := os.Getenv("tips_api_key")
+		// TODO: make this configurable
+		tailnet = "deckarep@gmail.com"
+
+		client := func() *tailscale.Client {
+			client, err := tailscale.NewClient(
+				api_key, // When doing oauth, this field must be blank!!!
+				tailnet,
+				//tailscale.WithOAuthClientCredentials(oauthClientID, oauthClientSecret, nil),
+				tailscale.WithUserAgent(pkg.UserAgent),
+			)
+			if err != nil {
+				log.Fatal("failed to create client with err: ", err)
+			}
+			return client
+		}()
+
+		devList, devEnriched, err := app.DevicesResource(ctx, client)
+		if err != nil {
+			log.Fatal("problem with resource lookup of devices with err: ", err)
 		}
-		if useCSSHX {
-			fmt.Println("ok we're going to prompt open csshx!")
+
+		view, err := app.ProcessDevicesTable(ctx, devList, devEnriched)
+		if err != nil {
+			log.Fatal("problem processing devices data with err: ", err)
+		}
+
+		err = app.RenderTableView(ctx, view, os.Stdout)
+		if err != nil {
+			log.Fatal("problem rendering table view with err: ", err)
 		}
 	},
 }

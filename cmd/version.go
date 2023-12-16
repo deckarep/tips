@@ -21,7 +21,7 @@ var versionCmd = &cobra.Command{
 		fmt.Printf("%s (%s) v%s\n", pkg.AppLongName, pkg.AppShortName, pkg.AppVersion)
 		fmt.Println()
 
-		cliVersion, err := tailscale_cli.TailScaleVersion()
+		cliVersion, err := tailscale_cli.GetVersion()
 		if err == nil {
 			fmt.Println("Tailscale CLI")
 			fmt.Println(strings.Repeat("*", 32))

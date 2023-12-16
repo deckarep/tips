@@ -32,7 +32,7 @@ import (
 
 const (
 	macOSAppStorePath = "/Applications/Tailscale.app/Contents/MacOS/Tailscale"
-	// TODO: other paths depending on how user installs.
+	// TODO: other paths depending on where user installs/OS.
 )
 
 type DeviceInfo struct {
@@ -41,7 +41,7 @@ type DeviceInfo struct {
 	Online  bool
 }
 
-func TailScaleVersion() (string, error) {
+func GetVersion() (string, error) {
 	confirmedPath, err := exec.LookPath(macOSAppStorePath)
 	if err != nil {
 		return "", err

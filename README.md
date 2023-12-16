@@ -3,8 +3,8 @@ The command-line tool to wrangle your Tailscale/Tailnet cluster whether large or
 
 ### What is tips?
 Any Tailscale user whether a hobbyist with a 5 node cluster or a seasoned cloud professional managing thousands of 
-production nodes can benefit from this tool. tips is the go-to tool to quickly and effectively manage a Tailnet
-cluster of any size. This tool will allow you to confidently slice and dice nodes, filter nodes, remotely execute 
+production nodes can benefit from this tool. `tips` is the go-to tool to quickly and effectively manage a `tailnet`
+cluster of any size. It allows you to confidently slice and dice nodes, filter nodes, remotely execute 
 commands and manage your nodes collectively using an effective pattern modeled after cloud automation software.
 
 ### Definitions
@@ -15,10 +15,10 @@ commands and manage your nodes collectively using an effective pattern modeled a
 ### You'll be able to ...
 * Easily view your nodes in a *beautifully rendered* and consistent table view
 * View *enriched, realtime* info such as `online status` when ran from the context of a node within a tailnet
-* Filter nodes based on: `tags`, `OS`, `hostname` or other fields
+* Filter nodes based on: `tags`, `OS`, `hostname` and other fields
 * *Slice or segment* nodes to work on a portion of them at a time
-* Easily `SSH` into a node
-* Execute *single-shot* complex commands against all matching nodes in parallel
+* Easily `ssh` into a node
+* Execute *single-shot* complex commands against all matching nodes in parallel with controllable concurrency
 * *Tail* the logs of long-running sessions from multiple nodes
 * Broadcast commands to multiple nodes using the `csshx` power-tool if installed
 * Quickly generate a `,` or `\n` delimited list of nodes for reporting or use in other apps/cli tools
@@ -27,9 +27,16 @@ commands and manage your nodes collectively using an effective pattern modeled a
 ...with automatic but configurable file-system caching built-in which means fast, consistent results everytime!
 
 ### Why the name?
-* The name must be short, this tool must not get in the way and will likely be typed many times a day
-* Simply, this tool is about managing your (T)ailscale (IPS) which shortens to: `tips`
-* Lastly, what better way to show appreciate for software than to **leave a tip** especially for commercial use?
+* The name must be short, this tool must not get in the way and will likely be often used to query infrastructure
+* Simply put, this tool is about managing a (t)ailnet's distributed (ips) or nodes which shortens to: `tips`
+* Lastly, what better way to show appreciation for software than to **leave a tip** especially if used in a
+professional or commercial setting?
 
 ### Built with ❤️
 * by deckarep
+
+### Disclaimer: Independent Project
+Please note that this project is a personal and independent initiative. It is not endorsed, sponsored, affiliated with, 
+or otherwise associated with any company or commercial entity. This project is developed and maintained by individual 
+contributors in their personal capacity. The views and opinions expressed here are those of the individual contributors 
+and do not reflect those of any company or professional organization they may be associated with.
