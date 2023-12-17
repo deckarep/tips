@@ -33,12 +33,47 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 	slicedDevList := devList[0:3]
 
 	// 3. Filter - such as by tag.
-	// TODO: apply filtering logic from user's configured setting.
+	// apply filtering logic from user's configured setting.
+	//var strSlicerLower = func(vals []string) []string {
+	//	var items []string
+	//	for _, s := range vals {
+	//		items = append(items, strings.ToLower(s))
+	//	}
+	//	return items
+	//}
+	var normalizeTags = func(vals []string) []string {
+		var items []string
+		for _, s := range vals {
+			items = append(items, strings.ToLower(strings.Replace(s, "tag:", "", -1)))
+		}
+		return items
+	}
 	var filteredDevList []tailscale.Device
 	for _, dev := range slicedDevList {
-		if dev.OS == "iOS" {
-			filteredDevList = append(filteredDevList, dev)
+		// Filter by 'os' if provided.
+		if f, exists := cfg.Filters["os"]; exists {
+			if !f.Contains(strings.ToLower(dev.OS)) {
+				continue
+			}
 		}
+
+		// Filter by 'tag' if provided.
+		if f, exists := cfg.Filters["tag"]; exists {
+			normalizedTags := normalizeTags(dev.Tags)
+			//spew.Dump(normalizedTags, f)
+			if (len(dev.Tags) == 0) || !f.Contains(normalizedTags...) {
+				continue
+			}
+		}
+
+		// Filter by 'user' if provided.
+		if f, exists := cfg.Filters["user"]; exists {
+			if !f.Contains(strings.ToLower(dev.User)) {
+				continue
+			}
+		}
+
+		filteredDevList = append(filteredDevList, dev)
 	}
 
 	// 3. Massage/Transform - final transformations here.
@@ -64,7 +99,6 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 	tbl.Rows = make([][]string, 0, len(filteredDevList))
 
 	for idx, dev := range filteredDevList {
-		//tbl.Rows = append(tbl.Rows, []string{strconv.Itoa(idx), dev.Hostname, dev.OS})
 		tbl.Rows = append(tbl.Rows, getRow(idx, dev, devEnriched))
 	}
 

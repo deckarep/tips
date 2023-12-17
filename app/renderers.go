@@ -107,37 +107,3 @@ func renderEpilog(ctx context.Context, tableView *GeneralTableView, w io.Writer)
 
 	return nil
 }
-
-// TODO: This stuff shouldn't be here...all of this should happen in a Processor
-//func getRowField(enrichedResults map[string]tailscale_cli.DeviceInfo, idx int, d tailscale.Device) []string {
-//	// You can also add tables row-by-row
-//
-//	var (
-//		version = fmt.Sprintf("%s - %s", strings.Split(d.ClientVersion, "-")[0], d.OS)
-//
-//		timeAgo = humanize.Time(d.LastSeen.Time)
-//		// Remove all tag: prefixes, and join the tags as a comma delimited string.
-//		tags = strings.Replace(strings.Join(d.Tags, ","), "tag:", "", -1)
-//	)
-//
-//	seenAgo := timeAgo
-//	//if strings.Contains(seenAgo, "seconds") {
-//	//	// https://github.com/tailscale/tailscale/pull/3534/files
-//	//	seenAgo = fmt.Sprintf("• %s", seenAgo)
-//	//}
-//
-//	if len(enrichedResults) > 0 {
-//		if enrichedDev, ok := enrichedResults[d.NodeKey]; ok && enrichedDev.Online {
-//			seenAgo = fmt.Sprintf("%s now", ui.Styles.Green.Render(ui.Dot))
-//		}
-//		return []string{strconv.Itoa(idx), d.Hostname, d.Addresses[0], tags, d.User, version, seenAgo}
-//	}
-//	return []string{strconv.Itoa(idx), d.Hostname, d.Addresses[0], tags, d.User, version, seenAgo}
-//}
-//
-//func getHeaders(enrichedResults map[string]tailscale_cli.DeviceInfo) []string {
-//	if len(enrichedResults) > 0 {
-//		return []string{"No", "Machine", "Address", "Tags", "User", "Version", "LastSeen"}
-//	}
-//	return []string{"No", "Machine", "Address", "Tags", "User", "Version", "LastSeen"}
-//}

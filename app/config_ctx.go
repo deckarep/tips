@@ -1,6 +1,9 @@
 package app
 
-import "time"
+import (
+	mapset "github.com/deckarep/golang-set/v2"
+	"time"
+)
 
 type TailscaleAPICfgCtx struct {
 	Timeout time.Duration
@@ -22,6 +25,7 @@ type TailscaleCLICfgCtx struct {
 
 type ConfigCtx struct {
 	NoCache      bool
+	Filters      map[string]mapset.Set[string]
 	Tailnet      string
 	TailscaleAPI TailscaleAPICfgCtx
 	TailscaleCLI TailscaleCLICfgCtx

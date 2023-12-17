@@ -94,11 +94,13 @@ var rootCmd = &cobra.Command{
 		ctx := context.Background()
 
 		log.Warnf("foo=%s", viper.GetString("foo"))
+		log.Warnf("filter=%s", filter)
 
 		// Populate context key/values as needed.
 		cfgCtx := app.NewConfigCtx()
 		// TODO: set everything in here.
 		cfgCtx.NoCache = nocache
+		cfgCtx.Filters = app.ApplyFilter(filter)
 		cfgCtx.TailscaleAPI.ApiKey = os.Getenv("tips_api_key")
 		cfgCtx.Tailnet = "deckarep@gmail.com"
 		cfgCtx.TailscaleAPI.Timeout = time.Second * 5
