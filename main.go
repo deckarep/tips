@@ -242,9 +242,9 @@ func main() {
 //		if enrichedDev, ok := enrichedResults[d.NodeKey]; ok && enrichedDev.Online {
 //			seenAgo = fmt.Sprintf("%s now", ui.Styles.Green.Render(ui.Dot))
 //		}
-//		return []string{strconv.Itoa(idx), d.Hostname, d.Addresses[0], tags, d.User, version, seenAgo}
+//		return []string{strconv.Itoa(idx), d.hostname, d.Addresses[0], tags, d.User, version, seenAgo}
 //	}
-//	return []string{strconv.Itoa(idx), d.Hostname, d.Addresses[0], tags, d.User, version, seenAgo}
+//	return []string{strconv.Itoa(idx), d.hostname, d.Addresses[0], tags, d.User, version, seenAgo}
 //}
 
 //func getHeaders(enrichedResults map[string]tailscale_cli.DeviceInfo) []string {

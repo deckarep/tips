@@ -99,6 +99,25 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
+		//const (
+		//	chanBuffer        = 10
+		//	maxLinesToProcess = 5
+		//	parallelism       = 5
+		//)
+
+		myCmd := "sudo ls /var/log"
+		var hosts = []string{
+			"blade",
+			"blade",
+			"blade",
+		}
+
+		app.ExecuteClusterRemoteCmd(ctx, hosts, myCmd)
+
+		if true {
+			return
+		}
+
 		log.Warn("args_provided", "args", args)
 		log.Warnf("foo=%s", viper.GetString("foo"))
 		log.Warnf("filter=%s", filter)
