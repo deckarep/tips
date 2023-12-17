@@ -56,6 +56,7 @@ TODO: allow for tailing logs of one or more boxes, ensure tailing logs works lik
 TODO: show online status (like the admin console)
 TODO: show the count of all nodes returned near the bottom.
 TODO: filter glob syntax: tips * 'hostname', tips blade* 'hostname', tips tag:peanuts 'hostname'
+	- Not based filter: tag:!peanuts
 TODO: default sorting (hostname, then address)
 TODO: slice syntax:
 	- tips blade[5:10] 'hostname' - returns hosts 5-10 (can't remember if it should be inclusive or not

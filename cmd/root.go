@@ -45,6 +45,7 @@ var (
 	concurrency   int
 	filter        string
 	nocache       bool
+	slice         string
 	sortOrder     string
 	tailnet       string
 	useCSSHX      bool
@@ -57,6 +58,7 @@ var (
 func init() {
 	//cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVarP(&foo, "foo", "", "blah", "foo is a test flag")
+	rootCmd.PersistentFlags().StringVarP(&slice, "slice", "", "", "slices the results after filtering followed by sorting")
 	rootCmd.PersistentFlags().StringVarP(&sortOrder, "sort", "s", "", "overrides the default/configured sort order --sort 'machine,addresss'")
 	rootCmd.PersistentFlags().StringVarP(&tailnet, "tailnet", "t", "", "the tailnet to operate on")
 	rootCmd.PersistentFlags().IntVarP(&concurrency, "concurrency", "c", 5, "concurrency level when executing requests")
@@ -100,6 +102,7 @@ var rootCmd = &cobra.Command{
 		cfgCtx := app.NewConfigCtx()
 		// TODO: set everything in here.
 		cfgCtx.NoCache = nocache
+		cfgCtx.Slice = app.ParseSlice(slice)
 		cfgCtx.Filters = app.ApplyFilter(filter)
 		cfgCtx.TailscaleAPI.ApiKey = os.Getenv("tips_api_key")
 		cfgCtx.Tailnet = "deckarep@gmail.com"

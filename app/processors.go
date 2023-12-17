@@ -19,21 +19,8 @@ import (
 func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnriched map[string]tailscale_cli.DeviceInfo) (*GeneralTableView, error) {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
-	// 1. Sort - here we'll sort based on user's configured setting.
-	slices.SortFunc(devList, func(a, b tailscale.Device) int {
-		// TODO: Must be able to do this from configuration logic from context.
-		if n := cmp.Compare(a.Name, b.Name); n != 0 {
-			return n
-		}
-		return cmp.Compare(a.Name, b.Name)
-	})
+	// 1. Filter -  if user requested any with the --filter flag
 
-	// 2. Slice - then slice what gets returned
-	// TODO: must be able to slice from user's configured setting.
-	slicedDevList := devList[0:3]
-
-	// 3. Filter - such as by tag.
-	// apply filtering logic from user's configured setting.
 	//var strSlicerLower = func(vals []string) []string {
 	//	var items []string
 	//	for _, s := range vals {
@@ -41,6 +28,7 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 	//	}
 	//	return items
 	//}
+
 	var normalizeTags = func(vals []string) []string {
 		var items []string
 		for _, s := range vals {
@@ -49,7 +37,7 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 		return items
 	}
 	var filteredDevList []tailscale.Device
-	for _, dev := range slicedDevList {
+	for _, dev := range devList {
 		// Filter by 'os' if provided.
 		if f, exists := cfg.Filters["os"]; exists {
 			if !f.Contains(strings.ToLower(dev.OS)) {
@@ -76,6 +64,28 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 		filteredDevList = append(filteredDevList, dev)
 	}
 
+	// 2. Sort - based on user's configured setting or --sort flag
+	slices.SortFunc(filteredDevList, func(a, b tailscale.Device) int {
+		// TODO: Must be able to do this from configuration logic from context.
+		if n := cmp.Compare(a.Name, b.Name); n != 0 {
+			return n
+		}
+		return cmp.Compare(a.Name, b.Name)
+	})
+
+	// 3. Slice - if provided via the --slice flag or configured, slice the results according to
+	// Go's standard slicing convention.
+	var slicedDevList = filteredDevList
+	if cfg.Slice.IsDefined() {
+		if cfg.Slice.From != nil && cfg.Slice.To != nil {
+			slicedDevList = filteredDevList[*cfg.Slice.From:*cfg.Slice.To]
+		} else if cfg.Slice.From != nil {
+			slicedDevList = filteredDevList[*cfg.Slice.From:]
+		} else {
+			slicedDevList = filteredDevList[:*cfg.Slice.To]
+		}
+	}
+
 	// 3. Massage/Transform - final transformations here.
 	tbl := &GeneralTableView{
 		ContextView: ContextView{
@@ -96,9 +106,9 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 	}
 
 	// Pre-alloc size.
-	tbl.Rows = make([][]string, 0, len(filteredDevList))
+	tbl.Rows = make([][]string, 0, len(slicedDevList))
 
-	for idx, dev := range filteredDevList {
+	for idx, dev := range slicedDevList {
 		tbl.Rows = append(tbl.Rows, getRow(idx, dev, devEnriched))
 	}
 
