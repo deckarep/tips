@@ -14,6 +14,20 @@ import (
 	"tips/pkg/ui"
 )
 
+const (
+	NoHdr       = "No"
+	MachineHdr  = "Machine"
+	AddressHdr  = "Address"
+	TagsHdr     = "Tags"
+	UserHdr     = "User"
+	VersionHdr  = "Version"
+	LastSeenHdr = "LastSeen"
+)
+
+var (
+	DefaultHeader = []string{NoHdr, MachineHdr, AddressHdr, TagsHdr, UserHdr, VersionHdr, LastSeenHdr}
+)
+
 // ProcessDevicesTable will apply sorting (if required), slicing (if required) and the massage/transformation of data to produce a final
 // `*DevicesTable` that has everything required to render.
 func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnriched map[string]tailscale_cli.DeviceInfo) (*GeneralTableView, error) {
@@ -116,14 +130,19 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 }
 
 func getHeaders(enrichedResults map[string]tailscale_cli.DeviceInfo) []string {
+	// TODO: I need to remove columns based on --columns flag.
+
+	// Currently there's no difference on the headers returned when enrichedResults are present.
 	if len(enrichedResults) > 0 {
-		return []string{"No", "Machine", "Address", "Tags", "User", "Version", "LastSeen"}
+		return DefaultHeader
 	}
-	return []string{"No", "Machine", "Address", "Tags", "User", "Version", "LastSeen"}
+	return DefaultHeader
 }
 
 func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cli.DeviceInfo) []string {
 	// You can also add tables row-by-row
+
+	// TODO: I need to remove columns based on --columns flag.
 
 	var (
 		version = fmt.Sprintf("%s - %s", strings.Split(d.ClientVersion, "-")[0], d.OS)

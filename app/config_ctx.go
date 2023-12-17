@@ -78,6 +78,7 @@ type TailscaleCLICfgCtx struct {
 }
 
 type ConfigCtx struct {
+	Columns      mapset.Set[string]
 	Filters      map[string]mapset.Set[string]
 	NoCache      bool
 	Slice        *SliceCfg
@@ -88,4 +89,19 @@ type ConfigCtx struct {
 
 func NewConfigCtx() *ConfigCtx {
 	return &ConfigCtx{}
+}
+
+func ParseColumns(s string) mapset.Set[string] {
+	if len(strings.TrimSpace(s)) == 0 {
+		return nil
+	}
+
+	m := mapset.NewSet[string]()
+
+	parts := strings.Split(s, ",")
+	for _, p := range parts {
+		m.Add(strings.ToLower(strings.TrimSpace(p)))
+	}
+
+	return m
 }

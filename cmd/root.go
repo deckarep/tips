@@ -42,6 +42,7 @@ var (
 	cfgFile       string
 	clientTimeout time.Duration
 	cliTimeout    time.Duration
+	columns       string
 	concurrency   int
 	filter        string
 	nocache       bool
@@ -62,6 +63,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&sortOrder, "sort", "s", "", "overrides the default/configured sort order --sort 'machine,addresss'")
 	rootCmd.PersistentFlags().StringVarP(&tailnet, "tailnet", "t", "", "the tailnet to operate on")
 	rootCmd.PersistentFlags().IntVarP(&concurrency, "concurrency", "c", 5, "concurrency level when executing requests")
+	rootCmd.PersistentFlags().StringVarP(&columns, "columns", "", "", "columns limits which columns to return")
 	rootCmd.PersistentFlags().StringVarP(&filter, "filter", "f", "", "if provided, applies filtering logic: --filter 'tag:tunnel'")
 	rootCmd.PersistentFlags().BoolVar(&useCSSHX, "csshx", false, "if csshx is installed, opens a multi-window session over all matching hosts")
 	rootCmd.PersistentFlags().BoolVar(&useSSH, "ssh", false, "ssh into a matching single host")
@@ -104,6 +106,7 @@ var rootCmd = &cobra.Command{
 		cfgCtx.NoCache = nocache
 		cfgCtx.Slice = app.ParseSlice(slice)
 		cfgCtx.Filters = app.ApplyFilter(filter)
+		cfgCtx.Columns = app.ParseColumns(columns)
 		cfgCtx.TailscaleAPI.ApiKey = os.Getenv("tips_api_key")
 		cfgCtx.Tailnet = "deckarep@gmail.com"
 		cfgCtx.TailscaleAPI.Timeout = time.Second * 5
