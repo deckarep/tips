@@ -1,15 +1,18 @@
 package app
 
 import (
+	"context"
 	"github.com/charmbracelet/log"
 	"github.com/tailscale/tailscale-client-go/tailscale"
 	"tips/pkg"
 )
 
-func NewClient(apiKey string, tailnet string) *tailscale.Client {
+func NewClient(ctx context.Context) *tailscale.Client {
+	cfg := CtxAsConfig(ctx, CtxKeyConfig)
+
 	client, err := tailscale.NewClient(
-		apiKey, // When doing oauth, this field must be blank!!!
-		tailnet,
+		cfg.TailscaleAPI.ApiKey, // When doing oauth, this field must be blank!!!
+		cfg.Tailnet,
 		//tailscale.WithOAuthClientCredentials(oauthClientID, oauthClientSecret, nil),
 		tailscale.WithUserAgent(pkg.UserAgent),
 	)
@@ -19,11 +22,12 @@ func NewClient(apiKey string, tailnet string) *tailscale.Client {
 	return client
 }
 
-func NewOauthClient(oauthClientID, oauthClientSecret, tailnet string) *tailscale.Client {
+func NewOauthClient(ctx context.Context) *tailscale.Client {
+	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 	client, err := tailscale.NewClient(
 		"", // When doing oauth, this field must be blank!!!
-		tailnet,
-		tailscale.WithOAuthClientCredentials(oauthClientID, oauthClientSecret, nil),
+		cfg.Tailnet,
+		tailscale.WithOAuthClientCredentials(cfg.TailscaleAPI.OAuthClientID, cfg.TailscaleAPI.OAuthClientSecret, nil),
 		tailscale.WithUserAgent(pkg.UserAgent),
 	)
 	if err != nil {

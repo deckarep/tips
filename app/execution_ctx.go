@@ -12,6 +12,8 @@ func (c contextKey) String() string {
 }
 
 var (
+	// CtxKeyConfig holds all config settings that were resolved from the environment/config file/cli flags
+	CtxKeyConfig    = contextKey("configuration")
 	CtxKeyUserQuery = contextKey("user-query")
 )
 
@@ -37,4 +39,12 @@ func CtxAsInt(ctx context.Context, key contextKey) int {
 	}
 	log.Fatalf("failed to get context value as an int with key: %s", key)
 	return 0
+}
+
+func CtxAsConfig(ctx context.Context, key contextKey) *ConfigCtx {
+	if val, ok := ctx.Value(key).(*ConfigCtx); ok {
+		return val
+	}
+	log.Fatalf("failed to get context value as an int with key: %s", key)
+	return &ConfigCtx{}
 }

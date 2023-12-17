@@ -44,6 +44,7 @@ var (
 	cliTimeout    time.Duration
 	concurrency   int
 	filter        string
+	nocache       bool
 	sortOrder     string
 	tailnet       string
 	useCSSHX      bool
@@ -64,6 +65,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&useSSH, "ssh", false, "ssh into a matching single host")
 	rootCmd.PersistentFlags().BoolVar(&useOauth, "oauth", false, "use oauth when flag is provided.")
 	rootCmd.PersistentFlags().DurationVarP(&clientTimeout, "client_timeout", "", time.Second*5, "timeout duration for the Tailscale api")
+	rootCmd.PersistentFlags().BoolVarP(&nocache, "nocache", "n", false, "forces the cache to be expunged")
+
 	// Note: Not sure if this flag is useful.
 	rootCmd.PersistentFlags().DurationVarP(&cliTimeout, "cli_timeout", "", time.Second*5, "timeout duration for the Tailscale cli")
 	//rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
@@ -92,20 +95,22 @@ var rootCmd = &cobra.Command{
 
 		log.Warnf("foo=%s", viper.GetString("foo"))
 
-		// TODO: make this configurable
-		api_key := os.Getenv("tips_api_key")
-		// TODO: make this configurable
-		tailnet = "deckarep@gmail.com"
+		// Populate context key/values as needed.
+		cfgCtx := app.NewConfigCtx()
+		// TODO: set everything in here.
+		cfgCtx.NoCache = nocache
+		cfgCtx.TailscaleAPI.ApiKey = os.Getenv("tips_api_key")
+		cfgCtx.Tailnet = "deckarep@gmail.com"
+		cfgCtx.TailscaleAPI.Timeout = time.Second * 5
 
-		// Populate context key/values as needed
+		ctx = context.WithValue(ctx, app.CtxKeyConfig, cfgCtx)
 		ctx = context.WithValue(ctx, app.CtxKeyUserQuery, "tips blade*")
 
 		var client *tailscale.Client
 		if !useOauth {
-			client = app.NewClient(api_key, tailnet)
+			client = app.NewClient(ctx)
 		} else {
-			// TODO: populate these values correctly.
-			client = app.NewOauthClient("", "", tailnet)
+			client = app.NewOauthClient(ctx)
 		}
 
 		devList, devEnriched, err := app.DevicesResource(ctx, client)

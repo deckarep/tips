@@ -26,8 +26,10 @@ SOFTWARE.
 package tailscale_cli
 
 import (
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/tidwall/gjson"
 	"os/exec"
+	"strings"
 )
 
 const (
@@ -39,6 +41,7 @@ type DeviceInfo struct {
 	DNSName string
 	IsSelf  bool
 	Online  bool
+	Tags    mapset.Set[string]
 }
 
 func GetVersion() (string, error) {
@@ -76,11 +79,26 @@ func GetDevicesStatuses() (map[string]DeviceInfo, error) {
 	jo := string(output)
 
 	// TODO: Lazy, dynamic json without checking type assertions. Clean this up.
+	var toTagSet = func(results []gjson.Result) mapset.Set[string] {
+		ts := mapset.NewSet[string]()
+		for _, t := range results {
+			ts.Add(strings.Replace(t.String(), "tag:", "", -1))
+		}
+		return ts
+	}
+
 	// Grab the Self info.
 	selfNodeKey := gjson.Get(jo, "Self.PublicKey").String()
 	selfOnline := gjson.Get(jo, "Self.Online").Bool()
 	selfDNSName := gjson.Get(jo, "Self.DNSName").String()
-	results[selfNodeKey] = DeviceInfo{DNSName: selfDNSName, Online: selfOnline, IsSelf: true}
+	selfTagSet := toTagSet(gjson.GetMany(jo, "Self.Tags"))
+
+	results[selfNodeKey] = DeviceInfo{
+		DNSName: selfDNSName,
+		Online:  selfOnline,
+		IsSelf:  true,
+		Tags:    selfTagSet,
+	}
 
 	// Grab the peers
 	peers := gjson.Get(jo, "Peer")
@@ -88,7 +106,14 @@ func GetDevicesStatuses() (map[string]DeviceInfo, error) {
 		peerNodeKey := value.Get("PublicKey").String()
 		peerOnline := value.Get("Online").Bool()
 		dnsName := value.Get("DNSName").String()
-		results[peerNodeKey] = DeviceInfo{DNSName: dnsName, Online: peerOnline, IsSelf: false}
+		tagSet := toTagSet(value.Get("Tags").Array())
+
+		results[peerNodeKey] = DeviceInfo{
+			DNSName: dnsName,
+			Online:  peerOnline,
+			IsSelf:  false,
+			Tags:    tagSet,
+		}
 		return true
 	})
 
