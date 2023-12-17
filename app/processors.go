@@ -50,16 +50,24 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 		}
 		return items
 	}
+
 	var filteredDevList []tailscale.Device
+	var primFilter = strings.ToLower(cfg.PrimaryFilter)
 	for _, dev := range devList {
-		// Filter by 'os' if provided.
+		// PrimaryFilter when not '*' (everything), by default this is a case-insensitive prefix filter.
+		if cfg.PrimaryFilter != PrimaryFilterAll &&
+			!strings.HasPrefix(strings.ToLower(dev.Hostname), primFilter) {
+			continue
+		}
+
+		// Filter by 'os' when provided.
 		if f, exists := cfg.Filters["os"]; exists {
 			if !f.Contains(strings.ToLower(dev.OS)) {
 				continue
 			}
 		}
 
-		// Filter by 'tag' if provided.
+		// Filter by 'tag' when provided.
 		if f, exists := cfg.Filters["tag"]; exists {
 			normalizedTags := normalizeTags(dev.Tags)
 			//spew.Dump(normalizedTags, f)
@@ -68,9 +76,18 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 			}
 		}
 
-		// Filter by 'user' if provided.
+		// Filter by 'user' when provided.
 		if f, exists := cfg.Filters["user"]; exists {
 			if !f.Contains(strings.ToLower(dev.User)) {
+				continue
+			}
+		}
+
+		// Filter by 'version' when provided.
+		if f, exists := cfg.Filters["version"]; exists {
+			// For now, just filter on the first portion of the version which has the format: 1.xx.1
+			semanticVersion := strings.Split(dev.ClientVersion, "-")[0]
+			if !f.Contains(strings.ToLower(semanticVersion)) {
 				continue
 			}
 		}

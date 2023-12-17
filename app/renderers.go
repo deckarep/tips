@@ -47,6 +47,10 @@ func renderProlog(ctx context.Context, tableView *GeneralTableView, w io.Writer)
 }
 
 func renderBody(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
+	const (
+		SmHdrWidth = 5
+	)
+
 	var (
 		re = lipgloss.NewRenderer(os.Stdout)
 
@@ -55,15 +59,11 @@ func renderBody(ctx context.Context, tableView *GeneralTableView, w io.Writer) e
 
 		// HeaderStyle is the lipgloss style used for the table headers.
 		HeaderStyle   = re.NewStyle().Foreground(ui.Colors.Purple).Bold(true).Align(lipgloss.Center)
-		SmHeaderStyle = HeaderStyle.Copy().Width(4).Align(lipgloss.Center)
+		SmHeaderStyle = HeaderStyle.Copy().Width(SmHdrWidth).Align(lipgloss.Center)
 		// OddRowStyle is the lipgloss style used for odd-numbered table rows.
 		OddRowStyle = CellStyle.Copy().Foreground(ui.Colors.Gray)
 		// EvenRowStyle is the lipgloss style used for even-numbered table rows.
 		EvenRowStyle = CellStyle.Copy().Foreground(ui.Colors.LightGray)
-	)
-
-	const (
-		SmHdrWidth = 4
 	)
 
 	t := table.New().

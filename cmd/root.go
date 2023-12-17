@@ -34,6 +34,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tailscale/tailscale-client-go/tailscale"
 	"os"
+	"strings"
 	"time"
 	"tips/app"
 )
@@ -49,6 +50,7 @@ var (
 	slice         string
 	sortOrder     string
 	tailnet       string
+	useCmd        bool
 	useCSSHX      bool
 	useOauth      bool
 	useSSH        bool
@@ -97,6 +99,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
+		log.Warn("args_provided", "args", args)
 		log.Warnf("foo=%s", viper.GetString("foo"))
 		log.Warnf("filter=%s", filter)
 
@@ -107,6 +110,17 @@ var rootCmd = &cobra.Command{
 		cfgCtx.Slice = app.ParseSlice(slice)
 		cfgCtx.Filters = app.ApplyFilter(filter)
 		cfgCtx.Columns = app.ParseColumns(columns)
+
+		if len(args) > 0 {
+			cfgCtx.PrimaryFilter = args[0]
+		} else {
+			cfgCtx.PrimaryFilter = app.PrimaryFilterAll
+		}
+
+		if len(args) > 1 {
+			cfgCtx.RemoteCmd = strings.TrimSpace(strings.Join(args[1:], " "))
+		}
+
 		cfgCtx.TailscaleAPI.ApiKey = os.Getenv("tips_api_key")
 		cfgCtx.Tailnet = "deckarep@gmail.com"
 		cfgCtx.TailscaleAPI.Timeout = time.Second * 5

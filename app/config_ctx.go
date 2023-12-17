@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+const (
+	// PrimaryFilterAll basically means glob: *, but since this expands in the terminal we use @
+	PrimaryFilterAll = "@"
+)
+
 type SliceCfg struct {
 	From *int
 	To   *int
@@ -78,13 +83,15 @@ type TailscaleCLICfgCtx struct {
 }
 
 type ConfigCtx struct {
-	Columns      mapset.Set[string]
-	Filters      map[string]mapset.Set[string]
-	NoCache      bool
-	Slice        *SliceCfg
-	Tailnet      string
-	TailscaleAPI TailscaleAPICfgCtx
-	TailscaleCLI TailscaleCLICfgCtx
+	Columns       mapset.Set[string]
+	Filters       map[string]mapset.Set[string]
+	NoCache       bool
+	PrimaryFilter string
+	RemoteCmd     string
+	Slice         *SliceCfg
+	Tailnet       string
+	TailscaleAPI  TailscaleAPICfgCtx
+	TailscaleCLI  TailscaleCLICfgCtx
 }
 
 func NewConfigCtx() *ConfigCtx {

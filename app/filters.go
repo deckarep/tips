@@ -13,6 +13,8 @@ import (
 // 'tag:peanuts,nuts'
 // Multi filters
 // 'tag:peanuts, version:1.54.1'
+// Future: not based filter?
+// 'tag:peanuts, !walnuts (will exclude walnuts)
 
 var (
 	filterTagsSupported = mapset.NewSet[string]("tag", "os", "user", "version")
