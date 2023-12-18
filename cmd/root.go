@@ -160,6 +160,7 @@ func packageCfg(args []string) *app.ConfigCtx {
 	cfgCtx.Slice = app.ParseSlice(slice)
 	cfgCtx.Filters = app.ApplyFilter(filter)
 	cfgCtx.Columns = app.ParseColumns(columns)
+	cfgCtx.Concurrency = concurrency
 
 	if len(args) > 0 {
 		cfgCtx.PrimaryFilter = args[0]

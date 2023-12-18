@@ -84,6 +84,7 @@ type TailscaleCLICfgCtx struct {
 
 type ConfigCtx struct {
 	Columns       mapset.Set[string]
+	Concurrency   int
 	Filters       map[string]mapset.Set[string]
 	NoCache       bool
 	PrimaryFilter string

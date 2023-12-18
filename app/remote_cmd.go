@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/log"
 	"io"
 	"os/exec"
+	"sync/atomic"
 	"time"
 	"tips/pkg/ui"
 )
@@ -14,7 +15,9 @@ import (
 const (
 	maxLinesToProcess    = 10
 	maxCompletionTimeout = time.Millisecond * 10
-	sshBin               = "/usr/bin/ssh"
+
+	// TODO: consider prioritizing the built-in ssh into Tailscale which accounts for authentication via the Tailscale api.
+	sshBin = "/usr/bin/ssh"
 )
 
 type hostLine struct {
@@ -31,15 +34,20 @@ type chanCompletions struct {
 }
 
 func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []string, remoteCmd string) {
+	cfg := CtxAsConfig(ctx, CtxKeyConfig)
+	startTime := time.Now()
+
 	const (
 		// TODO: Make this configurable.
-		chanBuffer  = 10
-		parallelism = 5
+		chanBuffer = 10
 	)
 
 	var (
 		allCompletions []*chanCompletions
-		sem            = make(chan struct{}, parallelism)
+		sem            = make(chan struct{}, cfg.Concurrency)
+
+		totalErrors  atomic.Uint32
+		totalSuccess atomic.Uint32
 	)
 
 	// For each host, kick-off a goroutine to execute the remote command.
@@ -55,11 +63,21 @@ func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []string, r
 
 		go func(i int, hn string, rch chan hostLine) {
 			sem <- struct{}{}
-			executeRemoteCmd(ctx, i, hn, remoteCmd, rch)
+			if err := executeRemoteCmd(ctx, i, hn, remoteCmd, rch); err != nil {
+				totalErrors.Add(1)
+				log.Error("error executing a remote command for", "host", hn, "error", err)
+				return
+			}
+			totalSuccess.Add(1)
 		}(idx, host, resultsChan)
 	}
 
 	poll(ctx, w, sem, allCompletions)
+
+	summary := fmt.Sprintf("Finished: successes: %d, failures: %d, elapsed_sec: %.2f", totalSuccess.Load(), totalErrors.Load(), time.Since(startTime).Seconds())
+	if _, err := fmt.Fprintln(w, summary); err != nil {
+		log.Error("error on `Fprintln` when writing elapsed time", "error", err)
+	}
 }
 
 func poll(ctx context.Context, w io.Writer, sem chan struct{}, allCompletions []*chanCompletions) {
@@ -80,20 +98,18 @@ func poll(ctx context.Context, w io.Writer, sem chan struct{}, allCompletions []
 
 		for _, comp := range allCompletions {
 		nextCompletion:
-			// Attempt to read n lines from the channel before trying the next one.
+			// Attempt to read n lines from the channel before trying the next one, assuming they're ready.
+			// This is intended to minimize the interleaving of lines across hosts.
 			for i := 0; i < maxLinesToProcess; i++ {
 				select {
 				case stream, isOpen := <-comp.ch:
 					if !isOpen && !comp.completed {
 						// Mark this completion as done!
-						//fmt.Printf("host: %s (%d) is completed!\n", compl.host, compl.idx)
 						comp.completed = true
 
 						// Track how many completions are done.
 						totalCompleted++
 
-						// Mark one as done.
-						//wg.Done()
 						// Mark sem for letting more work come in.
 						<-sem
 
@@ -147,11 +163,9 @@ func executeRemoteCmd(ctx context.Context, idx int, host string, remoteCmd strin
 	}
 
 	// Wait for the command to finish
-	//log.Warn("waiting on Wait()")
 	if err := sshCmd.Wait(); err != nil {
 		return err
 	}
 
-	//log.Warn("Finished because we can return.")
 	return nil
 }
