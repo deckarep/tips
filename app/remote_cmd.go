@@ -4,13 +4,17 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/charmbracelet/log"
+	"io"
 	"os/exec"
-	"sync"
 	"time"
+	"tips/pkg/ui"
 )
 
 const (
-	sshBin = "/usr/bin/ssh"
+	maxLinesToProcess    = 10
+	maxCompletionTimeout = time.Millisecond * 10
+	sshBin               = "/usr/bin/ssh"
 )
 
 type hostLine struct {
@@ -19,82 +23,102 @@ type hostLine struct {
 	line     string
 }
 
-func ExecuteClusterRemoteCmd(ctx context.Context, hosts []string, remoteCmd string) {
+type chanCompletions struct {
+	host      string
+	idx       int
+	completed bool
+	ch        chan hostLine
+}
+
+func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []string, remoteCmd string) {
 	const (
-		chanBuffer        = 10
-		maxLinesToProcess = 5
-		parallelism       = 5
+		// TODO: Make this configurable.
+		chanBuffer  = 10
+		parallelism = 5
 	)
 
-	type chanCompletions struct {
-		host      string
-		idx       int
-		completed bool
-		ch        chan hostLine
-	}
+	var (
+		allCompletions []*chanCompletions
+		sem            = make(chan struct{}, parallelism)
+	)
 
-	var allCompletions []*chanCompletions
-	sem := make(chan struct{}, parallelism)
-	var wg sync.WaitGroup
-	wg.Add(len(hosts))
-
+	// For each host, kick-off a goroutine to execute the remote command.
 	for idx, host := range hosts {
 		resultsChan := make(chan hostLine, chanBuffer)
-		allCompletions = append(allCompletions, &chanCompletions{ch: resultsChan, host: host, idx: idx, completed: false})
+
+		allCompletions = append(allCompletions, &chanCompletions{
+			ch:        resultsChan,
+			host:      host,
+			idx:       idx,
+			completed: false,
+		})
+
 		go func(i int, hn string, rch chan hostLine) {
 			sem <- struct{}{}
-			ExecuteRemoteCmd(ctx, i, hn, remoteCmd, rch)
+			executeRemoteCmd(ctx, i, hn, remoteCmd, rch)
 		}(idx, host, resultsChan)
 	}
 
-	go func() {
-		var totalCompleted int
-		for {
-			if totalCompleted == len(allCompletions) {
-				// We're completely done.
-				//log.Print("are we done?", "totalCompleted=", totalCompleted, "len(allCompletions)", len(allCompletions))
-				return
-			}
+	poll(ctx, w, sem, allCompletions)
+}
 
-			for _, compl := range allCompletions {
-			nextCompletion:
-				// Attempt to read n lines from the channel before trying the next one.
-				for i := 0; i < maxLinesToProcess; i++ {
-					select {
-					case stream, isOpen := <-compl.ch:
-						if !isOpen && !compl.completed {
-							// Mark this completion as done!
-							//fmt.Printf("host: %s (%d) is completed!\n", compl.host, compl.idx)
-							compl.completed = true
+func poll(ctx context.Context, w io.Writer, sem chan struct{}, allCompletions []*chanCompletions) {
+	var totalCompleted int
 
-							// Track how many completions are done.
-							totalCompleted++
+	// Loop indefinitely until all totalCompleted are accounted for, then bail.
+	for {
+		if totalCompleted == len(allCompletions) {
+			// We're completely done, so return.
+			return
+		}
 
-							// Done fully consuming.
-							wg.Done()
-							<-sem
+		// Continually iterate through all completions and check that the following conditions:
+		// 1. If we're completed for the first time, coordinate shutdown of this completion.
+		// 2. If we're already completed, just skip
+		// 3. Otherwise, if we're not completed consume up to maxLinesToProcess lines before moving onto the next
+		// channel. We do this to best-effort cluster the output.
 
-							// Move on to the next channel.
-							break nextCompletion
-						} else if compl.completed {
-							// We've already drained this to completion, our work is done so skip.
-							break nextCompletion
-						}
+		for _, comp := range allCompletions {
+		nextCompletion:
+			// Attempt to read n lines from the channel before trying the next one.
+			for i := 0; i < maxLinesToProcess; i++ {
+				select {
+				case stream, isOpen := <-comp.ch:
+					if !isOpen && !comp.completed {
+						// Mark this completion as done!
+						//fmt.Printf("host: %s (%d) is completed!\n", compl.host, compl.idx)
+						comp.completed = true
 
-						fmt.Println(fmt.Sprintf("%s (%d): %s ", stream.hostname, stream.idx, stream.line))
-					case <-time.After(10 * time.Millisecond):
-						// We've waited long enough maybe another chan is ready.
+						// Track how many completions are done.
+						totalCompleted++
+
+						// Mark one as done.
+						//wg.Done()
+						// Mark sem for letting more work come in.
+						<-sem
+
+						// This completion is complete, move on to the next non-closed completion.
+						break nextCompletion
+					} else if comp.completed {
+						// We've already drained this to completion, our work is done so skip.
 						break nextCompletion
 					}
+
+					// TODO: would be cool to add a log syntax highlighter like: https://github.com/bensadeh/tailspin
+					hostPrefix := ui.Styles.Green.Render(fmt.Sprintf("%s (%d): ", stream.hostname, stream.idx))
+					if _, err := fmt.Fprintln(w, hostPrefix+ui.Styles.Faint.Render(stream.line)); err != nil {
+						log.Error("error occurred during `Fprintln` to the local io.Writer:", err)
+					}
+				case <-time.After(maxCompletionTimeout):
+					// We've waited long enough maybe another completion is ready.
+					break nextCompletion
 				}
 			}
 		}
-	}()
-	wg.Wait()
+	}
 }
 
-func ExecuteRemoteCmd(ctx context.Context, idx int, host string, remoteCmd string, outputChan chan<- hostLine) error {
-
+func executeRemoteCmd(ctx context.Context, idx int, host string, remoteCmd string, outputChan chan<- hostLine) error {
 	// Construct the SSH command
 	sshCmd := exec.Command(sshBin, host, remoteCmd)
 	defer close(outputChan)

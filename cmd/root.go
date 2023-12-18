@@ -99,20 +99,26 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		//const (
-		//	chanBuffer        = 10
-		//	maxLinesToProcess = 5
-		//	parallelism       = 5
-		//)
+		// 0. Package all configuration logic.
+		cfgCtx := packageCfg(args)
+		ctx = context.WithValue(ctx, app.CtxKeyConfig, cfgCtx)
+		ctx = context.WithValue(ctx, app.CtxKeyUserQuery, "tips blade*")
 
 		myCmd := "sudo ls /var/log"
 		var hosts = []string{
 			"blade",
 			"blade",
 			"blade",
+			"blade",
+			"blade",
+			"blade",
+			"blade",
+			"blade",
+			"blade",
+			"blade",
 		}
 
-		app.ExecuteClusterRemoteCmd(ctx, hosts, myCmd)
+		app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, myCmd)
 
 		if true {
 			return
@@ -121,31 +127,6 @@ var rootCmd = &cobra.Command{
 		log.Warn("args_provided", "args", args)
 		log.Warnf("foo=%s", viper.GetString("foo"))
 		log.Warnf("filter=%s", filter)
-
-		// Populate context key/values as needed.
-		cfgCtx := app.NewConfigCtx()
-		// TODO: set everything in here.
-		cfgCtx.NoCache = nocache
-		cfgCtx.Slice = app.ParseSlice(slice)
-		cfgCtx.Filters = app.ApplyFilter(filter)
-		cfgCtx.Columns = app.ParseColumns(columns)
-
-		if len(args) > 0 {
-			cfgCtx.PrimaryFilter = args[0]
-		} else {
-			cfgCtx.PrimaryFilter = app.PrimaryFilterAll
-		}
-
-		if len(args) > 1 {
-			cfgCtx.RemoteCmd = strings.TrimSpace(strings.Join(args[1:], " "))
-		}
-
-		cfgCtx.TailscaleAPI.ApiKey = os.Getenv("tips_api_key")
-		cfgCtx.Tailnet = "deckarep@gmail.com"
-		cfgCtx.TailscaleAPI.Timeout = time.Second * 5
-
-		ctx = context.WithValue(ctx, app.CtxKeyConfig, cfgCtx)
-		ctx = context.WithValue(ctx, app.CtxKeyUserQuery, "tips blade*")
 
 		var client *tailscale.Client
 		if !useOauth {
@@ -169,6 +150,32 @@ var rootCmd = &cobra.Command{
 			log.Fatal("problem rendering table view with err: ", err)
 		}
 	},
+}
+
+func packageCfg(args []string) *app.ConfigCtx {
+	// Populate context key/values as needed.
+	cfgCtx := app.NewConfigCtx()
+	// TODO: set everything in here.
+	cfgCtx.NoCache = nocache
+	cfgCtx.Slice = app.ParseSlice(slice)
+	cfgCtx.Filters = app.ApplyFilter(filter)
+	cfgCtx.Columns = app.ParseColumns(columns)
+
+	if len(args) > 0 {
+		cfgCtx.PrimaryFilter = args[0]
+	} else {
+		cfgCtx.PrimaryFilter = app.PrimaryFilterAll
+	}
+
+	if len(args) > 1 {
+		cfgCtx.RemoteCmd = strings.TrimSpace(strings.Join(args[1:], " "))
+	}
+
+	cfgCtx.TailscaleAPI.ApiKey = os.Getenv("tips_api_key")
+	cfgCtx.Tailnet = "deckarep@gmail.com"
+	cfgCtx.TailscaleAPI.Timeout = time.Second * 5
+
+	return cfgCtx
 }
 
 func Execute() {
