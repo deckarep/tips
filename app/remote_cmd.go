@@ -74,7 +74,12 @@ func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []string, r
 
 	poll(ctx, w, sem, allCompletions)
 
-	summary := fmt.Sprintf("Finished: successes: %d, failures: %d, elapsed_sec: %.2f", totalSuccess.Load(), totalErrors.Load(), time.Since(startTime).Seconds())
+	// Prints a summary at the end of success vs failures as well as how long it took in seconds.
+	summary := fmt.Sprintf("Finished: successes: %d, failures: %d, elapsed_sec: %.2f",
+		totalSuccess.Load(),
+		totalErrors.Load(),
+		time.Since(startTime).Seconds())
+
 	if _, err := fmt.Fprintln(w, summary); err != nil {
 		log.Error("error on `Fprintln` when writing elapsed time", "error", err)
 	}

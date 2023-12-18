@@ -105,6 +105,7 @@ var rootCmd = &cobra.Command{
 		ctx = context.WithValue(ctx, app.CtxKeyUserQuery, "tips blade*")
 
 		myCmd := "sudo ls /var/log"
+		//myCmd := "while true; do echo 'hi'; sleep 1; done"
 		var hosts = []string{
 			"blade",
 			"blade",
