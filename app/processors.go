@@ -66,6 +66,19 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 			continue
 		}
 
+		if f, exists := cfg.Filters["ipv4"]; exists {
+			if (len(dev.Addresses) == 0) || !f.ContainsAny(dev.Addresses...) {
+				continue
+			}
+		}
+
+		// TODO: additional filters - by exitNode, lastSeen, ipv6
+		//if f, exists := cfg.Filters["ip6"]; exists {
+		//	if !f.Contains(dev.Addresses) {
+		//		continue
+		//	}
+		//}
+
 		// Filter by 'os' when provided.
 		if f, exists := cfg.Filters["os"]; exists {
 			if !f.Contains(strings.ToLower(dev.OS)) {
@@ -163,8 +176,6 @@ func getHeaders(enrichedResults map[string]tailscale_cli.DeviceInfo) []string {
 }
 
 func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cli.DeviceInfo) []string {
-	// You can also add tables row-by-row
-
 	// TODO: I need to remove columns based on --columns flag.
 
 	var (

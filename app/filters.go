@@ -17,7 +17,13 @@ import (
 // 'tag:peanuts, !walnuts (will exclude walnuts)
 
 var (
-	filterTagsSupported = mapset.NewSet[string]("tag", "os", "user", "version")
+	filterTagsSupported = mapset.NewSet[string](
+		"tag",
+		"os",
+		"user",
+		"version",
+		"ipv4",
+		"ipv6")
 )
 
 func ApplyFilter(filter string) map[string]mapset.Set[string] {

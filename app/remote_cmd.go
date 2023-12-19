@@ -13,7 +13,7 @@ import (
 
 const (
 	maxLinesToProcess    = 10
-	maxCompletionTimeout = time.Microsecond * 10
+	maxCompletionTimeout = time.Millisecond * 1
 
 	// TODO: consider prioritizing the built-in ssh into Tailscale which accounts for authentication via the Tailscale api.
 	sshBin = "/usr/bin/ssh"
