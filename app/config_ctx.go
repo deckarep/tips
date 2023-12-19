@@ -100,6 +100,10 @@ func NewConfigCtx() *ConfigCtx {
 	return &ConfigCtx{}
 }
 
+func (c *ConfigCtx) IsRemoteCommand() bool {
+	return len(c.RemoteCmd) > 0
+}
+
 func ParseColumns(s string) mapset.Set[string] {
 	if len(strings.TrimSpace(s)) == 0 {
 		return nil

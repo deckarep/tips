@@ -110,31 +110,33 @@ var rootCmd = &cobra.Command{
 		ctx = context.WithValue(ctx, app.CtxKeyConfig, cfgCtx)
 		ctx = context.WithValue(ctx, app.CtxKeyUserQuery, "tips blade*")
 
-		//myCmd := "sudo ls /var/log"
-		myCmd := "head -n100 /var/log/secure"
-		//myCmd := "while true; do echo 'hi'; sleep 1; done"
-		var hosts = []string{
-			"blade",
-			"blade",
-			//"blade",
-			//"blade",
-			//"blade",
-			//"blade",
-			//"blade",
-			//"blade",
-			//"blade",
-			//"blade",
+		if false {
+			//myCmd := "sudo ls /var/log"
+			myCmd := "head -n100 /var/log/secure"
+			//myCmd := "while true; do echo 'hi'; sleep 1; done"
+			var hosts = []string{
+				"blade",
+				"blade",
+				//"blade",
+				//"blade",
+				//"blade",
+				//"blade",
+				//"blade",
+				//"blade",
+				//"blade",
+				//"blade",
+			}
+
+			app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, myCmd)
 		}
 
-		app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, myCmd)
-
-		if true {
+		if false {
 			return
 		}
 
-		log.Warn("args_provided", "args", args)
-		log.Warnf("foo=%s", viper.GetString("foo"))
-		log.Warnf("filter=%s", filter)
+		//log.Warn("args_provided", "args", args)
+		//log.Warnf("foo=%s", viper.GetString("foo"))
+		//log.Warnf("filter=%s", filter)
 
 		var client *tailscale.Client
 		if !useOauth {
@@ -153,9 +155,22 @@ var rootCmd = &cobra.Command{
 			log.Fatal("problem processing devices data with err: ", err)
 		}
 
-		err = app.RenderTableView(ctx, view, os.Stdout)
-		if err != nil {
-			log.Fatal("problem rendering table view with err: ", err)
+		if cfgCtx.IsRemoteCommand() {
+			// It's a remote command, instead of rendering a table execute the remote command over all hosts.
+			var hosts []string
+			for _, rows := range view.Rows {
+				// TODO: getting back a GeneralTableView in this stage is not ideal, it's too abstract.
+				// Column's may change so this is dumb.
+				hosts = append(hosts, rows[1])
+			}
+			// Do the remote cluster command.
+			app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, cfgCtx.RemoteCmd)
+
+		} else {
+			err = app.RenderTableView(ctx, view, os.Stdout)
+			if err != nil {
+				log.Fatal("problem rendering table view with err: ", err)
+			}
 		}
 	},
 }

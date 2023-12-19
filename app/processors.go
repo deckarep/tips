@@ -51,12 +51,18 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 		return items
 	}
 
-	var filteredDevList []tailscale.Device
-	var primFilter = strings.ToLower(cfg.PrimaryFilter)
+	var (
+		filteredDevList []tailscale.Device
+		primFilter      = strings.ToLower(cfg.PrimaryFilter)
+	)
 	for _, dev := range devList {
+		// d.Name is the fully qualified DNS name, but we just shorten it and this is the name used
+		// that takes precedence when the user overrides the name.
+		easyName := strings.Split(dev.Name, ".")[0]
+
 		// PrimaryFilter when not '*' (everything), by default this is a case-insensitive prefix filter.
 		if cfg.PrimaryFilter != PrimaryFilterAll &&
-			!strings.HasPrefix(strings.ToLower(dev.Hostname), primFilter) {
+			!strings.HasPrefix(strings.ToLower(easyName), primFilter) {
 			continue
 		}
 
@@ -167,6 +173,10 @@ func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cl
 		timeAgo = humanize.Time(d.LastSeen.Time)
 		// Remove all tag: prefixes, and join the tags as a comma delimited string.
 		tags = strings.Replace(strings.Join(d.Tags, ","), "tag:", "", -1)
+
+		// d.Name is the fully qualified DNS name, but we just shorten it and this is the name used
+		// that takes precedence when the user overrides the name.
+		easyName = strings.Split(d.Name, ".")[0]
 	)
 
 	seenAgo := timeAgo
@@ -179,7 +189,7 @@ func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cl
 		if enrichedDev, ok := enrichedResults[d.NodeKey]; ok && enrichedDev.Online {
 			seenAgo = fmt.Sprintf("%s now", ui.Styles.Green.Render(ui.Dot))
 		}
-		return []string{strconv.Itoa(idx), d.Hostname, d.Addresses[0], tags, d.User, version, seenAgo}
+		return []string{strconv.Itoa(idx), easyName, d.Addresses[0], tags, d.User, version, seenAgo}
 	}
-	return []string{strconv.Itoa(idx), d.Hostname, d.Addresses[0], tags, d.User, version, seenAgo}
+	return []string{strconv.Itoa(idx), easyName, d.Addresses[0], tags, d.User, version, seenAgo}
 }
