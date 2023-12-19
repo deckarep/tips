@@ -1,16 +1,16 @@
 # tips
-The command-line tool to wrangle your Tailscale/Tailnet cluster whether large or small.
+The command-line tool to wrangle your Tailscale tailnet cluster whether large or small.
 
 ### What is tips?
-Any Tailscale user whether a hobbyist with a 5 node cluster or a seasoned cloud professional managing thousands of 
+Any Tailscale user whether a hobbyist with a 3 node cluster or a seasoned cloud professional managing thousands of 
 production nodes can benefit from this tool. `tips` is the go-to tool to quickly and effectively manage a `tailnet`
-cluster of any size. It allows you to confidently slice and dice nodes, filter nodes, remotely execute 
+cluster of any size. It allows you to confidently slice and dice nodes, filter/nodes, remotely execute 
 commands and manage your nodes collectively using an effective pattern modeled after cloud automation software.
 
 ### Definitions
-* **Tailscale**: makes creating software-defined networks easy: securely connecting users, services, and devices
-* **tailnet**: a single private network built from one or more nodes using Tailscale
-* **tips** (this tool): a command-line tool to easily manage your tailnet cluster for use on Mac, PC, or Linux
+* **[Tailscale](https://tailscale.com/)**: makes creating software-defined networks easy: securely connecting users, services, and devices
+* **[tailnet](https://tailscale.com/kb/1136/tailnet)**: a single private network built from one or more nodes using Tailscale
+* **[tips](https://github.com/deckarep/tips)** (this tool): a command-line tool to easily manage a tailnet cluster for use on Mac, PC, or Linux
 
 ### You'll be able to ...
 * Easily view your nodes in a *beautifully rendered* and consistent table view
@@ -31,6 +31,11 @@ commands and manage your nodes collectively using an effective pattern modeled a
 * Simply put, this tool is about managing a (t)ailnet's distributed (ips) or nodes which shortens to: `tips`
 * Lastly, what better way to show appreciation for software than to **leave a tip** especially if used in a
 professional or commercial setting?
+
+### Supported/Tested OS's
+- [x] MacOS (tested, actively developed)
+- [ ] Linux (planned soon)
+- [ ] PC (future planned: contributions welcome)
 
 ### Built with ❤️
 * by deckarep
