@@ -36,6 +36,14 @@ type styleTypes struct {
 	Bold  lipgloss.Style
 	Faint lipgloss.Style
 	Green lipgloss.Style
+
+	Red     lipgloss.Style
+	Blue    lipgloss.Style
+	Yellow  lipgloss.Style
+	White   lipgloss.Style
+	Magenta lipgloss.Style
+	Cyan    lipgloss.Style
+	Black   lipgloss.Style
 }
 
 type colorTypes struct {
@@ -43,6 +51,14 @@ type colorTypes struct {
 	Gray      lipgloss.Color
 	LightGray lipgloss.Color
 	Green     lipgloss.Color
+
+	Red     lipgloss.Color
+	Blue    lipgloss.Color
+	Yellow  lipgloss.Color
+	White   lipgloss.Color
+	Magenta lipgloss.Color
+	Cyan    lipgloss.Color
+	Black   lipgloss.Color
 }
 
 var (
@@ -50,7 +66,16 @@ var (
 		Purple:    lipgloss.Color("99"),
 		Gray:      lipgloss.Color("245"),
 		LightGray: lipgloss.Color("241"),
-		Green:     lipgloss.Color("99"),
+		//Green:     lipgloss.Color("99"),
+
+		Red:     lipgloss.Color("9"),
+		Green:   lipgloss.Color("10"), //("32"),
+		Blue:    lipgloss.Color("12"),
+		Yellow:  lipgloss.Color("11"),
+		White:   lipgloss.Color("15"),
+		Magenta: lipgloss.Color("5"),
+		Cyan:    lipgloss.Color("14"),
+		Black:   lipgloss.Color("16"),
 	}
 
 	Styles = styleTypes{
@@ -65,7 +90,28 @@ var (
 
 		Green: lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("#00ff00")),
+			Foreground(Colors.Green),
+		Blue: lipgloss.NewStyle().
+			Bold(true).
+			Foreground(Colors.Blue),
+		Cyan: lipgloss.NewStyle().
+			Bold(true).
+			Foreground(Colors.Cyan),
+		Magenta: lipgloss.NewStyle().
+			Bold(true).
+			Foreground(Colors.Magenta),
+		White: lipgloss.NewStyle().
+			Bold(true).
+			Foreground(Colors.Yellow),
+		Yellow: lipgloss.NewStyle().
+			Bold(true).
+			Foreground(Colors.Yellow),
+		Red: lipgloss.NewStyle().
+			Bold(true).
+			Foreground(Colors.Red),
+		Black: lipgloss.NewStyle().
+			Bold(true).
+			Foreground(Colors.Black),
 	}
 )
 

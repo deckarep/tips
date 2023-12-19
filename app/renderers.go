@@ -15,56 +15,85 @@ import (
 
 var (
 	// Colorization Rules regex (order matters, last one wins)
-	colorRules = []*regexp.Regexp{
-		// Keyword match
-		regexp.MustCompile(`\bsudo\b`),
+	colorRules = []regWithColor{
+		// Keyword match: sudo|closed
+		{reg: regexp.MustCompile(`\b(sudo|closed)\b`), color: ui.Styles.Red},
 		// Any size int regex (no decimals, boundaries don't matter)
-		regexp.MustCompile(`\b\d+\b`),
+		{reg: regexp.MustCompile(`\b\d+\b`), color: ui.Styles.Blue},
 		// IPV4 regex
-		regexp.MustCompile(`\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b`),
+		{reg: regexp.MustCompile(`\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b`), color: ui.Styles.Blue},
 	}
 )
 
-func applyColorRule(rule *regexp.Regexp, line string) string {
-	locs := rule.FindAllStringIndex(line, -1)
+type regWithColor struct {
+	reg   *regexp.Regexp
+	color lipgloss.Style
+}
 
-	if locs != nil {
-		var sb strings.Builder
-		lastEnd := 0
+type segment struct {
+	text      string
+	colorized bool
+}
 
-		for _, loc := range locs {
-			// Append the part of the string before the match
-			sb.WriteString(ui.Styles.Faint.Render(line[lastEnd:loc[0]]))
+func applyColorRule(rule regWithColor, segments []segment) []segment {
+	var newSegments []segment
 
-			// Append the match itself, colorized
-			sb.WriteString(ui.Styles.Green.Render(line[loc[0]:loc[1]]))
-
-			// Update the last processed index
-			lastEnd = loc[1]
+	for _, seg := range segments {
+		if seg.colorized {
+			newSegments = append(newSegments, seg)
+			continue
 		}
 
-		// Append the remainder of the string after the last match
-		sb.WriteString(ui.Styles.Faint.Render(line[lastEnd:]))
-
-		line = sb.String()
+		locs := rule.reg.FindAllStringIndex(seg.text, -1)
+		lastEnd := 0
+		for _, loc := range locs {
+			// Before the match
+			if loc[0] > lastEnd {
+				newSegments = append(newSegments, segment{text: seg.text[lastEnd:loc[0]]})
+			}
+			// The match itself
+			newSegments = append(newSegments, segment{
+				text:      rule.color.Render(seg.text[loc[0]:loc[1]]),
+				colorized: true,
+			})
+			lastEnd = loc[1]
+		}
+		// After the last match
+		if lastEnd < len(seg.text) {
+			newSegments = append(newSegments, segment{text: seg.text[lastEnd:]})
+		}
 	}
 
-	return line
+	return newSegments
 }
 
 func applyColorRules(line string) string {
+	segments := []segment{{text: line}}
+
 	for _, rule := range colorRules {
-		line = applyColorRule(rule, line)
+		segments = applyColorRule(rule, segments)
 	}
-	return line
+
+	// Reconstruct the line with default coloring for non-matching segments
+	var sb strings.Builder
+	for _, seg := range segments {
+		if seg.colorized {
+			sb.WriteString(seg.text)
+		} else {
+			sb.WriteString(ui.Styles.Faint.Render(seg.text))
+		}
+	}
+
+	return sb.String()
 }
 
 func RenderLogLine(ctx context.Context, w io.Writer, idx int, hostname, line string) {
 	// Apply regex coloring/filtering.
+	// Experiment: log syntax highlighter similar to https://github.com/bensadeh/tailspin
+	// TODO: this logic still isn't quite right...but it's a start.
 	line = applyColorRules(line)
 
-	// TODO: would be cool to add a log syntax highlighter like: https://github.com/bensadeh/tailspin
-	hostPrefix := ui.Styles.Green.Render(fmt.Sprintf("%s (%d): ", hostname, idx))
+	hostPrefix := ui.Styles.Cyan.Render(fmt.Sprintf("%s (%d): ", hostname, idx))
 	if _, err := fmt.Fprintln(w, hostPrefix+ui.Styles.Faint.Render(line)); err != nil {
 		log.Error("error occurred during `Fprintln` to the local io.Writer:", err)
 	}

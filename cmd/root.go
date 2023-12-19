@@ -28,6 +28,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -99,6 +100,9 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
+		// Dump colors
+		//dumpColors()
+
 		// 0. Package all configuration logic.
 		cfgCtx := packageCfg(args)
 		ctx = context.WithValue(ctx, app.CtxKeyConfig, cfgCtx)
@@ -152,6 +156,15 @@ var rootCmd = &cobra.Command{
 			log.Fatal("problem rendering table view with err: ", err)
 		}
 	},
+}
+
+func dumpColors() {
+	for i := 0; i < 256; i++ {
+		s := lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color(fmt.Sprintf("%d", i)))
+		fmt.Println(s.Render(fmt.Sprintf("Color: %d", i)))
+	}
 }
 
 func packageCfg(args []string) *app.ConfigCtx {
