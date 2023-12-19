@@ -87,6 +87,7 @@ type ConfigCtx struct {
 	Concurrency   int
 	Filters       map[string]mapset.Set[string]
 	NoCache       bool
+	NoColor       bool
 	PrimaryFilter string
 	RemoteCmd     string
 	Slice         *SliceCfg

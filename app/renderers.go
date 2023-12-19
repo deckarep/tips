@@ -88,10 +88,15 @@ func applyColorRules(line string) string {
 }
 
 func RenderLogLine(ctx context.Context, w io.Writer, idx int, hostname, line string) {
-	// Apply regex coloring/filtering.
-	// Experiment: log syntax highlighter similar to https://github.com/bensadeh/tailspin
-	// TODO: this logic still isn't quite right...but it's a start.
-	line = applyColorRules(line)
+	cfg := CtxAsConfig(ctx, CtxKeyConfig)
+
+	if !cfg.NoColor {
+		// Apply regex coloring/filtering.
+		// Experiment: log syntax highlighter similar to https://github.com/bensadeh/tailspin
+		// TODO: this logic still isn't quite right...but it's a start.
+
+		line = applyColorRules(line)
+	}
 
 	hostPrefix := ui.Styles.Cyan.Render(fmt.Sprintf("%s (%d): ", hostname, idx))
 	if _, err := fmt.Fprintln(w, hostPrefix+ui.Styles.Faint.Render(line)); err != nil {

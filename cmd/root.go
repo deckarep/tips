@@ -48,6 +48,7 @@ var (
 	concurrency   int
 	filter        string
 	nocache       bool
+	nocolor       bool
 	slice         string
 	sortOrder     string
 	tailnet       string
@@ -73,6 +74,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&useOauth, "oauth", false, "use oauth when flag is provided.")
 	rootCmd.PersistentFlags().DurationVarP(&clientTimeout, "client_timeout", "", time.Second*5, "timeout duration for the Tailscale api")
 	rootCmd.PersistentFlags().BoolVarP(&nocache, "nocache", "n", false, "forces the cache to be expunged")
+	rootCmd.PersistentFlags().BoolVarP(&nocolor, "nocolor", "", false, "when --nocolor is provided disables log color highlighting")
 
 	// Note: Not sure if this flag is useful.
 	rootCmd.PersistentFlags().DurationVarP(&cliTimeout, "cli_timeout", "", time.Second*5, "timeout duration for the Tailscale cli")
@@ -172,6 +174,7 @@ func packageCfg(args []string) *app.ConfigCtx {
 	cfgCtx := app.NewConfigCtx()
 	// TODO: set everything in here.
 	cfgCtx.NoCache = nocache
+	cfgCtx.NoColor = nocolor
 	cfgCtx.Slice = app.ParseSlice(slice)
 	cfgCtx.Filters = app.ApplyFilter(filter)
 	cfgCtx.Columns = app.ParseColumns(columns)
