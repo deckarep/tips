@@ -104,19 +104,20 @@ var rootCmd = &cobra.Command{
 		ctx = context.WithValue(ctx, app.CtxKeyConfig, cfgCtx)
 		ctx = context.WithValue(ctx, app.CtxKeyUserQuery, "tips blade*")
 
-		myCmd := "sudo ls /var/log"
+		//myCmd := "sudo ls /var/log"
+		myCmd := "head -n100 /var/log/secure"
 		//myCmd := "while true; do echo 'hi'; sleep 1; done"
 		var hosts = []string{
 			"blade",
 			"blade",
-			"blade",
-			"blade",
-			"blade",
-			"blade",
-			"blade",
-			"blade",
-			"blade",
-			"blade",
+			//"blade",
+			//"blade",
+			//"blade",
+			//"blade",
+			//"blade",
+			//"blade",
+			//"blade",
+			//"blade",
 		}
 
 		app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, myCmd)

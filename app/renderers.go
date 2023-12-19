@@ -5,10 +5,70 @@ import (
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
+	"github.com/charmbracelet/log"
 	"io"
 	"os"
+	"regexp"
+	"strings"
 	"tips/pkg/ui"
 )
+
+var (
+	// Colorization Rules regex (order matters, last one wins)
+	colorRules = []*regexp.Regexp{
+		// Keyword match
+		regexp.MustCompile(`\bsudo\b`),
+		// Any size int regex (no decimals, boundaries don't matter)
+		regexp.MustCompile(`\b\d+\b`),
+		// IPV4 regex
+		regexp.MustCompile(`\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b`),
+	}
+)
+
+func applyColorRule(rule *regexp.Regexp, line string) string {
+	locs := rule.FindAllStringIndex(line, -1)
+
+	if locs != nil {
+		var sb strings.Builder
+		lastEnd := 0
+
+		for _, loc := range locs {
+			// Append the part of the string before the match
+			sb.WriteString(ui.Styles.Faint.Render(line[lastEnd:loc[0]]))
+
+			// Append the match itself, colorized
+			sb.WriteString(ui.Styles.Green.Render(line[loc[0]:loc[1]]))
+
+			// Update the last processed index
+			lastEnd = loc[1]
+		}
+
+		// Append the remainder of the string after the last match
+		sb.WriteString(ui.Styles.Faint.Render(line[lastEnd:]))
+
+		line = sb.String()
+	}
+
+	return line
+}
+
+func applyColorRules(line string) string {
+	for _, rule := range colorRules {
+		line = applyColorRule(rule, line)
+	}
+	return line
+}
+
+func RenderLogLine(ctx context.Context, w io.Writer, idx int, hostname, line string) {
+	// Apply regex coloring/filtering.
+	line = applyColorRules(line)
+
+	// TODO: would be cool to add a log syntax highlighter like: https://github.com/bensadeh/tailspin
+	hostPrefix := ui.Styles.Green.Render(fmt.Sprintf("%s (%d): ", hostname, idx))
+	if _, err := fmt.Fprintln(w, hostPrefix+ui.Styles.Faint.Render(line)); err != nil {
+		log.Error("error occurred during `Fprintln` to the local io.Writer:", err)
+	}
+}
 
 func RenderTableView(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
 

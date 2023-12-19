@@ -9,12 +9,11 @@ import (
 	"os/exec"
 	"sync/atomic"
 	"time"
-	"tips/pkg/ui"
 )
 
 const (
 	maxLinesToProcess    = 10
-	maxCompletionTimeout = time.Millisecond * 10
+	maxCompletionTimeout = time.Microsecond * 10
 
 	// TODO: consider prioritizing the built-in ssh into Tailscale which accounts for authentication via the Tailscale api.
 	sshBin = "/usr/bin/ssh"
@@ -125,11 +124,7 @@ func poll(ctx context.Context, w io.Writer, sem chan struct{}, allCompletions []
 						break nextCompletion
 					}
 
-					// TODO: would be cool to add a log syntax highlighter like: https://github.com/bensadeh/tailspin
-					hostPrefix := ui.Styles.Green.Render(fmt.Sprintf("%s (%d): ", stream.hostname, stream.idx))
-					if _, err := fmt.Fprintln(w, hostPrefix+ui.Styles.Faint.Render(stream.line)); err != nil {
-						log.Error("error occurred during `Fprintln` to the local io.Writer:", err)
-					}
+					RenderLogLine(ctx, w, stream.idx, stream.hostname, stream.line)
 				case <-time.After(maxCompletionTimeout):
 					// We've waited long enough maybe another completion is ready.
 					break nextCompletion
