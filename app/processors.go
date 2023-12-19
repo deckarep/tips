@@ -33,16 +33,7 @@ var (
 func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnriched map[string]tailscale_cli.DeviceInfo) (*GeneralTableView, error) {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
-	// 1. Filter -  if user requested any with the --filter flag
-
-	//var strSlicerLower = func(vals []string) []string {
-	//	var items []string
-	//	for _, s := range vals {
-	//		items = append(items, strings.ToLower(s))
-	//	}
-	//	return items
-	//}
-
+	// 1. Filter - if user requested any with the --filter flag
 	var normalizeTags = func(vals []string) []string {
 		var items []string
 		for _, s := range vals {
@@ -55,6 +46,7 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 		filteredDevList []tailscale.Device
 		primFilter      = strings.ToLower(cfg.PrimaryFilter)
 	)
+
 	for _, dev := range devList {
 		// d.Name is the fully qualified DNS name, but we just shorten it and this is the name used
 		// that takes precedence when the user overrides the name.
@@ -66,27 +58,30 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 			continue
 		}
 
+		// Filters by ipv4 - currently only supports full matching.
 		if f, exists := cfg.Filters["ipv4"]; exists {
 			if (len(dev.Addresses) == 0) || !f.ContainsAny(dev.Addresses...) {
 				continue
 			}
 		}
 
-		// TODO: additional filters - by exitNode, lastSeen, ipv6
-		//if f, exists := cfg.Filters["ip6"]; exists {
-		//	if !f.Contains(dev.Addresses) {
-		//		continue
-		//	}
-		//}
+		// Filters by ipv6 - currently only supports full matching.
+		if f, exists := cfg.Filters["ipv6"]; exists {
+			if (len(dev.Addresses) == 0) || !f.ContainsAny(dev.Addresses...) {
+				continue
+			}
+		}
 
-		// Filter by 'os' when provided.
+		// TODO: additional filters - by exitNode, lastSeen
+
+		// Filter by 'os' when provided - currently only supports full matching.
 		if f, exists := cfg.Filters["os"]; exists {
 			if !f.Contains(strings.ToLower(dev.OS)) {
 				continue
 			}
 		}
 
-		// Filter by 'tag' when provided.
+		// Filter by 'tag' when provided - currently only supports full matching.
 		if f, exists := cfg.Filters["tag"]; exists {
 			normalizedTags := normalizeTags(dev.Tags)
 			//spew.Dump(normalizedTags, f)
@@ -95,14 +90,14 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 			}
 		}
 
-		// Filter by 'user' when provided.
+		// Filter by 'user' when provided - currently only supports full matching.
 		if f, exists := cfg.Filters["user"]; exists {
 			if !f.Contains(strings.ToLower(dev.User)) {
 				continue
 			}
 		}
 
-		// Filter by 'version' when provided.
+		// Filter by 'version' when provided - currently only supports full matching.
 		if f, exists := cfg.Filters["version"]; exists {
 			// For now, just filter on the first portion of the version which has the format: 1.xx.1
 			semanticVersion := strings.Split(dev.ClientVersion, "-")[0]
@@ -183,7 +178,7 @@ func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cl
 
 		timeAgo = humanize.Time(d.LastSeen.Time)
 		// Remove all tag: prefixes, and join the tags as a comma delimited string.
-		tags = strings.Replace(strings.Join(d.Tags, ","), "tag:", "", -1)
+		tags = strings.Replace(strings.Join(d.Tags, ", "), "tag:", "", -1)
 
 		// d.Name is the fully qualified DNS name, but we just shorten it and this is the name used
 		// that takes precedence when the user overrides the name.

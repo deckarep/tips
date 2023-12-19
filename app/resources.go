@@ -29,7 +29,7 @@ func DevicesResource(ctx context.Context, client *tailscale.Client) ([]tailscale
 	cfg.TailscaleAPI.ElapsedTime = time.Since(startTime)
 
 	// 2. When available, enrich this data with data from the Tailscale cli, if this is run from a node within the tailnet.
-	enrichedDevices, err := tailscale_cli.GetDevicesStatuses()
+	enrichedDevices, err := tailscale_cli.GetDevicesState()
 	if err != nil {
 		fmt.Println("failed to get results: ", err)
 	}

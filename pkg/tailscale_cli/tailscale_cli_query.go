@@ -59,7 +59,7 @@ func GetVersion() (string, error) {
 	return string(output), nil
 }
 
-func GetDevicesStatuses() (map[string]DeviceInfo, error) {
+func GetDevicesState() (map[string]DeviceInfo, error) {
 	// TODO: try to find the path or use the user's config setting.
 	confirmedPath, err := exec.LookPath(macOSAppStorePath)
 	if err != nil {

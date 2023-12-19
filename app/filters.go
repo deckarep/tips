@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/charmbracelet/log"
-	"github.com/davecgh/go-spew/spew"
 	mapset "github.com/deckarep/golang-set/v2"
 	"strings"
 )
@@ -76,6 +75,5 @@ func ApplyFilter(filter string) map[string]mapset.Set[string] {
 		m[activeFilter].Add(part)
 	}
 
-	spew.Dump(m)
 	return m
 }

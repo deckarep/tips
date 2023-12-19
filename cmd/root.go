@@ -102,41 +102,30 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		// Dump colors
-		//dumpColors()
-
 		// 0. Package all configuration logic.
 		cfgCtx := packageCfg(args)
 		ctx = context.WithValue(ctx, app.CtxKeyConfig, cfgCtx)
-		ctx = context.WithValue(ctx, app.CtxKeyUserQuery, "tips blade*")
+		ctx = context.WithValue(ctx, app.CtxKeyUserQuery, fmt.Sprintf("%s %s", cfgCtx.PrimaryFilter, cfgCtx.RemoteCmd))
 
-		if false {
-			//myCmd := "sudo ls /var/log"
-			myCmd := "head -n100 /var/log/secure"
-			//myCmd := "while true; do echo 'hi'; sleep 1; done"
-			var hosts = []string{
-				"blade",
-				"blade",
-				//"blade",
-				//"blade",
-				//"blade",
-				//"blade",
-				//"blade",
-				//"blade",
-				//"blade",
-				//"blade",
-			}
-
-			app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, myCmd)
-		}
-
-		if false {
-			return
-		}
-
-		//log.Warn("args_provided", "args", args)
-		//log.Warnf("foo=%s", viper.GetString("foo"))
-		//log.Warnf("filter=%s", filter)
+		//if false {
+		//	//myCmd := "sudo ls /var/log"
+		//	myCmd := "head -n100 /var/log/secure"
+		//	//myCmd := "while true; do echo 'hi'; sleep 1; done"
+		//	var hosts = []string{
+		//		"blade",
+		//		"blade",
+		//		//"blade",
+		//		//"blade",
+		//		//"blade",
+		//		//"blade",
+		//		//"blade",
+		//		//"blade",
+		//		//"blade",
+		//		//"blade",
+		//	}
+		//
+		//	app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, myCmd)
+		//}
 
 		var client *tailscale.Client
 		if !useOauth {
@@ -165,7 +154,6 @@ var rootCmd = &cobra.Command{
 			}
 			// Do the remote cluster command.
 			app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, cfgCtx.RemoteCmd)
-
 		} else {
 			err = app.RenderTableView(ctx, view, os.Stdout)
 			if err != nil {
@@ -186,8 +174,8 @@ func dumpColors() {
 
 func packageCfg(args []string) *app.ConfigCtx {
 	// Populate context key/values as needed.
+
 	cfgCtx := app.NewConfigCtx()
-	// TODO: set everything in here.
 	cfgCtx.NoCache = nocache
 	cfgCtx.NoColor = nocolor
 	cfgCtx.Slice = app.ParseSlice(slice)
@@ -195,12 +183,15 @@ func packageCfg(args []string) *app.ConfigCtx {
 	cfgCtx.Columns = app.ParseColumns(columns)
 	cfgCtx.Concurrency = concurrency
 
+	// The 0th arg is the Primary filter, if nothing was specified we consider it to represent: @ for all
 	if len(args) > 0 {
 		cfgCtx.PrimaryFilter = args[0]
 	} else {
 		cfgCtx.PrimaryFilter = app.PrimaryFilterAll
 	}
 
+	// The 1st arg along with the rest - [1:] when provided is a remote command to execute.
+	// So we join this up into a single string.
 	if len(args) > 1 {
 		cfgCtx.RemoteCmd = strings.TrimSpace(strings.Join(args[1:], " "))
 	}
