@@ -33,25 +33,18 @@ func ParseSlice(s string) *SliceCfg {
 	}
 
 	const (
-		invalidSliceMsg = "the --slice flag or slice configuration is invalid; format is: [from:to] where from and to are both optional"
+		invalidSliceMsg = "the --slice flag or slice configuration is invalid; format is like a Go slice without the brackets"
 	)
 
 	s = strings.TrimSpace(s)
-	if !strings.HasPrefix(s, "[") {
-		log.Fatal(invalidSliceMsg)
-	}
-
-	if !strings.HasSuffix(s, "]") {
-		log.Fatal(invalidSliceMsg)
-	}
 
 	colonIdx := strings.Index(s, ":")
 	if colonIdx == -1 {
 		log.Fatal(invalidSliceMsg)
 	}
 
-	fromNumStr := s[1:colonIdx]
-	toNumStr := s[colonIdx+1 : len(s)-1]
+	fromNumStr := s[0:colonIdx]
+	toNumStr := s[colonIdx+1:]
 
 	if n, err := strconv.Atoi(strings.TrimSpace(fromNumStr)); err == nil {
 		sli.From = &n

@@ -35,6 +35,7 @@ import (
 	"github.com/tailscale/tailscale-client-go/tailscale"
 	"golang.org/x/exp/rand"
 	"net"
+	"sort"
 	"strings"
 	"time"
 )
@@ -44,7 +45,16 @@ const (
 )
 
 var (
-	nameFmt                   = "tsc-serv-%04d"
+	nameFmts = map[string]int{
+		"magnesium-%04d": 0,
+		"arsenic-%04d":   0,
+		"iron-%04d":      0,
+		"nickel-%04d":    0,
+		"titanium-%04d":  0,
+		"copper-%04d":    0,
+		"lead-%04d":      0,
+		"cobalt-%04d":    0,
+	}
 	startingIPVAddress net.IP = net.IPv4(100, 100, 0, 0)
 	tagPool                   = []string{"almond", "walnut", "peanut", "pistachio", "pecan", "cachew", "hazelnut"}
 	users                     = []string{"admin@foo.net", "admin@foo.org", "jane@foo.net", "roberto@foo.com", "terry@foo.org", "ellen@foo.io"}
@@ -74,9 +84,10 @@ func main() {
 }
 
 func createFakeDevice(idx int) *tailscale.Device {
+	name := getName(idx)
 	dev := &tailscale.Device{
 		Addresses:                 getIPV4Set(),
-		Name:                      fmt.Sprintf(nameFmt, idx),
+		Name:                      name,
 		ID:                        getID(16),
 		Authorized:                randBool(),
 		User:                      oneOf(users),
@@ -90,7 +101,7 @@ func createFakeDevice(idx int) *tailscale.Device {
 		Expires: tailscale.Time{
 			expiresDate,
 		},
-		Hostname:        fmt.Sprintf(nameFmt, idx),
+		Hostname:        name,
 		IsExternal:      randBool(),
 		LastSeen:        tailscale.Time{},
 		MachineKey:      getHex("mkey:", 64),
@@ -99,6 +110,23 @@ func createFakeDevice(idx int) *tailscale.Device {
 		UpdateAvailable: randBool(),
 	}
 	return dev
+}
+
+func getName(idx int) string {
+	anotherN := int(rand.ExpFloat64())
+
+	var keys []string
+	for key := range nameFmts {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys) // Sorting the keys for consistency
+
+	selectedKey := keys[anotherN%len(keys)]
+	count := nameFmts[selectedKey]
+	nameFmts[selectedKey] += 1
+
+	return fmt.Sprintf(selectedKey, count) // Using modulus for safe indexing
 }
 
 func getHex(prefix string, length int) string {
