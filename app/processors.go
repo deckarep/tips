@@ -81,8 +81,13 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 		// Filter by 'tag' when provided - currently only supports full matching.
 		if f, exists := cfg.Filters["tag"]; exists {
 			normalizedTags := normalizeTags(dev.Tags)
-			//spew.Dump(normalizedTags, f)
-			if (len(dev.Tags) == 0) || !f.Contains(normalizedTags...) {
+
+			var wantsEmpty = false
+			if f.Contains("nil") {
+				wantsEmpty = true
+			}
+
+			if !wantsEmpty && (len(dev.Tags) == 0) || !f.Contains(normalizedTags...) {
 				continue
 			}
 		}
@@ -194,7 +199,7 @@ func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cl
 		if enrichedDev, ok := enrichedResults[d.NodeKey]; ok && enrichedDev.Online {
 			seenAgo = fmt.Sprintf("%s now", ui.Styles.Green.Render(ui.Dot))
 		}
-		return []string{num, easyName, d.Addresses[0], tags, d.User, version, seenAgo}
 	}
+
 	return []string{num, easyName, d.Addresses[0], tags, d.User, version, seenAgo}
 }
