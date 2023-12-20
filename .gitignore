@@ -29,3 +29,5 @@ tips
 .DS_Store
 
 vhs_demos/*.gif
+
+testmode/*.json

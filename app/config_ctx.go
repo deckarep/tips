@@ -86,6 +86,8 @@ type ConfigCtx struct {
 	Columns       mapset.Set[string]
 	Concurrency   int
 	Filters       map[string]mapset.Set[string]
+	IPsOutput     bool
+	JsonOutput    bool
 	NoCache       bool
 	NoColor       bool
 	PrimaryFilter string
@@ -94,6 +96,8 @@ type ConfigCtx struct {
 	Tailnet       string
 	TailscaleAPI  TailscaleAPICfgCtx
 	TailscaleCLI  TailscaleCLICfgCtx
+
+	TestMode bool
 }
 
 func NewConfigCtx() *ConfigCtx {

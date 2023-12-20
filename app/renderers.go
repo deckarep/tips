@@ -141,7 +141,7 @@ func renderProlog(ctx context.Context, tableView *GeneralTableView, w io.Writer)
 
 func renderBody(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
 	const (
-		SmHdrWidth = 5
+		SmHdrWidth = 6
 	)
 
 	var (

@@ -56,12 +56,16 @@ var (
 	useCSSHX      bool
 	useOauth      bool
 	useSSH        bool
+	test          bool
+	ips           bool
+	jsonn         bool
 
 	foo string
 )
 
 func init() {
 	//cobra.OnInitialize(initConfig)
+
 	rootCmd.PersistentFlags().StringVarP(&foo, "foo", "", "blah", "foo is a test flag")
 	rootCmd.PersistentFlags().StringVarP(&slice, "slice", "", "", "slices the results after filtering followed by sorting")
 	rootCmd.PersistentFlags().StringVarP(&sortOrder, "sort", "s", "", "overrides the default/configured sort order --sort 'machine,addresss'")
@@ -75,6 +79,9 @@ func init() {
 	rootCmd.PersistentFlags().DurationVarP(&clientTimeout, "client_timeout", "", time.Second*5, "timeout duration for the Tailscale api")
 	rootCmd.PersistentFlags().BoolVarP(&nocache, "nocache", "n", false, "forces the cache to be expunged")
 	rootCmd.PersistentFlags().BoolVarP(&nocolor, "nocolor", "", false, "when --nocolor is provided disables log color highlighting")
+	rootCmd.PersistentFlags().BoolVar(&test, "test", false, "when true runs the tool in test mode with mocked data")
+	rootCmd.PersistentFlags().BoolVar(&ips, "ips", false, "when true returns only ips")
+	rootCmd.PersistentFlags().BoolVar(&jsonn, "json", false, "when true returns only json data")
 
 	// Note: Not sure if this flag is useful.
 	rootCmd.PersistentFlags().DurationVarP(&cliTimeout, "cli_timeout", "", time.Second*5, "timeout duration for the Tailscale cli")
@@ -134,7 +141,13 @@ var rootCmd = &cobra.Command{
 			client = app.NewOauthClient(ctx)
 		}
 
-		devList, devEnriched, err := app.DevicesResource(ctx, client)
+		var devicesResourceFunc = app.DevicesResource
+		if cfgCtx.TestMode {
+			// In test mode, indirect to mocked test data.
+			devicesResourceFunc = app.DevicesResourceTest
+		}
+
+		devList, devEnriched, err := devicesResourceFunc(ctx, client)
 		if err != nil {
 			log.Fatal("problem with resource lookup of devices with err: ", err)
 		}
@@ -175,13 +188,21 @@ func dumpColors() {
 func packageCfg(args []string) *app.ConfigCtx {
 	// Populate context key/values as needed.
 
+	// 0. Validate
+	if jsonn == true && ips == true {
+		log.Fatal("the --ips and --json flag must not be used together. Choose one or the other.")
+	}
+
 	cfgCtx := app.NewConfigCtx()
+	cfgCtx.IPsOutput = ips
+	cfgCtx.JsonOutput = jsonn
 	cfgCtx.NoCache = nocache
 	cfgCtx.NoColor = nocolor
 	cfgCtx.Slice = app.ParseSlice(slice)
 	cfgCtx.Filters = app.ApplyFilter(filter)
 	cfgCtx.Columns = app.ParseColumns(columns)
 	cfgCtx.Concurrency = concurrency
+	cfgCtx.TestMode = test
 
 	// The 0th arg is the Primary filter, if nothing was specified we consider it to represent: @ for all
 	if len(args) > 0 {
