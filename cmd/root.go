@@ -35,6 +35,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tailscale/tailscale-client-go/tailscale"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 	"tips/app"
@@ -205,9 +206,9 @@ func packageCfg(args []string) *app.ConfigCtx {
 
 	// The 0th arg is the Primary filter, if nothing was specified we consider it to represent: @ for all
 	if len(args) > 0 {
-		cfgCtx.PrimaryFilter = args[0]
+		cfgCtx.PrimaryFilter = regexp.MustCompile(args[0])
 	} else {
-		cfgCtx.PrimaryFilter = app.PrimaryFilterAll
+		cfgCtx.PrimaryFilter = nil
 	}
 
 	// The 1st arg along with the rest - [1:] when provided is a remote command to execute.

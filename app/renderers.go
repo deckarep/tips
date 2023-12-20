@@ -128,7 +128,7 @@ func renderProlog(ctx context.Context, tableView *GeneralTableView, w io.Writer)
 	fmt.Fprintf(w, ui.Styles.Faint.Render("\nTailnet: "))
 	fmt.Fprintln(w, ui.Styles.Bold.Render(tableView.Tailnet))
 
-	fmt.Fprintf(w, ui.Styles.Faint.Render("Tailnet Query: "))
+	fmt.Fprintf(w, ui.Styles.Faint.Render("Query: "))
 	fmt.Fprintln(w, ui.Styles.Bold.Render(tableView.Query))
 
 	if len(tableView.DNSName) > 0 {

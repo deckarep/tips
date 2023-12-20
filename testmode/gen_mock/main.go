@@ -45,15 +45,18 @@ const (
 )
 
 var (
+	regionSuffixes = []string{
+		"lax", "sfo", "dfw", "sjc",
+	}
 	nameFmts = map[string]int{
-		"magnesium-%04d": 0,
-		"arsenic-%04d":   0,
-		"iron-%04d":      0,
-		"nickel-%04d":    0,
-		"titanium-%04d":  0,
-		"copper-%04d":    0,
-		"lead-%04d":      0,
-		"cobalt-%04d":    0,
+		"magnesium-%04d-%s": 0,
+		"arsenic-%04d-%s":   0,
+		"iron-%04d-%s":      0,
+		"nickel-%04d-%s":    0,
+		"titanium-%04d-%s":  0,
+		"copper-%04d-%s":    0,
+		"lead-%04d-%s":      0,
+		"cobalt-%04d-%s":    0,
 	}
 	startingIPVAddress net.IP = net.IPv4(100, 100, 0, 0)
 	tagPool                   = []string{"almond", "walnut", "peanut", "pistachio", "pecan", "cachew", "hazelnut"}
@@ -126,7 +129,7 @@ func getName(idx int) string {
 	count := nameFmts[selectedKey]
 	nameFmts[selectedKey] += 1
 
-	return fmt.Sprintf(selectedKey, count) // Using modulus for safe indexing
+	return fmt.Sprintf(selectedKey, count, regionSuffixes[idx%len(regionSuffixes)])
 }
 
 func getHex(prefix string, length int) string {

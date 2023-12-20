@@ -7,7 +7,6 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/tailscale/tailscale-client-go/tailscale"
 	"slices"
-	"strconv"
 	"strings"
 	"time"
 	"tips/pkg/tailscale_cli"
@@ -44,7 +43,6 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 
 	var (
 		filteredDevList []tailscale.Device
-		primFilter      = strings.ToLower(cfg.PrimaryFilter)
 	)
 
 	for _, dev := range devList {
@@ -53,8 +51,7 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 		easyName := strings.Split(dev.Name, ".")[0]
 
 		// PrimaryFilter when not '*' (everything), by default this is a case-insensitive prefix filter.
-		if cfg.PrimaryFilter != PrimaryFilterAll &&
-			!strings.HasPrefix(strings.ToLower(easyName), primFilter) {
+		if cfg.PrimaryFilter != nil && !cfg.PrimaryFilter.MatchString(easyName) {
 			continue
 		}
 
@@ -191,11 +188,13 @@ func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cl
 	//	seenAgo = fmt.Sprintf("• %s", seenAgo)
 	//}
 
+	num := fmt.Sprintf("%04d", idx)
+
 	if len(enrichedResults) > 0 {
 		if enrichedDev, ok := enrichedResults[d.NodeKey]; ok && enrichedDev.Online {
 			seenAgo = fmt.Sprintf("%s now", ui.Styles.Green.Render(ui.Dot))
 		}
-		return []string{strconv.Itoa(idx), easyName, d.Addresses[0], tags, d.User, version, seenAgo}
+		return []string{num, easyName, d.Addresses[0], tags, d.User, version, seenAgo}
 	}
-	return []string{strconv.Itoa(idx), easyName, d.Addresses[0], tags, d.User, version, seenAgo}
+	return []string{num, easyName, d.Addresses[0], tags, d.User, version, seenAgo}
 }

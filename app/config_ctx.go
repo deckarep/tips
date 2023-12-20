@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/charmbracelet/log"
 	mapset "github.com/deckarep/golang-set/v2"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -83,7 +84,7 @@ type ConfigCtx struct {
 	JsonOutput    bool
 	NoCache       bool
 	NoColor       bool
-	PrimaryFilter string
+	PrimaryFilter *regexp.Regexp
 	RemoteCmd     string
 	Slice         *SliceCfg
 	Tailnet       string
