@@ -23,7 +23,7 @@ func ParseSortString(sortString string) []SortSpec {
 	var specs []SortSpec
 	fields := strings.Split(sortString, ",")
 	for _, field := range fields {
-		parts := strings.Split(strings.TrimSpace(field), ":")
+		parts := strings.Split(strings.ToLower(strings.TrimSpace(field)), ":")
 		if len(parts) != 2 {
 			continue // or handle the error
 		}
@@ -66,21 +66,3 @@ func dynamicSortDevices(slice []tailscale.Device, specs []SortSpec) {
 		return false
 	})
 }
-
-//func main() {
-//	// Example usage
-//	data := []YourStruct{
-//		{Name: "Bob", Machine: "Windows-1"},
-//		{Name: "Bob", Machine: "Windows-3"},
-//		{Name: "Bob", Machine: "Windows-2"},
-//		{Name: "Tony", Machine: "Linux-2"},
-//		{Name: "Tony", Machine: "Linux-1"},
-//		{Name: "Carron", Machine: "iOS-19"},
-//	}
-//	sortString := "name:asc, machine:asc"
-//	sortSlice(data, sortString)
-//
-//	for _, d := range data {
-//		fmt.Println(d.Name, d.Machine)
-//	}
-//}
