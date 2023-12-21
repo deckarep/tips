@@ -1,4 +1,4 @@
-# tips
+# tips OR tailtop
 The command-line tool to wrangle your Tailscale tailnet cluster whether large or small.
 
 ### What is tips?
