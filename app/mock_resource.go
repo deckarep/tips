@@ -45,14 +45,19 @@ func DevicesResourceTest(ctx context.Context, client *tailscale.Client) ([]tails
 	for _, dev := range devs {
 		isSelf := counter == 0
 		isOnline := true
+		offersExitNode := false
 		if rand.Float32() < 0.01 {
 			isOnline = false
 		}
+		if rand.Float32() < 0.05 {
+			offersExitNode = true
+		}
 		enrichedDevices[dev.NodeKey] = tailscale_cli.DeviceInfo{
-			DNSName: "",
-			IsSelf:  isSelf,
-			Online:  isOnline,
-			Tags:    nil,
+			DNSName:           "",
+			HasExitNodeOption: offersExitNode,
+			IsSelf:            isSelf,
+			Online:            isOnline,
+			Tags:              nil,
 		}
 		counter++
 	}
