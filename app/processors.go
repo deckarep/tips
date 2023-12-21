@@ -1,12 +1,10 @@
 package app
 
 import (
-	"cmp"
 	"context"
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/tailscale/tailscale-client-go/tailscale"
-	"slices"
 	"strings"
 	"time"
 	"tips/pkg/tailscale_cli"
@@ -111,13 +109,18 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 	}
 
 	// 2. Sort - based on user's configured setting or --sort flag
-	slices.SortFunc(filteredDevList, func(a, b tailscale.Device) int {
-		// TODO: Must be able to do this from configuration logic from context.
-		if n := cmp.Compare(a.Name, b.Name); n != 0 {
-			return n
-		}
-		return cmp.Compare(a.Name, b.Name)
-	})
+	// If at least one dynamic sort was defined, then apply it.
+	if len(cfg.SortOrder) > 0 {
+		dynamicSortDevices(filteredDevList, cfg.SortOrder)
+	}
+	// Original code I stubbed in.
+	//slices.SortFunc(filteredDevList, func(a, b tailscale.Device) int {
+	//	// TODO: Must be able to do this from configuration logic from context.
+	//	if n := cmp.Compare(a.Name, b.Name); n != 0 {
+	//		return n
+	//	}
+	//	return cmp.Compare(a.Name, b.Name)
+	//})
 
 	// 3. Slice - if provided via the --slice flag or configured, slice the results according to
 	// Go's standard slicing convention.

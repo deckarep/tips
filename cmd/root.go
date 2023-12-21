@@ -213,6 +213,7 @@ func packageCfg(args []string) *app.ConfigCtx {
 	cfgCtx.NoCache = nocache
 	cfgCtx.NoColor = nocolor
 	cfgCtx.Slice = app.ParseSlice(slice)
+	cfgCtx.SortOrder = app.ParseSortString(sortOrder)
 	cfgCtx.Filters = app.ApplyFilter(filter)
 	cfgCtx.Columns = app.ParseColumns(columns)
 	cfgCtx.Concurrency = concurrency

@@ -87,6 +87,7 @@ type ConfigCtx struct {
 	PrimaryFilter *regexp.Regexp
 	RemoteCmd     string
 	Slice         *SliceCfg
+	SortOrder     []SortSpec
 	Tailnet       string
 	TailscaleAPI  TailscaleAPICfgCtx
 	TailscaleCLI  TailscaleCLICfgCtx
