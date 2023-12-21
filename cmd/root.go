@@ -155,26 +155,39 @@ var rootCmd = &cobra.Command{
 
 		view, err := app.ProcessDevicesTable(ctx, devList, devEnriched)
 		if err != nil {
-			log.Fatal("problem processing devices data with err: ", err)
+			log.Fatal("problem occurred processing devices data", "error", err)
 		}
 
 		if cfgCtx.IsRemoteCommand() {
 			// It's a remote command, instead of rendering a table execute the remote command over all hosts.
-			var hosts []string
-			for _, rows := range view.Rows {
-				// TODO: getting back a GeneralTableView in this stage is not ideal, it's too abstract.
-				// Column's may change so this is dumb.
-				hosts = append(hosts, rows[1])
-			}
+			hosts := getHosts(ctx, view)
+
 			// Do the remote cluster command.
 			app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, cfgCtx.RemoteCmd)
 		} else {
 			err = app.RenderTableView(ctx, view, os.Stdout)
 			if err != nil {
-				log.Fatal("problem rendering table view with err: ", err)
+				log.Fatal("problem occurred rendering table view", "error", err)
 			}
 		}
 	},
+}
+
+func getHosts(ctx context.Context, view *app.GeneralTableView) []string {
+	cfg := app.CtxAsConfig(ctx, app.CtxKeyConfig)
+	var hosts []string
+
+	for _, rows := range view.Rows {
+		// TODO: getting back a GeneralTableView in this stage is not ideal, it's too abstract.
+		// Column's may change so this is dumb.
+		if cfg.TestMode {
+			hosts = append(hosts, "blade")
+		} else {
+			hosts = append(hosts, rows[1])
+		}
+	}
+
+	return hosts
 }
 
 func dumpColors() {

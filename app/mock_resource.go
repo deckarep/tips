@@ -7,6 +7,7 @@ import (
 	"github.com/tailscale/tailscale-client-go/tailscale"
 	"golang.org/x/exp/rand"
 	"os"
+	"time"
 	"tips/pkg/tailscale_cli"
 )
 
@@ -15,9 +16,15 @@ const (
 )
 
 func DevicesResourceTest(ctx context.Context, client *tailscale.Client) ([]tailscale.Device, map[string]tailscale_cli.DeviceInfo, error) {
+	cfg := CtxAsConfig(ctx, CtxKeyConfig)
+	startTime := time.Now()
+	defer func() {
+		cfg.TailscaleAPI.ElapsedTime = time.Since(startTime)
+	}()
+
 	f, err := os.Open(testDevicesFile)
 	if err != nil {
-		log.Fatal("failed to read file testmode/devices.json with err: ", err)
+		log.Fatal("failed to read file", "error", err)
 	}
 
 	defer f.Close()
@@ -28,7 +35,7 @@ func DevicesResourceTest(ctx context.Context, client *tailscale.Client) ([]tails
 	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	err = json.NewDecoder(f).Decode(&devs)
 	if err != nil {
-		log.Fatal("failed to Unmarshal file testmode/devices.json with err: ", err)
+		log.Fatal("failed to Unmarshal file:", "error", err)
 	}
 
 	// Total shameful hack in the interest of testing.

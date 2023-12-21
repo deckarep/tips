@@ -195,8 +195,13 @@ func renderEpilog(ctx context.Context, tableView *GeneralTableView, w io.Writer)
 	fmt.Fprint(w, ui.Styles.Faint.Render("Total Machines: "))
 	fmt.Fprint(w, ui.Styles.Bold.Render(fmt.Sprintf("%d", tableView.TotalMachines)))
 
-	fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed (secs): "))
-	fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2f", tableView.APIElapsed.Seconds())))
+	if tableView.APIElapsed.Seconds() > 1 {
+		fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed (secs): "))
+		fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2f", tableView.APIElapsed.Seconds())))
+	} else {
+		fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed (ms): "))
+		fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2d", tableView.APIElapsed.Milliseconds())))
+	}
 
 	return nil
 }

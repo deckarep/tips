@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	maxLinesToProcess    = 10
+	maxLinesToCluster    = 10
 	maxCompletionTimeout = time.Millisecond * 1
 
 	// TODO: consider prioritizing the built-in ssh into Tailscale which accounts for authentication via the Tailscale api.
@@ -94,56 +94,6 @@ func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []string, r
 	}
 }
 
-func poll(ctx context.Context, w io.Writer, sem chan struct{}, allCompletions []*chanCompletions) {
-	var totalCompleted int
-
-	// Loop indefinitely until all totalCompleted are accounted for, then bail.
-	for {
-		if totalCompleted == len(allCompletions) {
-			// We're completely done, so return.
-			return
-		}
-
-		// Continually iterate through all completions and check that the following conditions:
-		// 1. If we're completed for the first time, coordinate shutdown of this completion.
-		// 2. If we're already completed, just skip
-		// 3. Otherwise, if we're not completed consume up to maxLinesToProcess lines before moving onto the next
-		// channel. We do this to best-effort cluster the output.
-
-		for _, comp := range allCompletions {
-		nextCompletion:
-			// Attempt to read n lines from the channel before trying the next one, assuming they're ready.
-			// This is intended to minimize the interleaving of lines across hosts.
-			for i := 0; i < maxLinesToProcess; i++ {
-				select {
-				case stream, isOpen := <-comp.ch:
-					if !isOpen && !comp.completed {
-						// Mark this completion as done!
-						comp.completed = true
-
-						// Track how many completions are done.
-						totalCompleted++
-
-						// Mark sem for letting more work come in.
-						<-sem
-
-						// This completion is complete, move on to the next non-closed completion.
-						break nextCompletion
-					} else if comp.completed {
-						// We've already drained this to completion, our work is done so skip.
-						break nextCompletion
-					}
-
-					RenderLogLine(ctx, w, stream.idx, stream.hostname, stream.line)
-				case <-time.After(maxCompletionTimeout):
-					// We've waited long enough maybe another completion is ready.
-					break nextCompletion
-				}
-			}
-		}
-	}
-}
-
 func executeRemoteCmd(ctx context.Context, idx int, host string, remoteCmd string, outputChan chan<- hostLine) error {
 	// Construct the SSH command
 	sshCmd := exec.Command(sshBin, host, remoteCmd)
@@ -178,4 +128,54 @@ func executeRemoteCmd(ctx context.Context, idx int, host string, remoteCmd strin
 	}
 
 	return nil
+}
+
+func poll(ctx context.Context, w io.Writer, sem chan struct{}, allCompletions []*chanCompletions) {
+	var totalCompleted int
+
+	// Loop indefinitely until all totalCompleted are accounted for, then bail.
+	for {
+		if totalCompleted == len(allCompletions) {
+			// We're completely done, so return.
+			return
+		}
+
+		// Continually iterate through all completions and check that the following conditions:
+		// 1. If we're completed for the first time, coordinate shutdown of this completion.
+		// 2. If we're already completed, just skip
+		// 3. Otherwise, if we're not completed consume up to maxLinesToProcess lines before moving onto the next
+		// channel. We do this to best-effort cluster the output.
+
+		for _, comp := range allCompletions {
+		nextCompletion:
+			// Attempt to read n lines from the channel before trying the next one, assuming they're ready.
+			// This is intended to minimize the interleaving of lines across hosts.
+			for i := 0; i < maxLinesToCluster; i++ {
+				select {
+				case stream, isOpen := <-comp.ch:
+					if !isOpen && !comp.completed {
+						// Mark this completion as done!
+						comp.completed = true
+
+						// Track how many completions are done.
+						totalCompleted++
+
+						// Mark sem for letting more work come in.
+						<-sem
+
+						// This completion is complete, move on to the next non-closed completion.
+						break nextCompletion
+					} else if comp.completed {
+						// We've already drained this to completion, our work is done so skip.
+						break nextCompletion
+					}
+
+					RenderLogLine(ctx, w, stream.idx, stream.hostname, stream.line)
+				case <-time.After(maxCompletionTimeout):
+					// We've waited long enough maybe another completion is ready.
+					break nextCompletion
+				}
+			}
+		}
+	}
 }
