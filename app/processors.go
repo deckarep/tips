@@ -19,11 +19,13 @@ const (
 	UserHdr     = "User"
 	VersionHdr  = "Version"
 	LastSeenHdr = "LastSeen"
+	ExitNodeHdr = "Exit Node"
 )
 
 var (
-	DefaultHeader = []string{NoHdr, MachineHdr, AddressHdr, TagsHdr, UserHdr, VersionHdr, LastSeenHdr}
+	DefaultHeader = []string{NoHdr, MachineHdr, AddressHdr, TagsHdr, UserHdr, VersionHdr, ExitNodeHdr, LastSeenHdr}
 	nowField      = fmt.Sprintf("%s now", ui.Styles.Green.Render(ui.Dot))
+	checkField    = fmt.Sprintf("%s yes", ui.Styles.Green.Render(ui.Checkmark))
 )
 
 // ProcessDevicesTable will apply sorting (if required), slicing (if required) and the massage/transformation of data to produce a final
@@ -178,7 +180,8 @@ func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cl
 	// TODO: I need to remove columns based on --columns flag.
 
 	var (
-		version = fmt.Sprintf("%s - %s", strings.Split(d.ClientVersion, "-")[0], d.OS)
+		hasExitNodeOption = "no"
+		version           = fmt.Sprintf("%s - %s", strings.Split(d.ClientVersion, "-")[0], d.OS)
 
 		timeAgo = humanize.Time(d.LastSeen.Time)
 		// Remove all tag: prefixes, and join the tags as a comma delimited string.
@@ -197,11 +200,18 @@ func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cl
 
 	num := fmt.Sprintf("%04d", idx)
 
+	// Enriched results are only available when run from a node that is in the tailnet cluster itself.
+	// In other words, the external Tailscale API only provides so much data.
 	if len(enrichedResults) > 0 {
-		if enrichedDev, ok := enrichedResults[d.NodeKey]; ok && enrichedDev.Online {
-			seenAgo = nowField
+		if enrichedDev, ok := enrichedResults[d.NodeKey]; ok {
+			if enrichedDev.Online {
+				seenAgo = nowField
+			}
+			if enrichedDev.HasExitNodeOption {
+				hasExitNodeOption = checkField
+			}
 		}
 	}
 
-	return []string{num, easyName, d.Addresses[0], tags, d.User, version, seenAgo}
+	return []string{num, easyName, d.Addresses[0], tags, d.User, version, hasExitNodeOption, seenAgo}
 }

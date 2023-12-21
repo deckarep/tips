@@ -38,10 +38,11 @@ const (
 )
 
 type DeviceInfo struct {
-	DNSName string
-	IsSelf  bool
-	Online  bool
-	Tags    mapset.Set[string]
+	DNSName           string
+	HasExitNodeOption bool
+	IsSelf            bool
+	Online            bool
+	Tags              mapset.Set[string]
 }
 
 func GetVersion() (string, error) {
@@ -92,27 +93,31 @@ func GetDevicesState() (map[string]DeviceInfo, error) {
 	selfOnline := gjson.Get(jo, "Self.Online").Bool()
 	selfDNSName := gjson.Get(jo, "Self.DNSName").String()
 	selfTagSet := toTagSet(gjson.GetMany(jo, "Self.Tags"))
+	selfExitNodeOption := gjson.Get(jo, "Self.ExitNodeOption").Bool()
 
 	results[selfNodeKey] = DeviceInfo{
-		DNSName: selfDNSName,
-		Online:  selfOnline,
-		IsSelf:  true,
-		Tags:    selfTagSet,
+		DNSName:           selfDNSName,
+		Online:            selfOnline,
+		IsSelf:            true,
+		Tags:              selfTagSet,
+		HasExitNodeOption: selfExitNodeOption,
 	}
 
 	// Grab the peers
 	peers := gjson.Get(jo, "Peer")
 	peers.ForEach(func(key, value gjson.Result) bool {
+		exitNodeOption := value.Get("ExitNodeOption").Bool()
 		peerNodeKey := value.Get("PublicKey").String()
 		peerOnline := value.Get("Online").Bool()
 		dnsName := value.Get("DNSName").String()
 		tagSet := toTagSet(value.Get("Tags").Array())
 
 		results[peerNodeKey] = DeviceInfo{
-			DNSName: dnsName,
-			Online:  peerOnline,
-			IsSelf:  false,
-			Tags:    tagSet,
+			DNSName:           dnsName,
+			Online:            peerOnline,
+			HasExitNodeOption: exitNodeOption,
+			IsSelf:            false,
+			Tags:              tagSet,
 		}
 		return true
 	})
