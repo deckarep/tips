@@ -53,11 +53,11 @@ func DevicesResourceTest(ctx context.Context, client *tailscale.Client) ([]tails
 			offersExitNode = true
 		}
 		enrichedDevices[dev.NodeKey] = tailscale_cli.DeviceInfo{
-			DNSName:           "",
+			DNSName:           "", // currently unused
 			HasExitNodeOption: offersExitNode,
 			IsSelf:            isSelf,
 			Online:            isOnline,
-			Tags:              nil,
+			Tags:              nil, // currently unused
 		}
 		counter++
 	}

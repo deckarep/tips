@@ -56,6 +56,17 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 			continue
 		}
 
+		// Filters by exit node - filter query looks like: --filter 'exit:yes|no'
+		if f, exists := cfg.Filters["exit"]; exists {
+			// NOTE: this information only exists from enriched results.
+			if enrichedDev, ok := devEnriched[dev.NodeKey]; ok {
+				if (f.Contains("yes") && !enrichedDev.HasExitNodeOption) ||
+					(f.Contains("no") && enrichedDev.HasExitNodeOption) {
+					continue
+				}
+			}
+		}
+
 		// Filters by ipv4 - currently only supports full matching.
 		if f, exists := cfg.Filters["ipv4"]; exists {
 			if (len(dev.Addresses) == 0) || !f.ContainsAny(dev.Addresses...) {
@@ -202,14 +213,13 @@ func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cl
 
 	// Enriched results are only available when run from a node that is in the tailnet cluster itself.
 	// In other words, the external Tailscale API only provides so much data.
-	if len(enrichedResults) > 0 {
-		if enrichedDev, ok := enrichedResults[d.NodeKey]; ok {
-			if enrichedDev.Online {
-				seenAgo = nowField
-			}
-			if enrichedDev.HasExitNodeOption {
-				hasExitNodeOption = checkField
-			}
+
+	if enrichedDev, ok := enrichedResults[d.NodeKey]; ok {
+		if enrichedDev.Online {
+			seenAgo = nowField
+		}
+		if enrichedDev.HasExitNodeOption {
+			hasExitNodeOption = checkField
 		}
 	}
 

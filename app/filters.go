@@ -17,12 +17,14 @@ import (
 
 var (
 	filterTagsSupported = mapset.NewSet[string](
-		"tag",
+		"exit",
+		"ipv4",
+		"ipv6",
 		"os",
+		"tag",
 		"user",
 		"version",
-		"ipv4",
-		"ipv6")
+	)
 )
 
 func ApplyFilter(filter string) map[string]mapset.Set[string] {
