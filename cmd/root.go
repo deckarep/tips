@@ -68,7 +68,8 @@ func init() {
 	//cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVarP(&foo, "foo", "", "blah", "foo is a test flag")
 	rootCmd.PersistentFlags().StringVarP(&slice, "slice", "", "", "slices the results after filtering followed by sorting")
-	rootCmd.PersistentFlags().StringVarP(&sortOrder, "sort", "s", "", "overrides the default/configured sort order --sort 'machine,addresss'")
+	rootCmd.PersistentFlags().StringVarP(&sortOrder, "sort", "s", "",
+		"overrides the default/configured sort order --sort 'machine,address:dsc' the default order is always ascending (asc) for each column")
 	rootCmd.PersistentFlags().StringVarP(&tailnet, "tailnet", "t", "", "the tailnet to operate on")
 	rootCmd.PersistentFlags().IntVarP(&concurrency, "concurrency", "c", 5, "concurrency level when executing requests")
 	rootCmd.PersistentFlags().StringVarP(&columns, "columns", "", "", "columns limits which columns to return")

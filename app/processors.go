@@ -25,6 +25,7 @@ const (
 
 var (
 	DefaultHeader = []string{NoHdr, MachineHdr, AddressHdr, TagsHdr, UserHdr, VersionHdr, LastSeenHdr}
+	nowField      = fmt.Sprintf("%s now", ui.Styles.Green.Render(ui.Dot))
 )
 
 // ProcessDevicesTable will apply sorting (if required), slicing (if required) and the massage/transformation of data to produce a final
@@ -82,10 +83,8 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device, devEnr
 		if f, exists := cfg.Filters["tag"]; exists {
 			normalizedTags := normalizeTags(dev.Tags)
 
-			var wantsEmpty = false
-			if f.Contains("nil") {
-				wantsEmpty = true
-			}
+			// If the user does a filter like: 'tag:nil' they want to filter out those rows WITH tags.
+			wantsEmpty := f.Contains("nil")
 
 			if !wantsEmpty && (len(dev.Tags) == 0) || !f.Contains(normalizedTags...) {
 				continue
@@ -197,7 +196,7 @@ func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cl
 
 	if len(enrichedResults) > 0 {
 		if enrichedDev, ok := enrichedResults[d.NodeKey]; ok && enrichedDev.Online {
-			seenAgo = fmt.Sprintf("%s now", ui.Styles.Green.Render(ui.Dot))
+			seenAgo = nowField
 		}
 	}
 

@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/log"
 	"io"
 	"os/exec"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -47,7 +48,10 @@ func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []string, r
 
 		totalErrors  atomic.Uint32
 		totalSuccess atomic.Uint32
+		wg           sync.WaitGroup
 	)
+
+	wg.Add(len(hosts))
 
 	// For each host, kick-off a goroutine to execute the remote command.
 	for idx, host := range hosts {
@@ -62,16 +66,22 @@ func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []string, r
 
 		go func(i int, hn string, rch chan hostLine) {
 			sem <- struct{}{}
+			defer wg.Done()
 			if err := executeRemoteCmd(ctx, i, hn, remoteCmd, rch); err != nil {
 				totalErrors.Add(1)
-				log.Error("error executing a remote command for", "host", hn, "error", err)
+				log.Error("error executing remote command for", "host", hn, "cmd", remoteCmd, "error", err)
 				return
 			}
 			totalSuccess.Add(1)
 		}(idx, host, resultsChan)
 	}
 
+	// This blocks until all completions have shutdown.
+	// However, upon an early ssh connection error this polling will immediately fallthrough.
 	poll(ctx, w, sem, allCompletions)
+
+	// But we still want to wait for all goroutines executed above to run to completion.
+	wg.Wait()
 
 	// Prints a summary at the end of success vs failures as well as how long it took in seconds.
 	summary := fmt.Sprintf("Finished: successes: %d, failures: %d, elapsed_sec: %.2f",

@@ -2,8 +2,8 @@ package app
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/charmbracelet/log"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tailscale/tailscale-client-go/tailscale"
 	"golang.org/x/exp/rand"
 	"os"
@@ -23,6 +23,9 @@ func DevicesResourceTest(ctx context.Context, client *tailscale.Client) ([]tails
 	defer f.Close()
 
 	var devs []tailscale.Device
+
+	// Using jsoniter for now...stdlib json was a bit slower for large blobs.
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	err = json.NewDecoder(f).Decode(&devs)
 	if err != nil {
 		log.Fatal("failed to Unmarshal file testmode/devices.json with err: ", err)
