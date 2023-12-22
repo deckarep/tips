@@ -99,10 +99,10 @@ func createFakeDevice(idx int) *tailscale.Device {
 		BlocksIncomingConnections: randBool(),
 		ClientVersion:             oneOf(versions),
 		Created: tailscale.Time{
-			createdDate,
+			Time: createdDate,
 		},
 		Expires: tailscale.Time{
-			expiresDate,
+			Time: expiresDate,
 		},
 		Hostname:        name,
 		IsExternal:      randBool(),
