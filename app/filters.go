@@ -115,11 +115,14 @@ func executeFilters(ctx context.Context, devList []tailscale.Device,
 		// Filter by 'tag' when provided - currently only supports full matching.
 		if f, exists := cfg.Filters["tag"]; exists {
 			normalizedTags := normalizeTags(dev.Tags)
+			wantsNoTags := f.Contains("nil") // User wants to filter out rows with tags.
 
-			// If the user does a filter like: 'tag:nil' they want to filter out those rows WITH tags.
-			wantsEmpty := f.Contains("nil")
+			// Determine if the device should be skipped based on tag presence and user's filter.
+			hasTags := len(dev.Tags) > 0
+			matchesTags := f.ContainsAny(normalizedTags...)
 
-			if !wantsEmpty && (len(dev.Tags) == 0) || !f.Contains(normalizedTags...) {
+			// Skip device if it doesn't match the filter criteria.
+			if (wantsNoTags && hasTags) || (!wantsNoTags && !matchesTags) {
 				continue
 			}
 		}

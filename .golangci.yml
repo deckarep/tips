@@ -4,10 +4,12 @@ linters:
   disable-all: true
   enable:
     - bidichk
+    - goconst
     - gofmt
     - goimports
     - govet
     - misspell
+    - musttag
     - revive
 
 # Configuration for how we run golangci-lint
