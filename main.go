@@ -26,12 +26,7 @@ SOFTWARE.
 package main
 
 import (
-	"github.com/charmbracelet/log"
-	"github.com/tailscale/tailscale-client-go/tailscale"
-	"os"
-	"time"
 	"tips/cmd"
-	"tips/pkg"
 )
 
 // Alternatively shell out to this command to get the Online status flag
@@ -69,31 +64,6 @@ TODO: enrich the API output with more details like "Online" status flag from the
 BUG: Why is LastSeen not as recent as what's on the admin page? Perhaps heavy caching for API access.
 	- maybe use the tsnet application for more realtime knowledge of what's going on: https://tailscale.com/kb/1244/tsnet/
 */
-
-const (
-	defaultClientTimeout = time.Second * 5
-)
-
-var (
-	tailnet           = "deckarep@gmail.com"
-	oauthClientID     = os.Getenv("tips_client_id")
-	oauthClientSecret = os.Getenv("tips_secret")
-
-	api_key = os.Getenv("tips_api_key")
-
-	client = func() *tailscale.Client {
-		client, err := tailscale.NewClient(
-			api_key, // When doing oauth, this field must be blank!!!
-			tailnet,
-			//tailscale.WithOAuthClientCredentials(oauthClientID, oauthClientSecret, nil),
-			tailscale.WithUserAgent(pkg.UserAgent),
-		)
-		if err != nil {
-			log.Fatal("failed to create client with err: ", err)
-		}
-		return client
-	}()
-)
 
 func main() {
 	cmd.Execute()

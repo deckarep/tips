@@ -28,11 +28,8 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/tailscale/tailscale-client-go/tailscale"
 	"os"
 	"regexp"
@@ -42,7 +39,7 @@ import (
 )
 
 var (
-	cfgFile       string
+	//cfgFile       string
 	clientTimeout time.Duration
 	cliTimeout    time.Duration
 	columns       string
@@ -53,7 +50,6 @@ var (
 	slice         string
 	sortOrder     string
 	tailnet       string
-	useCmd        bool
 	useCSSHX      bool
 	useOauth      bool
 	useSSH        bool
@@ -91,7 +87,10 @@ func init() {
 	//rootCmd.PersistentFlags().StringP("author", "a", "Ralph Caraveo <deckarep@gmail.com>", "Author name for copyright attribution")
 	//rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "Name of license for the project (can provide `licensetext` in config)")
 	//rootCmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
-	viper.BindPFlag("foo", rootCmd.PersistentFlags().Lookup("foo"))
+
+	// TODO: look at bindPflag and how it works.
+	//viper.BindPFlag("foo", rootCmd.PersistentFlags().Lookup("foo"))
+
 	//viper.SetDefault("foo", "barf")
 	//viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
 	//viper.BindPFlag("projectbase", rootCmd.PersistentFlags().Lookup("projectbase"))
@@ -202,20 +201,20 @@ func getHosts(ctx context.Context, view *app.GeneralTableView) []string {
 	return hosts
 }
 
-func dumpColors() {
-	for i := 0; i < 256; i++ {
-		s := lipgloss.NewStyle().
-			Bold(true).
-			Foreground(lipgloss.Color(fmt.Sprintf("%d", i)))
-		fmt.Println(s.Render(fmt.Sprintf("Color: %d", i)))
-	}
-}
+//func dumpColors() {
+//	for i := 0; i < 256; i++ {
+//		s := lipgloss.NewStyle().
+//			Bold(true).
+//			Foreground(lipgloss.Color(fmt.Sprintf("%d", i)))
+//		fmt.Println(s.Render(fmt.Sprintf("Color: %d", i)))
+//	}
+//}
 
 func packageCfg(args []string) *app.ConfigCtx {
 	// Populate context key/values as needed.
 
 	// 0. Validate
-	if jsonn == true && ips == true {
+	if jsonn && ips {
 		log.Fatal("the --ips and --json flag must not be used together. Choose one or the other.")
 	}
 
@@ -258,26 +257,26 @@ func Execute() {
 	}
 }
 
-func initConfig() {
-	// Don't forget to read config either from cfgFile or from home directory!
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		// Search config in home directory with name ".cobra" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".cobra")
-	}
-
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println("Can't read config:", err)
-		os.Exit(1)
-	}
-}
+//func initConfig() {
+//	// Don't forget to read config either from cfgFile or from home directory!
+//	if cfgFile != "" {
+//		// Use config file from the flag.
+//		viper.SetConfigFile(cfgFile)
+//	} else {
+//		// Find home directory.
+//		home, err := homedir.Dir()
+//		if err != nil {
+//			fmt.Println(err)
+//			os.Exit(1)
+//		}
+//
+//		// Search config in home directory with name ".cobra" (without extension).
+//		viper.AddConfigPath(home)
+//		viper.SetConfigName(".cobra")
+//	}
+//
+//	if err := viper.ReadInConfig(); err != nil {
+//		fmt.Println("Can't read config:", err)
+//		os.Exit(1)
+//	}
+//}

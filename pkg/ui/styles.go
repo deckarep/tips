@@ -114,5 +114,3 @@ var (
 			Foreground(Colors.Black),
 	}
 )
-
-var ()

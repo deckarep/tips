@@ -138,14 +138,14 @@ func RenderTableView(ctx context.Context, tableView *GeneralTableView, w io.Writ
 
 func renderProlog(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
 	// Show tailnet inspecting:
-	fmt.Fprintf(w, ui.Styles.Faint.Render("\nTailnet: "))
+	fmt.Fprint(w, ui.Styles.Faint.Render("\nTailnet: "))
 	fmt.Fprintln(w, ui.Styles.Bold.Render(tableView.Tailnet))
 
-	fmt.Fprintf(w, ui.Styles.Faint.Render("Query: "))
+	fmt.Fprint(w, ui.Styles.Faint.Render("Query: "))
 	fmt.Fprintln(w, ui.Styles.Bold.Render(tableView.Query))
 
 	if len(tableView.DNSName) > 0 {
-		fmt.Fprintf(w, ui.Styles.Faint.Render(fmt.Sprintf("Self (%d): ", tableView.SelfView.Index)))
+		fmt.Fprint(w, ui.Styles.Faint.Render(fmt.Sprintf("Self (%d): ", tableView.SelfView.Index)))
 		fmt.Fprintln(w, ui.Styles.Bold.Render(tableView.SelfView.DNSName))
 	}
 
