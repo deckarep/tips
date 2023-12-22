@@ -2,11 +2,13 @@ package app
 
 import (
 	"context"
+
+	"strings"
+	"tips/pkg/tailscale_cli"
+
 	"github.com/charmbracelet/log"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/tailscale/tailscale-client-go/tailscale"
-	"strings"
-	"tips/pkg/tailscale_cli"
 )
 
 // Formats we will take (whitespace doesn't matter:

@@ -2,10 +2,11 @@ package app
 
 import (
 	"context"
-	"github.com/charmbracelet/log"
-	"github.com/tailscale/tailscale-client-go/tailscale"
 	"time"
 	"tips/pkg/tailscale_cli"
+
+	"github.com/charmbracelet/log"
+	"github.com/tailscale/tailscale-client-go/tailscale"
 )
 
 func DevicesResource(ctx context.Context, client *tailscale.Client) ([]tailscale.Device, map[string]tailscale_cli.DeviceInfo, error) {

@@ -2,13 +2,15 @@ package app
 
 import (
 	"context"
+
+	"os"
+	"time"
+	"tips/pkg/tailscale_cli"
+
 	"github.com/charmbracelet/log"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/tailscale/tailscale-client-go/tailscale"
 	"golang.org/x/exp/rand"
-	"os"
-	"time"
-	"tips/pkg/tailscale_cli"
 )
 
 const (

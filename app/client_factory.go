@@ -2,9 +2,11 @@ package app
 
 import (
 	"context"
-	"github.com/charmbracelet/log"
-	"github.com/tailscale/tailscale-client-go/tailscale"
 	"tips/pkg"
+
+	"github.com/charmbracelet/log"
+
+	"github.com/tailscale/tailscale-client-go/tailscale"
 )
 
 func NewClient(ctx context.Context) *tailscale.Client {

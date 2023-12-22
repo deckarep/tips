@@ -1,10 +1,12 @@
 package app
 
 import (
-	"github.com/charmbracelet/log"
-	mapset "github.com/deckarep/golang-set/v2"
 	"regexp"
 	"strconv"
+
+	"github.com/charmbracelet/log"
+	mapset "github.com/deckarep/golang-set/v2"
+
 	"strings"
 	"time"
 )

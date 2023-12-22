@@ -1,9 +1,10 @@
 package app
 
 import (
-	"github.com/tailscale/tailscale-client-go/tailscale"
 	"sort"
 	"strings"
+
+	"github.com/tailscale/tailscale-client-go/tailscale"
 )
 
 type SortDirection int

@@ -3,12 +3,13 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/dustin/go-humanize"
-	"github.com/tailscale/tailscale-client-go/tailscale"
 	"strings"
 	"time"
 	"tips/pkg/tailscale_cli"
 	"tips/pkg/ui"
+
+	"github.com/dustin/go-humanize"
+	"github.com/tailscale/tailscale-client-go/tailscale"
 )
 
 const (

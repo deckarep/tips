@@ -31,11 +31,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net"
+	"sort"
+
 	"github.com/charmbracelet/log"
 	"github.com/tailscale/tailscale-client-go/tailscale"
 	"golang.org/x/exp/rand"
-	"net"
-	"sort"
+
 	"strings"
 	"time"
 )

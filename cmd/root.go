@@ -28,14 +28,15 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/charmbracelet/log"
-	"github.com/spf13/cobra"
-	"github.com/tailscale/tailscale-client-go/tailscale"
 	"os"
 	"regexp"
 	"strings"
 	"time"
 	"tips/app"
+
+	"github.com/charmbracelet/log"
+	"github.com/spf13/cobra"
+	"github.com/tailscale/tailscale-client-go/tailscale"
 )
 
 var (

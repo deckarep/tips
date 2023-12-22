@@ -3,15 +3,16 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/table"
-	"github.com/charmbracelet/log"
-	jsoniter "github.com/json-iterator/go"
 	"io"
 	"os"
 	"regexp"
 	"strings"
 	"tips/pkg/ui"
+
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
+	"github.com/charmbracelet/log"
+	jsoniter "github.com/json-iterator/go"
 )
 
 var (

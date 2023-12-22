@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/charmbracelet/log"
 	"io"
 	"os/exec"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 const (

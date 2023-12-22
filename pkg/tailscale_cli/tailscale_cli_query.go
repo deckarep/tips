@@ -27,22 +27,24 @@ package tailscale_cli
 
 import (
 	"errors"
-	"github.com/charmbracelet/log"
-	mapset "github.com/deckarep/golang-set/v2"
-	"github.com/tidwall/gjson"
+
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"github.com/charmbracelet/log"
+	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/tidwall/gjson"
 )
 
 var (
 	// binarySearchPathCandidates should be extended with all known paths that the Tailscale cli can exist.
 	// Additionally, the order has an influence on which path will be selected first.
 	binarySearchPathCandidates = map[string][]string{
-		"linux": []string{
+		"linux": {
 			"/usr/bin/tailscale",
 		},
-		"darwin": []string{
+		"darwin": {
 			// When install via Mac App Store.
 			"/Applications/Tailscale.app/Contents/MacOS/Tailscale",
 		},
