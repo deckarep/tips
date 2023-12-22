@@ -85,10 +85,6 @@ func ParseFilter(filter string) map[string]mapset.Set[string] {
 	return m
 }
 
-func doSomething() {
-
-}
-
 func executeFilters(ctx context.Context, devList []tailscale.Device,
 	devEnriched map[string]tailscale_cli.DeviceInfo) []tailscale.Device {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
