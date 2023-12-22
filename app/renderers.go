@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
 	"github.com/charmbracelet/log"
+	jsoniter "github.com/json-iterator/go"
 	"io"
 	"os"
 	"regexp"
@@ -103,6 +104,18 @@ func RenderLogLine(ctx context.Context, w io.Writer, idx int, hostname, line str
 	}
 }
 
+func RenderIPs(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
+	for _, devRow := range tableView.Rows {
+		fmt.Println(devRow[2])
+	}
+	return nil
+}
+
+func RenderJson(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
+	return json.NewEncoder(w).Encode(tableView)
+}
+
 func RenderTableView(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
 
 	err := renderProlog(ctx, tableView, w)
@@ -147,16 +160,12 @@ func renderBody(ctx context.Context, tableView *GeneralTableView, w io.Writer) e
 	var (
 		re = lipgloss.NewRenderer(os.Stdout)
 
-		//Checkmark = re.NewStyle().SetString("✓").Foreground(green)
 		CellStyle = re.NewStyle().Padding(0, 1).Width(20)
 
-		// HeaderStyle is the lipgloss style used for the table headers.
 		HeaderStyle   = re.NewStyle().Foreground(ui.Colors.Purple).Bold(true).Align(lipgloss.Center)
 		SmHeaderStyle = HeaderStyle.Copy().Width(SmHdrWidth).Align(lipgloss.Center)
-		// OddRowStyle is the lipgloss style used for odd-numbered table rows.
-		OddRowStyle = CellStyle.Copy().Foreground(ui.Colors.Gray)
-		// EvenRowStyle is the lipgloss style used for even-numbered table rows.
-		EvenRowStyle = CellStyle.Copy().Foreground(ui.Colors.LightGray)
+		OddRowStyle   = CellStyle.Copy().Foreground(ui.Colors.Gray)
+		EvenRowStyle  = CellStyle.Copy().Foreground(ui.Colors.LightGray)
 	)
 
 	t := table.New().

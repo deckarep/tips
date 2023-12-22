@@ -165,9 +165,21 @@ var rootCmd = &cobra.Command{
 			// Do the remote cluster command.
 			app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, cfgCtx.RemoteCmd)
 		} else {
-			err = app.RenderTableView(ctx, view, os.Stdout)
-			if err != nil {
-				log.Fatal("problem occurred rendering table view", "error", err)
+			if jsonn {
+				err = app.RenderJson(ctx, view, os.Stdout)
+				if err != nil {
+					log.Fatal("error occurred encoding json output", "error", err)
+				}
+			} else if ips {
+				err = app.RenderIPs(ctx, view, os.Stdout)
+				if err != nil {
+					log.Fatal("error occurred generating ips output", "error", err)
+				}
+			} else {
+				err = app.RenderTableView(ctx, view, os.Stdout)
+				if err != nil {
+					log.Fatal("problem occurred rendering table view", "error", err)
+				}
 			}
 		}
 	},
@@ -214,7 +226,7 @@ func packageCfg(args []string) *app.ConfigCtx {
 	cfgCtx.NoColor = nocolor
 	cfgCtx.Slice = app.ParseSlice(slice)
 	cfgCtx.SortOrder = app.ParseSortString(sortOrder)
-	cfgCtx.Filters = app.ApplyFilter(filter)
+	cfgCtx.Filters = app.ParseFilter(filter)
 	cfgCtx.Columns = app.ParseColumns(columns)
 	cfgCtx.Concurrency = concurrency
 	cfgCtx.TestMode = test
