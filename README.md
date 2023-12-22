@@ -1,3 +1,5 @@
+[![Go](https://github.com/deckarep/tips/actions/workflows/go.yml/badge.svg)](https://github.com/deckarep/tips/actions/workflows/go.yml)
+
 # tips OR tailtop
 The command-line tool to wrangle your Tailscale tailnet cluster whether large or small.
 
