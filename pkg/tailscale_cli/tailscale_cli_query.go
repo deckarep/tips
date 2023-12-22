@@ -26,15 +26,27 @@ SOFTWARE.
 package tailscale_cli
 
 import (
+	"errors"
+	"github.com/charmbracelet/log"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/tidwall/gjson"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
-const (
-	macOSAppStorePath = "/Applications/Tailscale.app/Contents/MacOS/Tailscale"
-	// TODO: other paths depending on where user installs/OS.
+var (
+	// binarySearchPathCandidates should be extended with all known paths that the Tailscale cli can exist.
+	// Additionally, the order has an influence on which path will be selected first.
+	binarySearchPathCandidates = map[string][]string{
+		"linux": []string{
+			"/usr/bin/tailscale",
+		},
+		"darwin": []string{
+			// When install via Mac App Store.
+			"/Applications/Tailscale.app/Contents/MacOS/Tailscale",
+		},
+	}
 )
 
 type DeviceInfo struct {
@@ -45,8 +57,23 @@ type DeviceInfo struct {
 	Tags              mapset.Set[string]
 }
 
+func selectBinaryPath() (string, error) {
+	osSelected := runtime.GOOS
+	if paths, exists := binarySearchPathCandidates[runtime.GOOS]; exists {
+		for _, p := range paths {
+			if confirmedPath, err := exec.LookPath(p); err == nil {
+				return confirmedPath, nil
+			}
+		}
+		return "", errors.New("no tailscale binary exists for this os: " + osSelected)
+	}
+
+	log.Fatal("linux/windows support for working with the tailscale binary is not yet supported!")
+	return "", nil
+}
+
 func GetVersion() (string, error) {
-	confirmedPath, err := exec.LookPath(macOSAppStorePath)
+	confirmedPath, err := selectBinaryPath()
 	if err != nil {
 		return "", err
 	}
@@ -61,8 +88,7 @@ func GetVersion() (string, error) {
 }
 
 func GetDevicesState() (map[string]DeviceInfo, error) {
-	// TODO: try to find the path or use the user's config setting.
-	confirmedPath, err := exec.LookPath(macOSAppStorePath)
+	confirmedPath, err := selectBinaryPath()
 	if err != nil {
 		return nil, err
 	}

@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"github.com/charmbracelet/log"
 	"github.com/tailscale/tailscale-client-go/tailscale"
 	"time"
@@ -32,7 +31,7 @@ func DevicesResource(ctx context.Context, client *tailscale.Client) ([]tailscale
 	// 2. When available, enrich this data with data from the Tailscale cli, if this is run from a node within the tailnet.
 	enrichedDevices, err := tailscale_cli.GetDevicesState()
 	if err != nil {
-		fmt.Println("failed to get results: ", err)
+		log.Debug("unable to get enriched data from tailscale cli", "error", err)
 	}
 
 	return devList, enrichedDevices, nil
