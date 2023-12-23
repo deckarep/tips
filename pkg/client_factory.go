@@ -1,8 +1,7 @@
-package app
+package pkg
 
 import (
 	"context"
-	"tips/pkg"
 
 	"github.com/charmbracelet/log"
 
@@ -16,7 +15,7 @@ func NewClient(ctx context.Context) *tailscale.Client {
 		cfg.TailscaleAPI.ApiKey, // When doing oauth, this field must be blank!!!
 		cfg.Tailnet,
 		//tailscale.WithOAuthClientCredentials(oauthClientID, oauthClientSecret, nil),
-		tailscale.WithUserAgent(pkg.UserAgent),
+		tailscale.WithUserAgent(UserAgent),
 	)
 	if err != nil {
 		log.Fatal("failed to create tailscale api client with err: ", err)
@@ -30,7 +29,7 @@ func NewOauthClient(ctx context.Context) *tailscale.Client {
 		"", // When doing oauth, this field must be blank!!!
 		cfg.Tailnet,
 		tailscale.WithOAuthClientCredentials(cfg.TailscaleAPI.OAuthClientID, cfg.TailscaleAPI.OAuthClientSecret, nil),
-		tailscale.WithUserAgent(pkg.UserAgent),
+		tailscale.WithUserAgent(UserAgent),
 	)
 	if err != nil {
 		log.Fatal("failed to create tailscale api client with err: ", err)

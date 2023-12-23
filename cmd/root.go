@@ -32,7 +32,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	"tips/app"
+	"tips/pkg"
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
@@ -112,8 +112,8 @@ var rootCmd = &cobra.Command{
 
 		// 0. Package all configuration logic.
 		cfgCtx := packageCfg(args)
-		ctx = context.WithValue(ctx, app.CtxKeyConfig, cfgCtx)
-		ctx = context.WithValue(ctx, app.CtxKeyUserQuery, fmt.Sprintf("%s %s", cfgCtx.PrimaryFilter, cfgCtx.RemoteCmd))
+		ctx = context.WithValue(ctx, pkg.CtxKeyConfig, cfgCtx)
+		ctx = context.WithValue(ctx, pkg.CtxKeyUserQuery, fmt.Sprintf("%s %s", cfgCtx.PrimaryFilter, cfgCtx.RemoteCmd))
 
 		//if false {
 		//	//myCmd := "sudo ls /var/log"
@@ -137,15 +137,15 @@ var rootCmd = &cobra.Command{
 
 		var client *tailscale.Client
 		if !useOauth {
-			client = app.NewClient(ctx)
+			client = pkg.NewClient(ctx)
 		} else {
-			client = app.NewOauthClient(ctx)
+			client = pkg.NewOauthClient(ctx)
 		}
 
-		var devicesResourceFunc = app.DevicesResource
+		var devicesResourceFunc = pkg.DevicesResource
 		if cfgCtx.TestMode {
 			// In test mode, indirect to mocked test data.
-			devicesResourceFunc = app.DevicesResourceTest
+			devicesResourceFunc = pkg.DevicesResourceTest
 		}
 
 		devList, devEnriched, err := devicesResourceFunc(ctx, client)
@@ -153,7 +153,7 @@ var rootCmd = &cobra.Command{
 			log.Fatal("problem with resource lookup of devices with err: ", err)
 		}
 
-		view, err := app.ProcessDevicesTable(ctx, devList, devEnriched)
+		view, err := pkg.ProcessDevicesTable(ctx, devList, devEnriched)
 		if err != nil {
 			log.Fatal("problem occurred processing devices data", "error", err)
 		}
@@ -163,20 +163,20 @@ var rootCmd = &cobra.Command{
 			hosts := getHosts(ctx, view)
 
 			// Do the remote cluster command.
-			app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, cfgCtx.RemoteCmd)
+			pkg.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, cfgCtx.RemoteCmd)
 		} else {
 			if jsonn {
-				err = app.RenderJson(ctx, view, os.Stdout)
+				err = pkg.RenderJson(ctx, view, os.Stdout)
 				if err != nil {
 					log.Fatal("error occurred encoding json output", "error", err)
 				}
 			} else if ips {
-				err = app.RenderIPs(ctx, view, os.Stdout)
+				err = pkg.RenderIPs(ctx, view, os.Stdout)
 				if err != nil {
 					log.Fatal("error occurred generating ips output", "error", err)
 				}
 			} else {
-				err = app.RenderTableView(ctx, view, os.Stdout)
+				err = pkg.RenderTableView(ctx, view, os.Stdout)
 				if err != nil {
 					log.Fatal("problem occurred rendering table view", "error", err)
 				}
@@ -185,8 +185,8 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-func getHosts(ctx context.Context, view *app.GeneralTableView) []string {
-	cfg := app.CtxAsConfig(ctx, app.CtxKeyConfig)
+func getHosts(ctx context.Context, view *pkg.GeneralTableView) []string {
+	cfg := pkg.CtxAsConfig(ctx, pkg.CtxKeyConfig)
 	var hosts []string
 
 	for _, rows := range view.Rows {
@@ -211,7 +211,7 @@ func getHosts(ctx context.Context, view *app.GeneralTableView) []string {
 //	}
 //}
 
-func packageCfg(args []string) *app.ConfigCtx {
+func packageCfg(args []string) *pkg.ConfigCtx {
 	// Populate context key/values as needed.
 
 	// 0. Validate
@@ -219,15 +219,15 @@ func packageCfg(args []string) *app.ConfigCtx {
 		log.Fatal("the --ips and --json flag must not be used together. Choose one or the other.")
 	}
 
-	cfgCtx := app.NewConfigCtx()
+	cfgCtx := pkg.NewConfigCtx()
 	cfgCtx.IPsOutput = ips
 	cfgCtx.JsonOutput = jsonn
 	cfgCtx.NoCache = nocache
 	cfgCtx.NoColor = nocolor
-	cfgCtx.Slice = app.ParseSlice(slice)
-	cfgCtx.SortOrder = app.ParseSortString(sortOrder)
-	cfgCtx.Filters = app.ParseFilter(filter)
-	cfgCtx.Columns = app.ParseColumns(columns)
+	cfgCtx.Slice = pkg.ParseSlice(slice)
+	cfgCtx.SortOrder = pkg.ParseSortString(sortOrder)
+	cfgCtx.Filters = pkg.ParseFilter(filter)
+	cfgCtx.Columns = pkg.ParseColumns(columns)
 	cfgCtx.Concurrency = concurrency
 	cfgCtx.TestMode = test
 
