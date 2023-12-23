@@ -8,7 +8,7 @@ ARGS ?=
 
 # Test the code.
 test:
-	go test ./...
+	go test -v ./...
 
 # Lint the code.
 lint:
@@ -20,7 +20,7 @@ gen:
 
 # Build the project: run the linter and then build.
 build: lint
-	go build
+	go build -v ./...
 	@echo "Build: Successful"
 
 # Run all steps: build and then run the application.

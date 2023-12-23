@@ -9,6 +9,12 @@ production nodes can benefit from this tool. `tips` is the go-to tool to quickly
 cluster of any size. It allows you to confidently slice and dice nodes, filter/nodes, remotely execute 
 commands and manage your nodes collectively using an effective pattern modeled after cloud automation software.
 
+### Alpha
+This code is currently being developed in a **rapid prototyping** mode. Therefore you will not see much unit-testing as 
+too much code is changing and being actively refactored as the design and approach is tightened up. If you use this at
+this stage please understand that things are bound to change or be broken until I promote this software to being at the
+"beta" stage. Currently only MacOS builds are working.
+
 ### Definitions
 * **[Tailscale](https://tailscale.com/)**: makes creating software-defined networks easy: securely connecting users, services, and devices
 * **[tailnet](https://tailscale.com/kb/1136/tailnet)**: a single private network built from one or more nodes using Tailscale
