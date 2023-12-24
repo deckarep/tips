@@ -26,13 +26,10 @@ SOFTWARE.
 package tailscale_cli
 
 import (
-	"errors"
-
 	"os/exec"
-	"runtime"
 	"strings"
+	"tips/pkg/utils"
 
-	"github.com/charmbracelet/log"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/tidwall/gjson"
 )
@@ -59,23 +56,8 @@ type DeviceInfo struct {
 	Tags              mapset.Set[string]
 }
 
-func selectBinaryPath() (string, error) {
-	osSelected := runtime.GOOS
-	if paths, exists := binarySearchPathCandidates[runtime.GOOS]; exists {
-		for _, p := range paths {
-			if confirmedPath, err := exec.LookPath(p); err == nil {
-				return confirmedPath, nil
-			}
-		}
-		return "", errors.New("no tailscale binary exists for this os: " + osSelected)
-	}
-
-	log.Fatal("linux/windows support for working with the tailscale binary is not yet supported!")
-	return "", nil
-}
-
 func GetVersion() (string, error) {
-	confirmedPath, err := selectBinaryPath()
+	confirmedPath, err := utils.SelectBinaryPath(binarySearchPathCandidates)
 	if err != nil {
 		return "", err
 	}
@@ -90,7 +72,7 @@ func GetVersion() (string, error) {
 }
 
 func GetDevicesState() (map[string]DeviceInfo, error) {
-	confirmedPath, err := selectBinaryPath()
+	confirmedPath, err := utils.SelectBinaryPath(binarySearchPathCandidates)
 	if err != nil {
 		return nil, err
 	}

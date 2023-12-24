@@ -34,6 +34,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"tips/pkg/utils"
 
 	"github.com/charmbracelet/log"
 )
@@ -41,9 +42,23 @@ import (
 const (
 	maxLinesToCluster    = 10
 	maxCompletionTimeout = time.Millisecond * 1
+)
 
-	// TODO: consider prioritizing the built-in ssh into Tailscale which accounts for authentication via the Tailscale api.
-	sshBin = "/usr/bin/ssh"
+var (
+	// binarySearchPathCandidates denotes priority per os. For ssh-based commands we attempt to utilize ssh via
+	// the Tailscale binary if it is present. Otherwise, we fall back to the regular ssh binary.
+	// This should ultimately be overridable within the config settings.
+	binarySearchPathCandidates = map[string][]string{
+		"linux": {
+			"/usr/bin/Tailscale ssh",
+			"/usr/bin/ssh",
+		},
+		"darwin": {
+			// When installed via Mac App Store.
+			"/Applications/Tailscale.app/Contents/MacOS/Tailscale ssh",
+			"/usr/bin/ssh",
+		},
+	}
 )
 
 type hostLine struct {
@@ -121,8 +136,13 @@ func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []string, r
 }
 
 func executeRemoteCmd(ctx context.Context, idx int, host string, remoteCmd string, outputChan chan<- hostLine) error {
+	binPath, err := utils.SelectBinaryPath(binarySearchPathCandidates)
+	if err != nil {
+		return err
+	}
+
 	// Construct the SSH command
-	sshCmd := exec.Command(sshBin, host, remoteCmd)
+	sshCmd := exec.Command(binPath, host, remoteCmd)
 	defer close(outputChan)
 
 	// Get the output pipe
@@ -156,7 +176,7 @@ func executeRemoteCmd(ctx context.Context, idx int, host string, remoteCmd strin
 	return nil
 }
 
-func poll(ctx context.Context, w io.Writer, sem chan struct{}, allCompletions []*chanCompletions) {
+func poll(ctx context.Context, w io.Writer, sem <-chan struct{}, allCompletions []*chanCompletions) {
 	var totalCompleted int
 
 	// Loop indefinitely until all totalCompleted are accounted for, then bail.

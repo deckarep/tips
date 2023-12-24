@@ -23,21 +23,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package pkg
+package utils
 
 import (
+	"errors"
 	"log"
-	"tips/pkg/tailscale_cli"
+	"os/exec"
+	"runtime"
 )
 
-// TODO: Move this somewhere else...
-func SelfDevice(devices map[string]tailscale_cli.DeviceInfo) tailscale_cli.DeviceInfo {
-	for _, d := range devices {
-		if d.IsSelf {
-			return d
+func SelectBinaryPath(candidates map[string][]string) (string, error) {
+	osSelected := runtime.GOOS
+	if paths, exists := candidates[runtime.GOOS]; exists {
+		for _, p := range paths {
+			if confirmedPath, err := exec.LookPath(p); err == nil {
+				return confirmedPath, nil
+			}
 		}
+		return "", errors.New("no binary exists for this os: " + osSelected)
 	}
 
-	log.Fatal("unexpected condition: if this func was invoked it must always return the `self` device")
-	return tailscale_cli.DeviceInfo{}
+	log.Fatal("binary is not setup for this os", "os", osSelected)
+	return "", nil
 }
