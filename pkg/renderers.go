@@ -126,7 +126,7 @@ func RenderLogLine(ctx context.Context, w io.Writer, idx int, hostname, line str
 
 	hostPrefix := ui.Styles.Cyan.Render(fmt.Sprintf("%s (%d): ", hostname, idx))
 	if _, err := fmt.Fprintln(w, hostPrefix+ui.Styles.Faint.Render(line)); err != nil {
-		log.Error("error occurred during `Fprintln` to the local io.Writer:", err)
+		log.Error("error occurred during `Fprintln` to the local io.Writer", "error", err)
 	}
 }
 
@@ -138,7 +138,9 @@ func RenderIPs(ctx context.Context, tableView *GeneralTableView, w io.Writer) er
 		ips = append(ips, devRow[2])
 	}
 
-	fmt.Fprintln(w, strings.Join(ips, cfg.IPsDelimiter))
+	if _, err := fmt.Fprintln(w, strings.Join(ips, cfg.IPsDelimiter)); err != nil {
+		log.Error("error occurred during `Fprintln` to the local io.Writer", "error", err)
+	}
 	return nil
 }
 
@@ -226,7 +228,9 @@ func renderBody(ctx context.Context, tableView *GeneralTableView, w io.Writer) e
 		Rows(tableView.Rows...)
 
 	// Finally, render the table
-	fmt.Fprintln(w, t)
+	if _, err := fmt.Fprintln(w, t); err != nil {
+		log.Error("error occurred during `Fprintln` to the local io.Writer", "error", err)
+	}
 	return nil
 }
 
