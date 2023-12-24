@@ -56,6 +56,7 @@ var (
 	useSSH        bool
 	test          bool
 	ips           bool
+	ips_delimiter string
 	jsonn         bool
 
 	foo string
@@ -78,7 +79,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&nocache, "nocache", "n", false, "forces the cache to be expunged")
 	rootCmd.PersistentFlags().BoolVarP(&nocolor, "nocolor", "", false, "when --nocolor is provided disables log color highlighting")
 	rootCmd.PersistentFlags().BoolVar(&test, "test", false, "when true runs the tool in test mode with mocked data")
-	rootCmd.PersistentFlags().BoolVar(&ips, "ips", false, "when true returns only ips")
+	rootCmd.PersistentFlags().BoolVarP(&ips, "ips", "", false, "when provided returns ips comma-delimited")
+	rootCmd.PersistentFlags().StringVarP(&ips_delimiter, "delimiter", "d", "\n", "delimiter to use when the --ips flag is provided")
 	rootCmd.PersistentFlags().BoolVar(&jsonn, "json", false, "when true returns only json data")
 
 	// Note: Not sure if this flag is useful.
@@ -170,7 +172,7 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					log.Fatal("error occurred encoding json output", "error", err)
 				}
-			} else if ips {
+			} else if cfgCtx.IPsOutput {
 				err = pkg.RenderIPs(ctx, view, os.Stdout)
 				if err != nil {
 					log.Fatal("error occurred generating ips output", "error", err)
@@ -221,6 +223,7 @@ func packageCfg(args []string) *pkg.ConfigCtx {
 
 	cfgCtx := pkg.NewConfigCtx()
 	cfgCtx.IPsOutput = ips
+	cfgCtx.IPsDelimiter = ips_delimiter
 	cfgCtx.JsonOutput = jsonn
 	cfgCtx.NoCache = nocache
 	cfgCtx.NoColor = nocolor

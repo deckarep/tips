@@ -131,9 +131,14 @@ func RenderLogLine(ctx context.Context, w io.Writer, idx int, hostname, line str
 }
 
 func RenderIPs(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
+	cfg := CtxAsConfig(ctx, CtxKeyConfig)
+	ips := make([]string, 0, len(tableView.Rows))
+
 	for _, devRow := range tableView.Rows {
-		fmt.Println(devRow[2])
+		ips = append(ips, devRow[2])
 	}
+
+	fmt.Fprintln(w, strings.Join(ips, cfg.IPsDelimiter))
 	return nil
 }
 

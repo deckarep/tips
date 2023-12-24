@@ -108,6 +108,7 @@ type ConfigCtx struct {
 	Concurrency   int
 	Filters       map[string]mapset.Set[string]
 	IPsOutput     bool
+	IPsDelimiter  string
 	JsonOutput    bool
 	NoCache       bool
 	NoColor       bool
