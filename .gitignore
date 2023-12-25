@@ -31,3 +31,5 @@ tips
 vhs_demos/*.gif
 
 testmode/*.json
+
+*.db.bolt

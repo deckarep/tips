@@ -10,7 +10,6 @@ linters:
     - goimports
     - govet
     - misspell
-    - musttag
     - revive
 
 # Configuration for how we run golangci-lint

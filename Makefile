@@ -1,10 +1,13 @@
-.PHONY: test build lint gen all
+.PHONY: test build lint gen all clean
 
 # Define the default goal. When you run "make" without argument, it will run the "all" target.
 default: all
 
 # Capture additional arguments which can optionally be passed in.
 ARGS ?=
+
+clean:
+	rm *db.bolt
 
 # Test the code.
 test:
@@ -20,7 +23,7 @@ gen:
 
 # Build the project: run the linter and then build.
 build: lint
-	go build -v ./...
+	go build
 	@echo "Build: Successful"
 
 # Run all steps: build and then run the application.

@@ -30,7 +30,6 @@ import (
 	"strings"
 	"tips/pkg/utils"
 
-	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/tidwall/gjson"
 )
 
@@ -49,11 +48,12 @@ var (
 )
 
 type DeviceInfo struct {
-	DNSName           string
-	HasExitNodeOption bool
-	IsSelf            bool
-	Online            bool
-	Tags              mapset.Set[string]
+	NodeKey           string   `json:"node_key"`
+	DNSName           string   `json:"dns_name"`
+	HasExitNodeOption bool     `json:"has_exit_node_option"`
+	IsSelf            bool     `json:"is_self"`
+	Online            bool     `json:"online"`
+	Tags              []string `json:"tags"`
 }
 
 func GetVersion() (string, error) {
@@ -90,12 +90,12 @@ func GetDevicesState() (map[string]DeviceInfo, error) {
 	jo := string(output)
 
 	// TODO: Lazy, dynamic json without checking type assertions. Clean this up.
-	var toTagSet = func(results []gjson.Result) mapset.Set[string] {
-		ts := mapset.NewSet[string]()
+	var toTagSet = func(results []gjson.Result) []string {
+		var tags []string
 		for _, t := range results {
-			ts.Add(strings.Replace(t.String(), "tag:", "", -1))
+			tags = append(tags, strings.Replace(t.String(), "tag:", "", -1))
 		}
-		return ts
+		return tags
 	}
 
 	// Grab the Self info.
@@ -106,6 +106,7 @@ func GetDevicesState() (map[string]DeviceInfo, error) {
 	selfExitNodeOption := gjson.Get(jo, "Self.ExitNodeOption").Bool()
 
 	results[selfNodeKey] = DeviceInfo{
+		NodeKey:           selfNodeKey,
 		DNSName:           selfDNSName,
 		Online:            selfOnline,
 		IsSelf:            true,
@@ -123,6 +124,7 @@ func GetDevicesState() (map[string]DeviceInfo, error) {
 		tagSet := toTagSet(value.Get("Tags").Array())
 
 		results[peerNodeKey] = DeviceInfo{
+			NodeKey:           peerNodeKey,
 			DNSName:           dnsName,
 			Online:            peerOnline,
 			HasExitNodeOption: exitNodeOption,
