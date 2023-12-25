@@ -30,6 +30,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 	"tips/pkg/tailscale_cli"
 
@@ -48,7 +49,15 @@ const (
 	// These two buckets contain FULL data.
 	devicesBucket  = "devices.full"
 	enrichedBucket = "enriched.full"
+
+	statsBucket = "stats"
+	statsKey    = "stats"
 )
+
+type DBStats struct {
+	DevicesCount  int `json:"devices_count"`
+	EnrichedCount int `json:"enriched_count"`
+}
 
 type DB struct {
 	tailnetScope string
@@ -91,13 +100,18 @@ func (d *DB) Erase() error {
 }
 
 func (d *DB) Exists(ctx context.Context) (bool, error) {
-	return fileExistsAndIsRecent(d.File(), time.Second*15)
+	cfg := CtxAsConfig(ctx, CtxKeyConfig)
+	return fileExistsAndIsRecent(d.File(), cfg.CacheTimeout)
 }
 
 func (d *DB) IndexDevices(ctx context.Context, devList []tailscale.Device, enrichedDevList map[string]tailscale_cli.DeviceInfo) error {
 	// Start a writable transaction.
 	err := d.hdl.Update(func(tx *bolt.Tx) error {
 		// Create all buckets.
+		statsBuck, err := tx.CreateBucketIfNotExists([]byte(statsBucket))
+		if err != nil {
+			return err
+		}
 
 		// If the bucket already exists, it will return a reference to it.
 		devicesBucket, err := tx.CreateBucketIfNotExists([]byte(devicesBucket))
@@ -106,6 +120,22 @@ func (d *DB) IndexDevices(ctx context.Context, devList []tailscale.Device, enric
 		}
 
 		enrichedBucket, err := tx.CreateBucketIfNotExists([]byte(enrichedBucket))
+		if err != nil {
+			return err
+		}
+
+		// Record stats
+		// TODO: record version
+		var stats DBStats
+		stats.DevicesCount = len(devList)
+		stats.EnrichedCount = len(enrichedDevList)
+
+		encoded, err := json.Marshal(stats)
+		if err != nil {
+			return err
+		}
+
+		err = statsBuck.Put([]byte(statsKey), encoded)
 		if err != nil {
 			return err
 		}
@@ -155,9 +185,26 @@ func (d *DB) IndexDevices(ctx context.Context, devList []tailscale.Device, enric
 func (d *DB) FindDevices(ctx context.Context) ([]tailscale.Device, map[string]tailscale_cli.DeviceInfo, error) {
 	// 0. First populate all devices.
 	// TODO: index metadata like the size of devices then we can instantiate with the correct capacity.
-	devList := make([]tailscale.Device, 0)
+	//devList := make([]tailscale.Device, 0)
+	var devList []tailscale.Device
+	var enrichedDevs map[string]tailscale_cli.DeviceInfo
 	err := d.hdl.View(func(tx *bolt.Tx) error {
-		// Assume bucket exists and has keys
+		// 0. Check for stats
+		sb := tx.Bucket([]byte(statsBucket))
+		if sb == nil {
+			return errors.New("bucket is unknown: " + statsBucket)
+		}
+		sts := sb.Get([]byte(statsKey))
+		var stats DBStats
+		err := json.Unmarshal(sts, &stats)
+		if err != nil {
+			return err
+		}
+
+		devList = make([]tailscale.Device, 0, stats.DevicesCount)
+		enrichedDevs = make(map[string]tailscale_cli.DeviceInfo, stats.EnrichedCount)
+
+		// 1. Next populate all devices data
 		b := tx.Bucket([]byte(devicesBucket))
 		if b == nil {
 			return errors.New("bucket is unknown: " + devicesBucket)
@@ -178,6 +225,22 @@ func (d *DB) FindDevices(ctx context.Context) ([]tailscale.Device, map[string]ta
 			devList = append(devList, dev)
 		}
 
+		// 2. Next populate only enriched data, that is needed.
+		// No cursor is needed, we only need to get the enriched data for devices that were returned above!
+		b = tx.Bucket([]byte(enrichedBucket))
+
+		for _, dev := range devList {
+			k := dev.NodeKey
+			v := b.Get([]byte(k))
+			var dev tailscale_cli.DeviceInfo
+			err := json.Unmarshal(v, &dev)
+			if err != nil {
+				return err
+			}
+
+			enrichedDevs[k] = dev
+		}
+
 		// TODO: need to set this up.
 		// Prefix scan (use this in the future)
 		//prefix := []byte("1234")
@@ -191,39 +254,27 @@ func (d *DB) FindDevices(ctx context.Context) ([]tailscale.Device, map[string]ta
 		return nil, nil, err
 	}
 
-	// 2. Next populate all enriched data
-	enrichedDevs := make(map[string]tailscale_cli.DeviceInfo)
-	err = d.hdl.View(func(tx *bolt.Tx) error {
-		// Assume bucket exists and has keys
-		b := tx.Bucket([]byte(enrichedBucket))
-		c := b.Cursor()
+	return devList, enrichedDevs, nil
+}
 
-		// This is a linear scan over all key/values
-		for k, v := c.First(); k != nil; k, v = c.Next() {
-			//fmt.Printf("key=%s, value=%s\n", k, v)
-			//fmt.Printf("key=%s\n", k)
-
-			var dev tailscale_cli.DeviceInfo
-			err := json.Unmarshal(v, &dev)
-			if err != nil {
-				return err
-			}
-
-			enrichedDevs[string(k)] = dev
-		}
-
-		// TODO: need to set this up.
-		// Prefix scan (use this in the future)
-		//prefix := []byte("1234")
-		//for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
-		//	fmt.Printf("key=%s, value=%s\n", k, v)
-		//}
-
-		return nil
-	})
-	if err != nil {
-		log.Fatal("error occurred attempting to lookup enriched devices", "error", err)
+func fileExistsAndIsRecent(filePath string, duration time.Duration) (bool, error) {
+	// Check if the file exists
+	info, err := os.Stat(filePath)
+	if os.IsNotExist(err) {
+		// The file does not exist
+		return false, nil
+	} else if err != nil {
+		// There was some other error getting the file info
+		return false, err
 	}
 
-	return devList, enrichedDevs, nil
+	// Check the time since the file was created
+	creationTime := info.ModTime()
+	if time.Since(creationTime) <= duration {
+		// The file is recent enough
+		return true, nil
+	}
+
+	// The file exists but is not recent
+	return false, nil
 }

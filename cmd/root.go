@@ -41,6 +41,7 @@ import (
 
 var (
 	//cfgFile       string
+	cacheTimeout  time.Duration
 	clientTimeout time.Duration
 	cliTimeout    time.Duration
 	columns       string
@@ -64,6 +65,7 @@ var (
 
 func init() {
 	//cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().DurationVarP(&cacheTimeout, "cache_timeout", "", time.Minute*5, "timeout duration for local db (db.bolt) cache file")
 	rootCmd.PersistentFlags().StringVarP(&foo, "foo", "", "blah", "foo is a test flag")
 	rootCmd.PersistentFlags().StringVarP(&slice, "slice", "", "", "slices the results after filtering followed by sorting")
 	rootCmd.PersistentFlags().StringVarP(&sortOrder, "sort", "s", "",
@@ -222,6 +224,7 @@ func packageCfg(args []string) *pkg.ConfigCtx {
 	}
 
 	cfgCtx := pkg.NewConfigCtx()
+	cfgCtx.CacheTimeout = cacheTimeout
 	cfgCtx.IPsOutput = ips
 	cfgCtx.IPsDelimiter = ips_delimiter
 	cfgCtx.JsonOutput = jsonn

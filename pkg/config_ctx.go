@@ -104,6 +104,7 @@ type TailscaleCLICfgCtx struct {
 }
 
 type ConfigCtx struct {
+	CacheTimeout  time.Duration
 	Columns       mapset.Set[string]
 	Concurrency   int
 	Filters       map[string]mapset.Set[string]
