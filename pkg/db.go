@@ -42,16 +42,12 @@ import (
 )
 
 const (
-
-	// These buckets only point to keys where the actual data exists in those respective buckets.
-	// TODO:
-
 	// These two buckets contain FULL data.
-	devicesBucket  = "devices.full"
-	enrichedBucket = "enriched.full"
+	devicesBucket  = "bucket:devices.full"
+	enrichedBucket = "bucket:enriched.full"
+	statsBucket    = "bucket:stats"
 
-	statsBucket = "stats"
-	statsKey    = "stats"
+	statsKey = "key:stats"
 )
 
 type DBStats struct {
@@ -105,6 +101,10 @@ func (d *DB) Exists(ctx context.Context) (bool, error) {
 }
 
 func (d *DB) IndexDevices(ctx context.Context, devList []tailscale.Device, enrichedDevList map[string]tailscale_cli.DeviceInfo) error {
+	if d.hdl == nil {
+		return errors.New("trying to index db when handle to db is nil")
+	}
+
 	// Start a writable transaction.
 	err := d.hdl.Update(func(tx *bolt.Tx) error {
 		// Create all buckets.
@@ -125,10 +125,11 @@ func (d *DB) IndexDevices(ctx context.Context, devList []tailscale.Device, enric
 		}
 
 		// Record stats
-		// TODO: record version
-		var stats DBStats
-		stats.DevicesCount = len(devList)
-		stats.EnrichedCount = len(enrichedDevList)
+		// TODO: perhaps record version so we can delete version files that don't match. Overkill?
+		stats := DBStats{
+			DevicesCount:  len(devList),
+			EnrichedCount: len(enrichedDevList),
+		}
 
 		encoded, err := json.Marshal(stats)
 		if err != nil {
@@ -228,7 +229,6 @@ func (d *DB) FindDevices(ctx context.Context) ([]tailscale.Device, map[string]ta
 		// 2. Next populate only enriched data, that is needed.
 		// No cursor is needed, we only need to get the enriched data for devices that were returned above!
 		b = tx.Bucket([]byte(enrichedBucket))
-
 		for _, dev := range devList {
 			k := dev.NodeKey
 			v := b.Get([]byte(k))
