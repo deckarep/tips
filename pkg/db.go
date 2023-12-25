@@ -100,6 +100,25 @@ func (d *DB) Exists(ctx context.Context) (bool, error) {
 	return fileExistsAndIsRecent(d.File(), cfg.CacheTimeout)
 }
 
+func put(bucket *bolt.Bucket, key string, data any) error {
+	// Encode as JSON: in the future encode as Proto/more compact form.
+	encoded, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	// The key is the data point ID converted to a byte slice.
+	// The value is the encoded JSON data.
+	return bucket.Put([]byte(key), encoded)
+}
+
+func get[T any](bucket *bolt.Bucket, key string) (T, error) {
+	var obj T
+	v := bucket.Get([]byte(key))
+	err := json.Unmarshal(v, &obj)
+	return obj, err
+}
+
 func (d *DB) IndexDevices(ctx context.Context, devList []tailscale.Device, enrichedDevList map[string]tailscale_cli.DeviceInfo) error {
 	if d.hdl == nil {
 		return errors.New("trying to index db when handle to db is nil")
@@ -131,27 +150,14 @@ func (d *DB) IndexDevices(ctx context.Context, devList []tailscale.Device, enric
 			EnrichedCount: len(enrichedDevList),
 		}
 
-		encoded, err := json.Marshal(stats)
-		if err != nil {
-			return err
-		}
-
-		err = statsBuck.Put([]byte(statsKey), encoded)
+		err = put(statsBuck, statsKey, stats)
 		if err != nil {
 			return err
 		}
 
 		// Iterate over all devices.
 		for _, dev := range devList {
-			// Encode as JSON: in the future encode as Proto/more compact form.
-			encoded, err := json.Marshal(dev)
-			if err != nil {
-				return err
-			}
-
-			// The key is the data point ID converted to a byte slice.
-			// The value is the encoded JSON data.
-			err = devicesBucket.Put([]byte(dev.Name), encoded)
+			err = put(devicesBucket, dev.Name, dev)
 			if err != nil {
 				return err
 			}
@@ -159,15 +165,7 @@ func (d *DB) IndexDevices(ctx context.Context, devList []tailscale.Device, enric
 
 		// Iterate over all enriched info.
 		for _, enr := range enrichedDevList {
-			// Encode as JSON: in the future encode as Proto/more compact form.
-			encoded, err := json.Marshal(enr)
-			if err != nil {
-				return err
-			}
-
-			// The key is the data point ID converted to a byte slice.
-			// The value is the encoded JSON data.
-			err = enrichedBucket.Put([]byte(enr.NodeKey), encoded)
+			err = put(enrichedBucket, enr.NodeKey, enr)
 			if err != nil {
 				return err
 			}
@@ -177,7 +175,7 @@ func (d *DB) IndexDevices(ctx context.Context, devList []tailscale.Device, enric
 	})
 
 	if err != nil {
-		log.Fatal("error updating the database index", "error", err)
+		log.Fatal("error creating the database index", "error", err)
 	}
 
 	return nil
@@ -193,9 +191,7 @@ func (d *DB) FindDevices(ctx context.Context) ([]tailscale.Device, map[string]ta
 		if sb == nil {
 			return errors.New("bucket is unknown: " + statsBucket)
 		}
-		sts := sb.Get([]byte(statsKey))
-		var stats DBStats
-		err := json.Unmarshal(sts, &stats)
+		stats, err := get[DBStats](sb, statsKey)
 		if err != nil {
 			return err
 		}
@@ -230,15 +226,12 @@ func (d *DB) FindDevices(ctx context.Context) ([]tailscale.Device, map[string]ta
 		// No cursor is needed, we only need to get the enriched data for devices that were returned above!
 		b = tx.Bucket([]byte(enrichedBucket))
 		for _, dev := range devList {
-			k := dev.NodeKey
-			v := b.Get([]byte(k))
-			var dev tailscale_cli.DeviceInfo
-			err := json.Unmarshal(v, &dev)
+			dev, err := get[tailscale_cli.DeviceInfo](b, dev.NodeKey)
 			if err != nil {
 				return err
 			}
 
-			enrichedDevs[k] = dev
+			enrichedDevs[dev.NodeKey] = dev
 		}
 
 		return nil
