@@ -78,17 +78,14 @@ func DevicesResource(ctx context.Context, client *tailscale.Client) ([]tailscale
 	}
 	defer indexedDB.Close()
 
-	if true {
-		if devList, enrichedDevs, err := indexedDB.FindDevices(ctx); existsAndRecent && err == nil {
-			log.Warn("found a bolt file and its recent enough so that will be used!")
-			return devList, enrichedDevs, nil
-		}
-	}
-	log.Warn("bolt file has expired or must be regenerated")
-
 	// TODO: 0. Check cache config - return cached results if cache timeout not yet expired.
 	if cfg.NoCache {
-		log.Warn("--nocache is not yet support, but this should force a refresh of data in cache")
+		log.Info("--nocache was supplied, so forcing a fetch of all data")
+	} else if devList, enrichedDevs, err := indexedDB.FindDevices(ctx); existsAndRecent && err == nil {
+		log.Info("found a bolt file and its recent enough so that will be used!")
+		return devList, enrichedDevs, nil
+	} else {
+		log.Info("bolt file has expired or must be regenerated")
 	}
 
 	// 1. Do tailscale api lookup for devices data.
