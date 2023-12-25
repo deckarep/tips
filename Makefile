@@ -1,10 +1,14 @@
-.PHONY: test build lint gen all clean
+.PHONY: test build lint gen all clean update
 
 # Define the default goal. When you run "make" without argument, it will run the "all" target.
 default: all
 
 # Capture additional arguments which can optionally be passed in.
 ARGS ?=
+
+update:
+	go get -u
+	go mod tidy
 
 clean:
 	rm *db.bolt

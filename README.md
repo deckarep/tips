@@ -3,22 +3,16 @@
 # tips OR tailtop
 The command-line tool to wrangle your Tailscale tailnet cluster whether large or small.
 
+### Definitions
+* **[Tailscale](https://tailscale.com/)**: makes creating software-defined networks easy: securely connecting users, services, and devices
+* **[tailnet](https://tailscale.com/kb/1136/tailnet)**: a single private network built from one or more nodes using Tailscale
+* **[tips](https://github.com/deckarep/tips)** (this tool): a command-line tool to easily manage a tailnet cluster for use on Mac, PC, or Linux
+
 ### What is tips?
 Any Tailscale user whether a hobbyist with a 3 node cluster or a seasoned cloud professional managing thousands of 
 production nodes can benefit from this tool. `tips` is the go-to tool to quickly and effectively manage a `tailnet`
 cluster of any size. It allows you to confidently slice and dice nodes, filter/nodes, remotely execute 
 commands and manage your nodes collectively using an effective pattern modeled after cloud automation software.
-
-### Alpha
-This code is currently being developed in a **rapid prototyping** mode. Therefore you will not see much unit-testing as 
-too much code is changing and being actively refactored as the design and approach is tightened up. If you use this at
-this stage please understand that things are bound to change or be broken until I promote this software to being at the
-"beta" stage. Currently only MacOS builds are working.
-
-### Definitions
-* **[Tailscale](https://tailscale.com/)**: makes creating software-defined networks easy: securely connecting users, services, and devices
-* **[tailnet](https://tailscale.com/kb/1136/tailnet)**: a single private network built from one or more nodes using Tailscale
-* **[tips](https://github.com/deckarep/tips)** (this tool): a command-line tool to easily manage a tailnet cluster for use on Mac, PC, or Linux
 
 ### You'll be able to ...
 * Easily view your nodes in a *beautifully rendered* and consistent table view
@@ -47,6 +41,16 @@ professional or commercial setting?
 
 ### Built with ❤️
 * by deckarep
+
+### FAQ
+
+
+
+### Alpha
+This code is currently being developed in a **rapid prototyping** mode. Therefore you will not see much unit-testing as
+too much code is changing and being actively refactored as the design and approach is tightened up. If you use this at
+this stage please understand that things are bound to change or be broken until I promote this software to being at the
+"beta" stage. Currently only MacOS builds are working.
 
 ### Disclaimer: Independent Project
 Please note that this project is a personal and independent initiative. It is not endorsed, sponsored, affiliated with, 
