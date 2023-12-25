@@ -184,8 +184,6 @@ func (d *DB) IndexDevices(ctx context.Context, devList []tailscale.Device, enric
 
 func (d *DB) FindDevices(ctx context.Context) ([]tailscale.Device, map[string]tailscale_cli.DeviceInfo, error) {
 	// 0. First populate all devices.
-	// TODO: index metadata like the size of devices then we can instantiate with the correct capacity.
-	//devList := make([]tailscale.Device, 0)
 	var devList []tailscale.Device
 	var enrichedDevs map[string]tailscale_cli.DeviceInfo
 	err := d.hdl.View(func(tx *bolt.Tx) error {
@@ -211,11 +209,13 @@ func (d *DB) FindDevices(ctx context.Context) ([]tailscale.Device, map[string]ta
 		}
 		c := b.Cursor()
 
-		// This is a linear scan over all key/values
+		// TODO: This is a linear scan over all key/values, change to prefix/seek scan!!!
+		// Prefix scan (use this in the future)
+		// prefix := []byte("1234")
+		// for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+		//   fmt.Printf("key=%s, value=%s\n", k, v)
+		// }
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			//fmt.Printf("key=%s, value=%s\n", k, v)
-			//fmt.Printf("key=%s\n", k)
-
 			var dev tailscale.Device
 			err := json.Unmarshal(v, &dev)
 			if err != nil {
@@ -240,13 +240,6 @@ func (d *DB) FindDevices(ctx context.Context) ([]tailscale.Device, map[string]ta
 
 			enrichedDevs[k] = dev
 		}
-
-		// TODO: need to set this up.
-		// Prefix scan (use this in the future)
-		//prefix := []byte("1234")
-		//for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
-		//	fmt.Printf("key=%s, value=%s\n", k, v)
-		//}
 
 		return nil
 	})
