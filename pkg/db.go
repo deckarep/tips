@@ -26,6 +26,7 @@ SOFTWARE.
 package pkg
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -192,6 +193,7 @@ func (d *DB) IndexDevices(ctx context.Context, devList []tailscale.Device, enric
 }
 
 func (d *DB) FindDevices(ctx context.Context) ([]tailscale.Device, map[string]tailscale_cli.DeviceInfo, error) {
+	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 	// 0. First populate all devices.
 	var devList []tailscale.Device
 	var enrichedDevs map[string]tailscale_cli.DeviceInfo
@@ -216,20 +218,29 @@ func (d *DB) FindDevices(ctx context.Context) ([]tailscale.Device, map[string]ta
 		}
 		c := b.Cursor()
 
-		// TODO: This is a linear scan over all key/values, change to prefix/seek scan!!!
-		// Prefix scan (use this in the future)
-		// prefix := []byte("1234")
-		// for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
-		//   fmt.Printf("key=%s, value=%s\n", k, v)
-		// }
-		for k, v := c.First(); k != nil; k, v = c.Next() {
-			var dev tailscale.Device
-			err := json.Unmarshal(v, &dev)
-			if err != nil {
-				return err
-			}
+		// Full scan when everything is requested.
+		if cfg.PrefixFilter == "*" {
+			for k, v := c.First(); k != nil; k, v = c.Next() {
+				var dev tailscale.Device
+				err := json.Unmarshal(v, &dev)
+				if err != nil {
+					return err
+				}
 
-			devList = append(devList, dev)
+				devList = append(devList, dev)
+			}
+		} else {
+			// Prefix scan (much faster) when a prefix is present.
+			prefix := []byte(cfg.PrefixFilter)
+			for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+				var dev tailscale.Device
+				err := json.Unmarshal(v, &dev)
+				if err != nil {
+					return err
+				}
+
+				devList = append(devList, dev)
+			}
 		}
 
 		// 2. Next populate only enriched data, that is needed.

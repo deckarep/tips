@@ -130,12 +130,13 @@ func executeFilters(ctx context.Context, devList []tailscale.Device,
 	for _, dev := range devList {
 		// d.Name is the fully qualified DNS name, but we just shorten it and this is the name used
 		// that takes precedence when the user overrides the name.
-		easyName := strings.Split(dev.Name, ".")[0]
+		//easyName := strings.Split(dev.Name, ".")[0]
 
+		// TODO: Regex-based PrimaryFilter is deprecated in favor of the PrefixFilter
 		// PrimaryFilter is a regex and applied when non-nil.
-		if cfg.PrimaryFilter != nil && !cfg.PrimaryFilter.MatchString(easyName) {
-			continue
-		}
+		//if cfg.PrimaryFilter != nil && !cfg.PrimaryFilter.MatchString(easyName) {
+		//	continue
+		//}
 
 		// Filter by 'tag' when provided - currently only supports full matching.
 		if f, exists := cfg.Filters["tag"]; exists {

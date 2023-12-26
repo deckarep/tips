@@ -113,7 +113,8 @@ type ConfigCtx struct {
 	JsonOutput    bool
 	NoCache       bool
 	NoColor       bool
-	PrimaryFilter *regexp.Regexp
+	PrefixFilter  string         // We'll do prefix filtering in Boltdb
+	PrimaryFilter *regexp.Regexp // This is to be deprecated.
 	RemoteCmd     string
 	Slice         *SliceCfg
 	SortOrder     []SortSpec

@@ -48,13 +48,14 @@ func DevicesResource(ctx context.Context, client *tailscale.Client) ([]tailscale
 		log.Warn("problem checking for bolt db file", "error", err)
 	}
 
+	// If the db cache file exists, and we're not asked to expunge the cache then return from the cache.
 	if existsAndRecent && !cfg.NoCache {
 		if err = indexedDB.Open(); err != nil {
 			return nil, nil, err
 		}
-		defer indexedDB.Close()
 		if devList, enrichedDevs, err := indexedDB.FindDevices(ctx); err == nil {
 			log.Info("local db file (db.bolt) was found and recent enough so using this as a cache")
+			indexedDB.Close()
 			return devList, enrichedDevs, nil
 		}
 	}
@@ -88,6 +89,13 @@ func DevicesResource(ctx context.Context, client *tailscale.Client) ([]tailscale
 	err = indexedDB.IndexDevices(ctx, devList, enrichedDevices)
 	if err != nil {
 		log.Debug("unable to index the devices", "error", err)
+	}
+
+	// 4. Return the data from the db because the db can utilize the index on prefix filters.
+	// In the future it may also do other heavyweight filters that we don't have to do in "user space"
+	devList, enrichedDevices, err = indexedDB.FindDevices(ctx)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	return devList, enrichedDevices, nil
