@@ -31,6 +31,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 	"tips/pkg/tailscale_cli"
 
@@ -75,6 +76,11 @@ func (d *DB) File() string {
 }
 
 func (d *DB) Open() error {
+	// Already opened, it's a no-op.
+	if d.hdl != nil {
+		return nil
+	}
+
 	db, err := bolt.Open(d.File(), 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		return err
@@ -91,8 +97,12 @@ func (d *DB) Close() error {
 }
 
 func (d *DB) Erase() error {
-	// TODO: destroy the local file.
-	return nil
+	fileToDelete := d.File()
+	if !strings.HasSuffix(fileToDelete, "db.bolt") {
+		return nil
+	}
+
+	return deleteFileIfExists(fileToDelete)
 }
 
 func (d *DB) Exists(ctx context.Context) (bool, error) {
@@ -263,4 +273,20 @@ func fileExistsAndIsRecent(filePath string, duration time.Duration) (bool, error
 
 	// The file exists but is not recent
 	return false, nil
+}
+
+// deleteFileIfExists deletes the file if it exists
+func deleteFileIfExists(filename string) error {
+	// Check if the file exists
+	_, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		// File does not exist, nothing to do
+		return nil
+	} else if err != nil {
+		// Some other error occurred when trying to get the file info
+		return err
+	}
+
+	// Delete the file
+	return os.Remove(filename)
 }

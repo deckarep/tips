@@ -1,6 +1,6 @@
 [![Go](https://github.com/deckarep/tips/actions/workflows/go.yml/badge.svg)](https://github.com/deckarep/tips/actions/workflows/go.yml)
 
-# tips OR tailtop
+# tips OR tailtop OR topsntails
 The command-line tool to wrangle your Tailscale tailnet cluster whether large or small.
 
 ### Definitions

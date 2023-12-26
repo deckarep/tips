@@ -41,29 +41,35 @@ func DevicesResource(ctx context.Context, client *tailscale.Client) ([]tailscale
 		cfg.TailscaleAPI.ElapsedTime = time.Since(startTime)
 	}()
 
-	// 0. Check this index first.
+	// 0. Check cache config - return cached results if cache timeout not yet expired.
 	indexedDB := NewDB(cfg.Tailnet)
 	existsAndRecent, err := indexedDB.Exists(ctx)
 	if err != nil {
 		log.Warn("problem checking for bolt db file", "error", err)
 	}
 
-	err = indexedDB.Open()
-	if err != nil {
+	if existsAndRecent && !cfg.NoCache {
+		if err = indexedDB.Open(); err != nil {
+			return nil, nil, err
+		}
+		defer indexedDB.Close()
+		if devList, enrichedDevs, err := indexedDB.FindDevices(ctx); err == nil {
+			log.Info("local db file (db.bolt) was found and recent enough so using this as a cache")
+			return devList, enrichedDevs, nil
+		}
+	}
+
+	log.Debug("rebuilding local db cache file", "file", indexedDB.File())
+	if err = indexedDB.Erase(); err != nil {
+		return nil, nil, err
+	}
+
+	if err = indexedDB.Open(); err != nil {
 		return nil, nil, err
 	}
 	defer indexedDB.Close()
 
-	// TODO: 0. Check cache config - return cached results if cache timeout not yet expired.
-	if cfg.NoCache {
-		log.Info("--nocache was supplied, so forcing a fresh fetch of all data")
-	} else if devList, enrichedDevs, err := indexedDB.FindDevices(ctx); existsAndRecent && err == nil {
-		log.Info("local db file (db.bolt) was found and recent enough so using this as a cache")
-		return devList, enrichedDevs, nil
-	} else {
-		log.Info("local db file (db.bolt) has expired or must be regenerated")
-	}
-
+	log.Debug("doing remote lookup of devices data")
 	// 1. Do tailscale api lookup for devices data.
 	ctxTimeOut, cancelTimeout := context.WithTimeout(ctx, cfg.TailscaleAPI.Timeout)
 	defer cancelTimeout()
