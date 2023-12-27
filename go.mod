@@ -3,16 +3,17 @@ module tips
 go 1.21.3
 
 require (
+	github.com/brianvoe/gofakeit/v6 v6.26.3
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/charmbracelet/log v0.3.1
-	github.com/deckarep/golang-set/v2 v2.5.0
+	github.com/deckarep/golang-set/v2 v2.6.0
 	github.com/dustin/go-humanize v1.0.1
 	github.com/json-iterator/go v1.1.12
 	github.com/spf13/cobra v1.8.0
 	github.com/tailscale/tailscale-client-go v1.15.0
 	github.com/tidwall/gjson v1.17.0
 	go.etcd.io/bbolt v1.3.8
-	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848
+	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b
 )
 
 require (

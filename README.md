@@ -138,6 +138,14 @@ nodes?.**
 clusters. One of the primary goals of this project is that it can help you manage a `tailnet` from *5 to 50,000 
 nodes*. Perhaps even more so stay tuned!
 
+**Q: How can I execute remote commands with a greater degree of `parallelism` or `concurrency`?**
+
+**A:** We have you covered: see the `-c` or `--concurrency` flag.
+
+**Q: How can I disable colored output?**
+
+**A:** See the `--nocolor` flag.
+
 ### Alpha
 This code is currently being developed in a **rapid prototyping** mode. Therefore you will not see much unit-testing as
 too much code is changing and being actively refactored as the design and approach is tightened up. If you use this at

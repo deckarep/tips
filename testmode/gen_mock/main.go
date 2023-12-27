@@ -25,6 +25,8 @@ SOFTWARE.
 
 package main
 
+// go run testmode/gen_mock/main.go | grep hostname | cut -d'-' -f1 | sort | uniq -c
+
 // This cli just generates fake data...it's meant to create a static test file of devices. You may have to periodically
 // re-run this to add support for new fields that we want to process.
 
@@ -33,6 +35,8 @@ import (
 	"fmt"
 	"net"
 	"sort"
+
+	"github.com/brianvoe/gofakeit/v6"
 
 	"github.com/charmbracelet/log"
 	"github.com/tailscale/tailscale-client-go/tailscale"
@@ -50,16 +54,25 @@ var (
 	regionSuffixes = []string{
 		"lax", "sfo", "dfw", "sjc",
 	}
-	nameFmts = map[string]int{
-		"magnesium-%04d-%s": 0,
-		"arsenic-%04d-%s":   0,
-		"iron-%04d-%s":      0,
-		"nickel-%04d-%s":    0,
-		"titanium-%04d-%s":  0,
-		"copper-%04d-%s":    0,
-		"lead-%04d-%s":      0,
-		"cobalt-%04d-%s":    0,
-	}
+	// Animal based names.
+	nameFmts = func() map[string]int {
+		m := make(map[string]int)
+		for i := 0; i < 120; i++ {
+			m[gofakeit.Animal()+"-%04d-%s"] = 0
+		}
+		return m
+	}()
+	// Metal-based names.
+	//nameFmts = map[string]int{
+	//	"magnesium-%04d-%s": 0,
+	//	"arsenic-%04d-%s":   0,
+	//	"iron-%04d-%s":      0,
+	//	"nickel-%04d-%s":    0,
+	//	"titanium-%04d-%s":  0,
+	//	"copper-%04d-%s":    0,
+	//	"lead-%04d-%s":      0,
+	//	"cobalt-%04d-%s":    0,
+	//}
 	startingIPVAddress net.IP = net.IPv4(100, 100, 0, 0)
 	tagPool                   = []string{"almond", "walnut", "peanut", "pistachio", "pecan", "cachew", "hazelnut"}
 	users                     = []string{"admin@foo.net", "admin@foo.org", "jane@foo.net", "roberto@foo.com", "terry@foo.org", "ellen@foo.io"}
@@ -118,12 +131,16 @@ func createFakeDevice(idx int) *tailscale.Device {
 }
 
 func getName(idx int) string {
-	anotherN := int(rand.ExpFloat64())
+	rFloat := rand.ExpFloat64() / 0.1
+	anotherN := int(rFloat)
 
 	var keys []string
 	for key := range nameFmts {
 		keys = append(keys, key)
 	}
+
+	//fmt.Println("rFloat: ", rFloat)
+	//fmt.Println("anotherN: ", anotherN)
 
 	sort.Strings(keys) // Sorting the keys for consistency
 
