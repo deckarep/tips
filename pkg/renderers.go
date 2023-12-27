@@ -32,6 +32,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 	"tips/pkg/ui"
 
 	"github.com/charmbracelet/lipgloss"
@@ -114,6 +115,27 @@ func applyColorRules(line string) string {
 	return sb.String()
 }
 
+func RenderRemoteSummary(ctx context.Context, w io.Writer, success, errors uint32, elapsed time.Duration) error {
+	succStr := ui.Styles.Green.Render(fmt.Sprintf("%d", success))
+	errStr := ui.Styles.Faint.Render(fmt.Sprintf("%d", errors))
+
+	// Upon any errors lets highlight this fact.
+	if errors > 0 {
+		succStr = ui.Styles.Faint.Render(fmt.Sprintf("%d", success))
+		errStr = ui.Styles.Red.Render(fmt.Sprintf("%d", errors))
+	}
+
+	summary := fmt.Sprintf("Finished: successes: %s, failures: %s, elapsed (secs): %.2f",
+		succStr,
+		errStr,
+		elapsed.Seconds())
+
+	if _, err := fmt.Fprintln(w, summary); err != nil {
+		log.Error("error on `Fprintln` when writing elapsed time", "error", err)
+	}
+	return nil
+}
+
 func RenderLogLine(ctx context.Context, w io.Writer, idx int, hostname, line string) {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
@@ -151,17 +173,17 @@ func RenderJson(ctx context.Context, tableView *GeneralTableView, w io.Writer) e
 
 func RenderTableView(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
 
-	err := renderProlog(ctx, tableView, w)
+	err := renderTableProlog(ctx, tableView, w)
 	if err != nil {
 		return err
 	}
 
-	err = renderBody(ctx, tableView, w)
+	err = renderTableBody(ctx, tableView, w)
 	if err != nil {
 		return err
 	}
 
-	err = renderEpilog(ctx, tableView, w)
+	err = renderTableEpilog(ctx, tableView, w)
 	if err != nil {
 		return err
 	}
@@ -169,7 +191,7 @@ func RenderTableView(ctx context.Context, tableView *GeneralTableView, w io.Writ
 	return nil
 }
 
-func renderProlog(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
+func renderTableProlog(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
 	// Show tailnet inspecting:
 	fmt.Fprint(w, ui.Styles.Faint.Render("\nTailnet: "))
 	fmt.Fprintln(w, ui.Styles.Bold.Render(tableView.Tailnet))
@@ -185,7 +207,7 @@ func renderProlog(ctx context.Context, tableView *GeneralTableView, w io.Writer)
 	return nil
 }
 
-func renderBody(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
+func renderTableBody(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
 	const (
 		SmHdrWidth = 6
 	)
@@ -234,7 +256,7 @@ func renderBody(ctx context.Context, tableView *GeneralTableView, w io.Writer) e
 	return nil
 }
 
-func renderEpilog(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
+func renderTableEpilog(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
 	// Render machine count and elapsed secs.
 	fmt.Fprint(w, ui.Styles.Faint.Render("Total Machines: "))
 	fmt.Fprint(w, ui.Styles.Bold.Render(fmt.Sprintf("%d", tableView.TotalMachines)))
