@@ -37,20 +37,23 @@ professional or commercial setting?
 ### How To
 Here is a list of common commands from easy to more advanced.
 
-How do I get a list?
+How do I get a list of *all* `devices` or `nodes` in a `tailnet`?
 ```sh
 ./tips
+./tips @ # This is equivalent as @ means all/everything.
+```
+
+However, it's better to query by a `full name` or `prefix` especially if you have a large infrastructure
+```sh
+# Simply provide a partial or full string name.
+./tips [prefix-filter]
+./tips blade # Find all nodes with a machine name starting with 'blade'
+./tips bla # Find all nodes with a machine name starting with 'bla'
 ```
 
 How do I get more details?
 ```sh
 ./tips --details
-```
-
-How do I query nodes by name?
-```sh
-# Simply provide a partial or full string name.
-./tips bla
 ```
 
 How do I sort nodes?
@@ -78,6 +81,7 @@ How do I generate a JSON-based result
 ```sh
 ./tips --json
 ```
+
 How do I generate a list of ips only
 ```sh
 # Provides a \n delimited list of ips
@@ -85,6 +89,7 @@ How do I generate a list of ips only
 # Provides a comma delimited list of ips
 ./tips --ips --delimiter ','
 ```
+
 How do run a remote command on all returned nodes?
 ```sh
 ./tips [prefix-filter] [remote command here]
@@ -95,7 +100,7 @@ How do run a remote command on all returned nodes?
 How do I rebuild the index? Running this forces a full rebuild (fetch all remote data) and builds the index
 for speedy queries. Normally you don't have to do this manually.
 ```sh
-./tips --index
+./tips --reindex
 ```
 
 ### Supported/Tested OS's
