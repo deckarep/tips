@@ -146,13 +146,14 @@ var rootCmd = &cobra.Command{
 			client = pkg.NewOauthClient(ctx)
 		}
 
-		var devicesResourceFunc = pkg.DevicesResource
+		cachedDevRepo := pkg.NewCachedRepo(pkg.NewRemoteDeviceRepo(client), pkg.NewDB("deckarep@gmail.com"))
+		var devicesResourceFunc = cachedDevRepo.DevicesResource
 		if cfgCtx.TestMode {
 			// In test mode, indirect to mocked test data.
-			devicesResourceFunc = pkg.DevicesResourceTest
+			//devicesResourceFunc = pkg.DevicesResourceTest
 		}
 
-		devList, devEnriched, err := devicesResourceFunc(ctx, client)
+		devList, devEnriched, err := devicesResourceFunc(ctx)
 		if err != nil {
 			log.Fatal("problem with resource lookup of devices with err: ", err)
 		}

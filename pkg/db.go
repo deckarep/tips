@@ -62,8 +62,8 @@ type DB struct {
 	hdl          *bolt.DB
 }
 
-func NewDB(tailnetScope string) DB {
-	return DB{
+func NewDB(tailnetScope string) *DB {
+	return &DB{
 		tailnetScope: tailnetScope,
 	}
 }
