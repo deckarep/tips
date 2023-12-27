@@ -61,7 +61,7 @@ func ParseSlice(s string) *SliceCfg {
 	}
 
 	const (
-		invalidSliceMsg = "the --slice flag or slice configuration is invalid; format is like a Go slice without the brackets"
+		invalidSliceMsg = "the --slice flag is invalid; format is like a Go slice (with no brackets needed)"
 	)
 
 	s = strings.TrimSpace(s)

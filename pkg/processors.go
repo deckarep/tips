@@ -33,6 +33,8 @@ import (
 	"tips/pkg/tailscale_cli"
 	"tips/pkg/ui"
 
+	"github.com/charmbracelet/log"
+
 	"github.com/dustin/go-humanize"
 	"github.com/tailscale/tailscale-client-go/tailscale"
 )
@@ -73,11 +75,22 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device,
 	// Go's standard slicing convention.
 	var slicedDevList = filteredDevList
 	if cfg.Slice.IsDefined() {
+		sliceWarnMsgFmt := "upper bound on slice: %d is larger than results len: %d"
 		if cfg.Slice.From != nil && cfg.Slice.To != nil {
+			// pin the upperbound to something reasonable.
+			if *cfg.Slice.To > len(filteredDevList) {
+				log.Warnf(sliceWarnMsgFmt, *cfg.Slice.To, len(filteredDevList))
+				*cfg.Slice.To = len(filteredDevList)
+			}
 			slicedDevList = filteredDevList[*cfg.Slice.From:*cfg.Slice.To]
 		} else if cfg.Slice.From != nil {
 			slicedDevList = filteredDevList[*cfg.Slice.From:]
 		} else {
+			// pin the upperbound to something reasonable.
+			if *cfg.Slice.To > len(filteredDevList) {
+				log.Warnf(sliceWarnMsgFmt, *cfg.Slice.To, len(filteredDevList))
+				*cfg.Slice.To = len(filteredDevList)
+			}
 			slicedDevList = filteredDevList[:*cfg.Slice.To]
 		}
 	}
