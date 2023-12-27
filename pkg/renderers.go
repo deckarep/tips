@@ -264,11 +264,11 @@ func renderTableEpilog(ctx context.Context, tableView *GeneralTableView, w io.Wr
 
 	var showElapsed = func(elapsed time.Duration) {
 		if elapsed.Seconds() >= 1.0 {
-			fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed (secs): "))
-			fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2f", elapsed.Seconds())))
+			fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed: "))
+			fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2fsecs", elapsed.Seconds())))
 		} else {
-			fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed (ms): "))
-			fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2d", elapsed.Milliseconds())))
+			fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed: "))
+			fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2dms", elapsed.Milliseconds())))
 		}
 	}
 
