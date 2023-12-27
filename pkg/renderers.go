@@ -257,16 +257,25 @@ func renderTableBody(ctx context.Context, tableView *GeneralTableView, w io.Writ
 }
 
 func renderTableEpilog(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
+	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 	// Render machine count and elapsed secs.
 	fmt.Fprint(w, ui.Styles.Faint.Render("Total Machines: "))
 	fmt.Fprint(w, ui.Styles.Bold.Render(fmt.Sprintf("%d", tableView.TotalMachines)))
 
-	if tableView.APIElapsed.Seconds() > 1 {
-		fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed (secs): "))
-		fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2f", tableView.APIElapsed.Seconds())))
-	} else {
-		fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed (ms): "))
-		fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2d", tableView.APIElapsed.Milliseconds())))
+	var showElapsed = func(elapsed time.Duration) {
+		if elapsed.Seconds() >= 1.0 {
+			fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed (secs): "))
+			fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2f", elapsed.Seconds())))
+		} else {
+			fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed (ms): "))
+			fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2d", elapsed.Milliseconds())))
+		}
+	}
+
+	if cfg.TailscaleAPI.ElapsedTime > 0 {
+		showElapsed(cfg.TailscaleAPI.ElapsedTime)
+	} else if cfg.CachedElapsed > 0 {
+		showElapsed(cfg.CachedElapsed)
 	}
 
 	return nil

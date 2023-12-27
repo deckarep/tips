@@ -47,6 +47,7 @@ func (r *RemoteDeviceRepo) DevicesResource(ctx context.Context) ([]tailscale.Dev
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
 	log.Debug("doing remote lookup of devices data")
+
 	// 1. Do tailscale api lookup for devices data.
 	ctxTimeOut, cancelTimeout := context.WithTimeout(ctx, cfg.TailscaleAPI.Timeout)
 	defer cancelTimeout()
@@ -55,7 +56,8 @@ func (r *RemoteDeviceRepo) DevicesResource(ctx context.Context) ([]tailscale.Dev
 		log.Fatal("tailscale api failed during devices lookup: ", err)
 	}
 
-	// 2. When available, enrich this data with data from the Tailscale cli, if this is run from a node within the tailnet.
+	// 2. When available, enrich this data with data from the Tailscale cli, if this is run from a node within the
+	// tailnet. NOTE: This data may not be available if this tool is not run within a node on the tailnet.
 	enrichedDevices, err := tailscale_cli.GetDevicesState()
 	if err != nil {
 		log.Debug("unable to get enriched data from tailscale cli", "error", err)

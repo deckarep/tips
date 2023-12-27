@@ -119,6 +119,7 @@ type ConfigCtx struct {
 	Slice         *SliceCfg
 	SortOrder     []SortSpec
 	Tailnet       string
+	CachedElapsed time.Duration
 	TailscaleAPI  TailscaleAPICfgCtx
 	TailscaleCLI  TailscaleCLICfgCtx
 
