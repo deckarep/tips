@@ -11,7 +11,7 @@ update:
 	go mod tidy
 
 clean:
-	rm *db.bolt
+	rm -f *db.bolt
 
 # Test the code.
 test:

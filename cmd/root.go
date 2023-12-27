@@ -239,7 +239,11 @@ func packageCfg(args []string) *pkg.ConfigCtx {
 
 	// The 0th arg is the Primary filter, if nothing was specified we consider it to represent: @ for all
 	if len(args) > 0 {
-		cfgCtx.PrefixFilter = args[0]
+		if strings.TrimSpace(args[0]) == "@" {
+			cfgCtx.PrefixFilter = "*"
+		} else {
+			cfgCtx.PrefixFilter = args[0]
+		}
 		// The regex filter to be deprecated.
 		cfgCtx.PrimaryFilter = regexp.MustCompile(args[0])
 	} else {

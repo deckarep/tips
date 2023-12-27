@@ -34,6 +34,70 @@ commands and manage your nodes collectively using an effective pattern modeled a
 * Lastly, what better way to show appreciation for software than to **leave a tip** especially if used in a
 professional or commercial setting?
 
+### How To
+Here is a list of common commands from easy to more advanced.
+
+How do I get a list?
+```sh
+./tips
+```
+
+How do I get more details?
+```sh
+./tips --details
+```
+
+How do I query nodes by name?
+```sh
+# Simply provide a partial or full string name.
+./tips bla
+```
+
+How do I sort nodes?
+```sh
+# To sort by one column ascending (default)
+./tips --sort 'name'
+# To sort by multiple columns with varying order, specifically in ascending or descending order
+./tips --sort 'name:dsc,email:asc'
+```
+
+How do I slice/partition nodes?
+```sh
+# Shows the top 5 nodes
+./tips --slice 0:5
+# Shows the nodes between 5-10
+./tips --slice 5:10
+```
+
+How do I limit which columns to show?
+```sh
+./tips --columns 'name,address'
+```
+
+How do I generate a JSON-based result
+```sh
+./tips --json
+```
+How do I generate a list of ips only
+```sh
+# Provides a \n delimited list of ips
+./tips --ips
+# Provides a comma delimited list of ips
+./tips --ips --delimiter ','
+```
+How do run a remote command on all returned nodes?
+```sh
+./tips [prefix-filter] [remote command here]
+./tips blade "hostname" # runs the remote command 'hostname' on all nodes that start with prefix:blade
+./tips bla "echo 'hello'" -c20 # same as above but does an echo with a concurrency value of 20.
+```
+
+How do I rebuild the index? Running this forces a full rebuild (fetch all remote data) and builds the index
+for speedy queries. Normally you don't have to do this manually.
+```sh
+./tips --index
+```
+
 ### Supported/Tested OS's
 - [x] MacOS (tested, actively developed)
 - [ ] Linux (planned soon)

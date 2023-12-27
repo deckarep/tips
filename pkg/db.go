@@ -197,6 +197,7 @@ func (d *DB) FindDevices(ctx context.Context) ([]tailscale.Device, map[string]ta
 	// 0. First populate all devices.
 	var devList []tailscale.Device
 	var enrichedDevs map[string]tailscale_cli.DeviceInfo
+
 	err := d.hdl.View(func(tx *bolt.Tx) error {
 		// 0. Check for stats
 		sb := tx.Bucket([]byte(statsBucket))
