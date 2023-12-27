@@ -47,7 +47,9 @@ However, it's better to query by a `full name` or `prefix` especially if you hav
 ```sh
 # Simply provide a partial or full string name.
 ./tips [prefix-filter]
+
 ./tips blade # Find all nodes with a machine name starting with 'blade'
+
 ./tips bla # Find all nodes with a machine name starting with 'bla'
 ```
 
@@ -56,10 +58,11 @@ How do I get more details?
 ./tips --details
 ```
 
-How do I sort nodes?
+How do I sort the output?
 ```sh
 # To sort by one column ascending (default)
 ./tips --sort 'name'
+
 # To sort by multiple columns with varying order, specifically in ascending or descending order
 ./tips --sort 'name:dsc,email:asc'
 ```
@@ -68,6 +71,7 @@ How do I slice/partition nodes?
 ```sh
 # Shows the top 5 nodes
 ./tips --slice 0:5
+
 # Shows the nodes between 5-10
 ./tips --slice 5:10
 ```
@@ -86,6 +90,7 @@ How do I generate a list of ips only
 ```sh
 # Provides a \n delimited list of ips
 ./tips --ips
+
 # Provides a comma delimited list of ips
 ./tips --ips --delimiter ','
 ```
@@ -93,7 +98,9 @@ How do I generate a list of ips only
 How do run a remote command on all returned nodes?
 ```sh
 ./tips [prefix-filter] [remote command here]
+
 ./tips blade "hostname" # runs the remote command 'hostname' on all nodes that start with prefix:blade
+
 ./tips bla "echo 'hello'" -c20 # same as above but does an echo with a concurrency value of 20.
 ```
 
@@ -111,9 +118,25 @@ for speedy queries. Normally you don't have to do this manually.
 ### Built with ❤️
 * by deckarep
 
-### FAQ
+### F.A.Q.
+**Q: I'm having trouble executing remote commands on some nodes in my `tailnet`.**
 
+**A:** This is typically not a problem with this tool, but rather your `tailnet` configuration with respect to 
+`permissions` or `tagging` or `ssh auth keys`. Please check that your nodes have the appropriate `ports open`, 
+`permissions` and/or `public keys` to match your user `logon` credentials.
 
+**Q: I'm having trouble `sshing` into a node with this tool.**
+
+**A:** This tool does absolutely nothing special to manage ssh-based logins and `simply forwards` such requests to 
+either the `Tailscale ssh subcommand` or the `native ssh executable`. Please see the previous question as for what 
+could be wrong.
+
+**Q: I have a massive infrastructure. Will this tool help me manage a large infrastructure with 10's of thousands of 
+nodes?.**
+
+**A:** Yes, with *robust caching and indexing built-in*, this tool ensures fast queries amongst even the largest 
+clusters. One of the primary goals of this project is that it can help you manage a `tailnet` from *5 to 50,000 
+nodes*. Perhaps even more so stay tuned!
 
 ### Alpha
 This code is currently being developed in a **rapid prototyping** mode. Therefore you will not see much unit-testing as
