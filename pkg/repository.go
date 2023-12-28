@@ -43,7 +43,7 @@ func NewRemoteDeviceRepo(client *tailscale.Client) *RemoteDeviceRepo {
 	}
 }
 
-func (r *RemoteDeviceRepo) DevicesResource(ctx context.Context) ([]tailscale.Device, map[string]tailscale_cli.DeviceInfo, error) {
+func (r *RemoteDeviceRepo) DevicesResource(ctx context.Context) ([]*WrappedDevice, error) {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
 	log.Debug("doing remote lookup of devices data")
@@ -60,8 +60,21 @@ func (r *RemoteDeviceRepo) DevicesResource(ctx context.Context) ([]tailscale.Dev
 	// tailnet. NOTE: This data may not be available if this tool is not run within a node on the tailnet.
 	enrichedDevices, err := tailscale_cli.GetDevicesState()
 	if err != nil {
-		log.Debug("unable to get enriched data from tailscale cli", "error", err)
+		log.Debug("unable to get enriched data from tailscale cli, but this is optionally returned",
+			"error", err)
 	}
 
-	return devList, enrichedDevices, nil
+	// NOTE: It's not ideal, but a "join" occurs here if it turns out we're operating on a node within the tailnet
+	// and enriched device results were returned from the Tailscale CLI app. This may not always be the case! The
+	// other thing that is not ideal is that we do a loop again to join the results.
+	var wrappedDevs []*WrappedDevice
+	for _, dev := range devList {
+		if enrichedInfo, exists := enrichedDevices[dev.NodeKey]; exists {
+			wrappedDevs = append(wrappedDevs, &WrappedDevice{Device: dev, EnrichedInfo: &enrichedInfo})
+		} else {
+			wrappedDevs = append(wrappedDevs, &WrappedDevice{Device: dev})
+		}
+	}
+
+	return wrappedDevs, nil
 }

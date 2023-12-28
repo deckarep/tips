@@ -30,13 +30,11 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"tips/pkg/tailscale_cli"
 	"tips/pkg/ui"
 
 	"github.com/charmbracelet/log"
 
 	"github.com/dustin/go-humanize"
-	"github.com/tailscale/tailscale-client-go/tailscale"
 )
 
 const (
@@ -58,12 +56,13 @@ var (
 
 // ProcessDevicesTable will apply sorting (if required), slicing (if required) and the massage/transformation of data to produce a final
 // `*DevicesTable` that has everything required to render.
-func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device,
-	devEnriched map[string]tailscale_cli.DeviceInfo) (*GeneralTableView, error) {
+func ProcessDevicesTable(ctx context.Context, devList []*WrappedDevice) (*GeneralTableView, error) {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
+	hasEnrichedInfo := devList[0].EnrichedInfo != nil
+
 	// 1. Filter - if user requested any with the --filter flag
-	filteredDevList := executeFilters(ctx, devList, devEnriched)
+	filteredDevList := executeFilters(ctx, devList)
 
 	// 2. Sort - based on user's configured setting or --sort flag
 	// If at least one dynamic sort was defined, then apply it.
@@ -111,30 +110,30 @@ func ProcessDevicesTable(ctx context.Context, devList []tailscale.Device,
 			Index:   0,
 			DNSName: "foo.bar.3234.dns.name.",
 		},
-		Headers: getHeaders(devEnriched),
+		Headers: getHeaders(hasEnrichedInfo),
 	}
 
 	// Pre-alloc size.
 	tbl.Rows = make([][]string, 0, len(slicedDevList))
 
 	for idx, dev := range slicedDevList {
-		tbl.Rows = append(tbl.Rows, getRow(idx, dev, devEnriched))
+		tbl.Rows = append(tbl.Rows, getRow(idx, dev))
 	}
 
 	return tbl, nil
 }
 
-func getHeaders(enrichedResults map[string]tailscale_cli.DeviceInfo) []string {
+func getHeaders(hasEnrichedInfo bool) []string {
 	// TODO: I need to remove columns based on --columns flag.
 
 	// Currently there's no difference on the headers returned when enrichedResults are present.
-	if len(enrichedResults) > 0 {
+	if hasEnrichedInfo {
 		return DefaultHeader
 	}
 	return DefaultHeader
 }
 
-func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cli.DeviceInfo) []string {
+func getRow(idx int, d *WrappedDevice) []string {
 	// TODO: I need to remove columns based on --columns flag.
 
 	var (
@@ -161,7 +160,7 @@ func getRow(idx int, d tailscale.Device, enrichedResults map[string]tailscale_cl
 	// Enriched results are only available when run from a node that is in the tailnet cluster itself.
 	// In other words, the external Tailscale API only provides so much data.
 
-	if enrichedDev, ok := enrichedResults[d.NodeKey]; ok {
+	if enrichedDev := d.EnrichedInfo; enrichedDev != nil {
 		if enrichedDev.Online {
 			seenAgo = nowField
 		}

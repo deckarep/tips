@@ -28,8 +28,6 @@ package pkg
 import (
 	"sort"
 	"strings"
-
-	"github.com/tailscale/tailscale-client-go/tailscale"
 )
 
 type SortDirection int
@@ -62,7 +60,7 @@ func ParseSortString(sortString string) []SortSpec {
 	return specs
 }
 
-func dynamicSortDevices(slice []tailscale.Device, specs []SortSpec) {
+func dynamicSortDevices(slice []*WrappedDevice, specs []SortSpec) {
 	sort.Slice(slice, func(i, j int) bool {
 		for _, spec := range specs {
 			switch spec.Field {

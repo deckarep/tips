@@ -29,11 +29,9 @@ import (
 	"context"
 
 	"strings"
-	"tips/pkg/tailscale_cli"
 
 	"github.com/charmbracelet/log"
 	mapset "github.com/deckarep/golang-set/v2"
-	"github.com/tailscale/tailscale-client-go/tailscale"
 )
 
 // Formats we will take (whitespace doesn't matter:
@@ -110,8 +108,7 @@ func ParseFilter(filter string) map[string]mapset.Set[string] {
 	return m
 }
 
-func executeFilters(ctx context.Context, devList []tailscale.Device,
-	devEnriched map[string]tailscale_cli.DeviceInfo) []tailscale.Device {
+func executeFilters(ctx context.Context, devList []*WrappedDevice) []*WrappedDevice {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
 	var normalizeTags = func(vals []string) []string {
@@ -123,7 +120,7 @@ func executeFilters(ctx context.Context, devList []tailscale.Device,
 	}
 
 	var (
-		filteredDevList []tailscale.Device
+		filteredDevList []*WrappedDevice
 	)
 
 	// Note: for better performance, filtering should be done by the most selective fields first.
@@ -195,7 +192,7 @@ func executeFilters(ctx context.Context, devList []tailscale.Device,
 		// Filters by exit node - filter query looks like: --filter 'exit:yes|no'
 		if f, exists := cfg.Filters["exit"]; exists {
 			// NOTE: this information only exists from enriched results.
-			if enrichedDev, ok := devEnriched[dev.NodeKey]; ok {
+			if enrichedDev := dev.EnrichedInfo; enrichedDev != nil {
 				if (f.Contains("yes") && !enrichedDev.HasExitNodeOption) ||
 					(f.Contains("no") && enrichedDev.HasExitNodeOption) {
 					continue

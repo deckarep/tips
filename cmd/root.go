@@ -143,19 +143,19 @@ var rootCmd = &cobra.Command{
 			client = pkg.NewOauthClient(ctx)
 		}
 
-		cachedDevRepo := pkg.NewCachedRepo(pkg.NewRemoteDeviceRepo(client), pkg.NewDB("deckarep@gmail.com"))
+		cachedDevRepo := pkg.NewCachedRepo(pkg.NewRemoteDeviceRepo(client))
 		var devicesResourceFunc = cachedDevRepo.DevicesResource
 		if cfgCtx.TestMode {
 			// In test mode, indirect to mocked test data.
 			//devicesResourceFunc = pkg.DevicesResourceTest
 		}
 
-		devList, devEnriched, err := devicesResourceFunc(ctx)
+		devList, err := devicesResourceFunc(ctx)
 		if err != nil {
 			log.Fatal("problem with resource lookup of devices", "error", err)
 		}
 
-		view, err := pkg.ProcessDevicesTable(ctx, devList, devEnriched)
+		view, err := pkg.ProcessDevicesTable(ctx, devList)
 		if err != nil {
 			log.Fatal("problem occurred processing devices data", "error", err)
 		}
