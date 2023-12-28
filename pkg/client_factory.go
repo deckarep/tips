@@ -37,13 +37,12 @@ func NewClient(ctx context.Context) *tailscale.Client {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
 	client, err := tailscale.NewClient(
-		cfg.TailscaleAPI.ApiKey, // When doing oauth, this field must be blank!!!
+		cfg.TailscaleAPI.ApiKey,
 		cfg.Tailnet,
-		//tailscale.WithOAuthClientCredentials(oauthClientID, oauthClientSecret, nil),
 		tailscale.WithUserAgent(UserAgent),
 	)
 	if err != nil {
-		log.Fatal("failed to create tailscale api client with err: ", err)
+		log.Fatal("failed to create tailscale api client", "error", err)
 	}
 	return client
 }
@@ -51,13 +50,14 @@ func NewClient(ctx context.Context) *tailscale.Client {
 func NewOauthClient(ctx context.Context) *tailscale.Client {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 	client, err := tailscale.NewClient(
-		"", // When doing oauth, this field must be blank!!!
+		// When doing oauth, this field must be blank.
+		"",
 		cfg.Tailnet,
 		tailscale.WithOAuthClientCredentials(cfg.TailscaleAPI.OAuthClientID, cfg.TailscaleAPI.OAuthClientSecret, nil),
 		tailscale.WithUserAgent(UserAgent),
 	)
 	if err != nil {
-		log.Fatal("failed to create tailscale api client with err: ", err)
+		log.Fatal("failed to create tailscale api oauth client", "error", err)
 	}
 	return client
 }

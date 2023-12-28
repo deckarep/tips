@@ -36,7 +36,6 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
-	"github.com/tailscale/tailscale-client-go/tailscale"
 )
 
 var (
@@ -106,9 +105,9 @@ func init() {
 
 var rootCmd = &cobra.Command{
 	Use:   "tips",
-	Short: "tips: The command-line tool to wrangle your Tailscale/tailnet cluster whether large or small.",
+	Short: "tips: The command-line tool to wrangle your Tailscale tailnet cluster whether large or small.",
 	Long: `tips is a robust command-line tool to help you inspect, query, manage and execute commands on your 
-				tailnet cluster created by deckarep.
+				tailnet cluster. Created by @deckarep.
                 Complete documentation is available at: github.com/deckarep/tips`,
 	Args: cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -139,10 +138,8 @@ var rootCmd = &cobra.Command{
 		//	app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, myCmd)
 		//}
 
-		var client *tailscale.Client
-		if !useOauth {
-			client = pkg.NewClient(ctx)
-		} else {
+		client := pkg.NewClient(ctx)
+		if useOauth {
 			client = pkg.NewOauthClient(ctx)
 		}
 
@@ -155,7 +152,7 @@ var rootCmd = &cobra.Command{
 
 		devList, devEnriched, err := devicesResourceFunc(ctx)
 		if err != nil {
-			log.Fatal("problem with resource lookup of devices with err: ", err)
+			log.Fatal("problem with resource lookup of devices", "error", err)
 		}
 
 		view, err := pkg.ProcessDevicesTable(ctx, devList, devEnriched)
@@ -171,18 +168,15 @@ var rootCmd = &cobra.Command{
 			pkg.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, cfgCtx.RemoteCmd)
 		} else {
 			if jsonn {
-				err = pkg.RenderJson(ctx, view, os.Stdout)
-				if err != nil {
+				if err = pkg.RenderJson(ctx, view, os.Stdout); err != nil {
 					log.Fatal("error occurred encoding json output", "error", err)
 				}
 			} else if cfgCtx.IPsOutput {
-				err = pkg.RenderIPs(ctx, view, os.Stdout)
-				if err != nil {
+				if err = pkg.RenderIPs(ctx, view, os.Stdout); err != nil {
 					log.Fatal("error occurred generating ips output", "error", err)
 				}
 			} else {
-				err = pkg.RenderTableView(ctx, view, os.Stdout)
-				if err != nil {
+				if err = pkg.RenderTableView(ctx, view, os.Stdout); err != nil {
 					log.Fatal("problem occurred rendering table view", "error", err)
 				}
 			}

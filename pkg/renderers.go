@@ -268,14 +268,18 @@ func renderTableEpilog(ctx context.Context, tableView *GeneralTableView, w io.Wr
 			fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2fsecs", elapsed.Seconds())))
 		} else {
 			fmt.Fprint(w, ui.Styles.Faint.Render(", Elapsed: "))
-			fmt.Fprintln(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2dms", elapsed.Milliseconds())))
+			fmt.Fprint(w, ui.Styles.Bold.Render(fmt.Sprintf("%0.2dms", elapsed.Milliseconds())))
 		}
 	}
 
 	if cfg.TailscaleAPI.ElapsedTime > 0 {
 		showElapsed(cfg.TailscaleAPI.ElapsedTime)
+		fmt.Fprintln(w)
 	} else if cfg.CachedElapsed > 0 {
 		showElapsed(cfg.CachedElapsed)
+
+		fmt.Fprint(w, ui.Styles.Faint.Render(", Cached: "))
+		fmt.Fprintln(w, ui.Styles.Green.Render(ui.Checkmark))
 	}
 
 	return nil
