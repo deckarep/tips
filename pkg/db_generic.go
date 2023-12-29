@@ -32,9 +32,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/user"
+	"path"
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/log"
 	bolt "go.etcd.io/bbolt"
 )
 
@@ -71,8 +74,12 @@ func (d *DB2[T]) TailnetScope() string {
 }
 
 func (d *DB2[T]) File() string {
-	// TODO: move the file location to be somewhere in the user's homedir.
-	return fmt.Sprintf("%s.db.bolt", d.tailnetScope)
+	u, err := user.Current()
+	if err != nil {
+		log.Fatal("failed to get current user; aborting", "error", err)
+	}
+
+	return path.Join(u.HomeDir, fmt.Sprintf("%s.db.bolt", d.tailnetScope))
 }
 
 func (d *DB2[T]) Open() error {
