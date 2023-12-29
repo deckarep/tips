@@ -167,17 +167,17 @@ var rootCmd = &cobra.Command{
 			// Do the remote cluster command.
 			pkg.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, cfgCtx.RemoteCmd)
 		} else {
-			if jsonn {
+			if cfgCtx.JsonOutput {
 				if err = pkg.RenderJson(ctx, view, os.Stdout); err != nil {
-					log.Fatal("error occurred encoding json output", "error", err)
+					log.Fatal("problem encoding json output", "error", err)
 				}
 			} else if cfgCtx.IPsOutput {
 				if err = pkg.RenderIPs(ctx, view, os.Stdout); err != nil {
-					log.Fatal("error occurred generating ips output", "error", err)
+					log.Fatal("problem generating ips output", "error", err)
 				}
 			} else {
 				if err = pkg.RenderTableView(ctx, view, os.Stdout); err != nil {
-					log.Fatal("problem occurred rendering table view", "error", err)
+					log.Fatal("problem rendering table view", "error", err)
 				}
 			}
 		}

@@ -171,6 +171,13 @@ func RenderJson(ctx context.Context, tableView *GeneralTableView, w io.Writer) e
 	return json.NewEncoder(w).Encode(tableView)
 }
 
+func RenderASCIITableView(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
+	// TODO: this is intended to be a table view that uses a simple tabwriter. That's all.
+	// This is in case people want to just pipe the output without Charmbracelet getting in the way.
+	// No color!, tabwriter, 0th line header, the rest are just the results.
+	return nil
+}
+
 func RenderTableView(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
 
 	err := renderTableProlog(ctx, tableView, w)
