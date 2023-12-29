@@ -50,8 +50,8 @@ const (
 
 var (
 	DefaultHeader = []string{NoHdr, MachineHdr, AddressHdr, TagsHdr, UserHdr, VersionHdr, ExitNodeHdr, LastSeenHdr}
-	nowField      = fmt.Sprintf("%s now", ui.Styles.Green.Render(ui.Dot))
-	checkField    = fmt.Sprintf("%s yes", ui.Styles.Green.Render(ui.Checkmark))
+	nowField      = fmt.Sprintf("%s now", ui.Styles.Green.Render(ui.Symbols.Dot))
+	checkField    = fmt.Sprintf("%s yes", ui.Styles.Green.Render(ui.Symbols.Checkmark))
 )
 
 // ProcessDevicesTable will apply sorting (if required), slicing (if required) and the massage/transformation of data to produce a final

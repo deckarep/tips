@@ -27,54 +27,57 @@ package ui
 
 import "github.com/charmbracelet/lipgloss"
 
-const (
-	Checkmark = "✔"
-	Dot       = "•"
-)
+type symbols struct {
+	Checkmark string
+	Dot       string
+}
 
 type styleTypes struct {
 	Bold  lipgloss.Style
 	Faint lipgloss.Style
-	Green lipgloss.Style
 
-	Red     lipgloss.Style
-	Blue    lipgloss.Style
-	Yellow  lipgloss.Style
-	White   lipgloss.Style
-	Magenta lipgloss.Style
-	Cyan    lipgloss.Style
 	Black   lipgloss.Style
+	Blue    lipgloss.Style
+	Cyan    lipgloss.Style
+	Green   lipgloss.Style
+	Magenta lipgloss.Style
+	Red     lipgloss.Style
+	White   lipgloss.Style
+	Yellow  lipgloss.Style
 }
 
 type colorTypes struct {
-	Purple    lipgloss.Color
+	Black     lipgloss.Color
+	Blue      lipgloss.Color
+	Cyan      lipgloss.Color
 	Gray      lipgloss.Color
-	LightGray lipgloss.Color
 	Green     lipgloss.Color
-
-	Red     lipgloss.Color
-	Blue    lipgloss.Color
-	Yellow  lipgloss.Color
-	White   lipgloss.Color
-	Magenta lipgloss.Color
-	Cyan    lipgloss.Color
-	Black   lipgloss.Color
+	LightGray lipgloss.Color
+	Magenta   lipgloss.Color
+	Purple    lipgloss.Color
+	Red       lipgloss.Color
+	White     lipgloss.Color
+	Yellow    lipgloss.Color
 }
 
 var (
-	Colors colorTypes = colorTypes{
-		Purple:    "99",
+	Symbols = symbols{
+		Checkmark: "✔",
+		Dot:       "•",
+	}
+
+	Colors = colorTypes{
+		Black:     "16",
+		Blue:      "12",
+		Cyan:      "14",
 		Gray:      "245",
+		Green:     "10", // "32", "99",
 		LightGray: "241",
-		// Green:  "99",
-		Red:     "9",
-		Green:   "10", // "32",
-		Blue:    "12",
-		Yellow:  "11",
-		White:   "15",
-		Magenta: "5",
-		Cyan:    "14",
-		Black:   "16",
+		Magenta:   "5",
+		Purple:    "99",
+		Red:       "9",
+		White:     "15",
+		Yellow:    "11",
 	}
 
 	Styles = styleTypes{

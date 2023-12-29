@@ -286,7 +286,7 @@ func renderTableEpilog(ctx context.Context, tableView *GeneralTableView, w io.Wr
 		showElapsed(cfg.CachedElapsed)
 
 		fmt.Fprint(w, ui.Styles.Faint.Render(", Cached: "))
-		fmt.Fprintln(w, ui.Styles.Green.Render(ui.Checkmark))
+		fmt.Fprintln(w, ui.Styles.Green.Render(ui.Symbols.Checkmark))
 	}
 
 	return nil
