@@ -95,7 +95,7 @@ func main() {
 
 	b, err := json.MarshalIndent(devices, "", "  ")
 	if err != nil {
-		log.Fatal("failed to marshal all devices into json with err: ", err)
+		log.Fatal("failed to marshal all devices into json", "error", err)
 	}
 
 	fmt.Println(string(b))

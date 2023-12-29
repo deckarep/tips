@@ -63,19 +63,18 @@ type colorTypes struct {
 
 var (
 	Colors colorTypes = colorTypes{
-		Purple:    lipgloss.Color("99"),
-		Gray:      lipgloss.Color("245"),
-		LightGray: lipgloss.Color("241"),
-		//Green:     lipgloss.Color("99"),
-
-		Red:     lipgloss.Color("9"),
-		Green:   lipgloss.Color("10"), //("32"),
-		Blue:    lipgloss.Color("12"),
-		Yellow:  lipgloss.Color("11"),
-		White:   lipgloss.Color("15"),
-		Magenta: lipgloss.Color("5"),
-		Cyan:    lipgloss.Color("14"),
-		Black:   lipgloss.Color("16"),
+		Purple:    "99",
+		Gray:      "245",
+		LightGray: "241",
+		// Green:  "99",
+		Red:     "9",
+		Green:   "10", // "32",
+		Blue:    "12",
+		Yellow:  "11",
+		White:   "15",
+		Magenta: "5",
+		Cyan:    "14",
+		Black:   "16",
 	}
 
 	Styles = styleTypes{
@@ -87,7 +86,6 @@ var (
 		//Width(22)
 
 		Faint: lipgloss.NewStyle().Faint(true),
-
 		Green: lipgloss.NewStyle().
 			Bold(true).
 			Foreground(Colors.Green),

@@ -67,7 +67,7 @@ func (r *RemoteDeviceRepo) DevicesResource(ctx context.Context) ([]*WrappedDevic
 	// NOTE: It's not ideal, but a "join" occurs here if it turns out we're operating on a node within the tailnet
 	// and enriched device results were returned from the Tailscale CLI app. This may not always be the case! The
 	// other thing that is not ideal is that we do a loop again to join the results.
-	var wrappedDevs []*WrappedDevice
+	wrappedDevs := make([]*WrappedDevice, 0, len(devList))
 	for _, dev := range devList {
 		if enrichedInfo, exists := enrichedDevices[dev.NodeKey]; exists {
 			wrappedDevs = append(wrappedDevs, &WrappedDevice{Device: dev, EnrichedInfo: &enrichedInfo})

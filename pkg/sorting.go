@@ -61,10 +61,10 @@ func ParseSortString(sortString string) []SortSpec {
 }
 
 func dynamicSortDevices(slice []*WrappedDevice, specs []SortSpec) {
-	sort.Slice(slice, func(i, j int) bool {
+	sort.SliceStable(slice, func(i, j int) bool {
 		for _, spec := range specs {
 			switch spec.Field {
-			case "MACHINE":
+			case "MACHINE", "NAME":
 				if spec.Direction == Ascending {
 					if slice[i].Name != slice[j].Name {
 						return slice[i].Name < slice[j].Name
@@ -74,7 +74,7 @@ func dynamicSortDevices(slice []*WrappedDevice, specs []SortSpec) {
 						return slice[i].Name > slice[j].Name
 					}
 				}
-			case "USER":
+			case "USER", "EMAIL":
 				if spec.Direction == Ascending {
 					if slice[i].User != slice[j].User {
 						return slice[i].User < slice[j].User
