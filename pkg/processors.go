@@ -59,7 +59,8 @@ var (
 func ProcessDevicesTable(ctx context.Context, devList []*WrappedDevice) (*GeneralTableView, error) {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
-	hasEnrichedInfo := devList[0].EnrichedInfo != nil
+	// Simple hack to determine if EnrichedInfo even exists.
+	hasEnrichedInfo := len(devList) > 0 && devList[0].EnrichedInfo != nil
 
 	// 1. Filter - if user requested any with the --filter flag
 	filteredDevList := executeFilters(ctx, devList)

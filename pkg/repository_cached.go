@@ -68,7 +68,7 @@ func (c *CachedRepository) DevicesResource(ctx context.Context) ([]*WrappedDevic
 			return nil, err
 		}
 
-		log.Info("local db file (db.bolt) was found and recent enough so using this as a cache")
+		log.Debug("local db file (db.bolt) was found and recent enough so using this as a cache")
 		deviceIndexedRepo.Close()
 		cfg.CachedElapsed = time.Since(cachedStartTime)
 
