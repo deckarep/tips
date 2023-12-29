@@ -32,6 +32,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"text/tabwriter"
 	"time"
 	"tips/pkg/ui"
 
@@ -172,10 +173,25 @@ func RenderJson(ctx context.Context, tableView *GeneralTableView, w io.Writer) e
 }
 
 func RenderASCIITableView(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {
-	// TODO: this is intended to be a table view that uses a simple tabwriter. That's all.
-	// This is in case people want to just pipe the output without Charmbracelet getting in the way.
-	// No color!, tabwriter, 0th line header, the rest are just the results.
-	return nil
+	// Create a new tabwriter.Writer. The 'minwidth', 'tabwidth', 'padding' and 'padchar' parameters can be adjusted to your needs.
+	tw := tabwriter.NewWriter(w, 0, 4, 4, ' ', tabwriter.AlignRight)
+
+	// Write the headers.
+	for _, h := range tableView.Headers {
+		fmt.Fprint(tw, h+"\t") // Use \t as the column delimiter
+	}
+	fmt.Fprintln(tw) // End of the header line
+
+	// Write all the rows.
+	for _, row := range tableView.Rows {
+		for _, col := range row {
+			fmt.Fprint(tw, col+"\t")
+		}
+		fmt.Fprintln(tw) // End of the row
+	}
+
+	// Ensure all data is written
+	return tw.Flush()
 }
 
 func RenderTableView(ctx context.Context, tableView *GeneralTableView, w io.Writer) error {

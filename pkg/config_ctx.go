@@ -104,6 +104,7 @@ type TailscaleCLICfgCtx struct {
 }
 
 type ConfigCtx struct {
+	Basic         bool
 	CacheTimeout  time.Duration
 	Columns       mapset.Set[string]
 	Concurrency   int

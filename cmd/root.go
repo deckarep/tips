@@ -40,6 +40,7 @@ import (
 
 var (
 	//cfgFile       string
+	basic         bool
 	cacheTimeout  time.Duration
 	clientTimeout time.Duration
 	cliTimeout    time.Duration
@@ -83,6 +84,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&ips, "ips", "", false, "when provided returns ips comma-delimited")
 	rootCmd.PersistentFlags().StringVarP(&ips_delimiter, "delimiter", "d", "\n", "delimiter to use when the --ips flag is provided")
 	rootCmd.PersistentFlags().BoolVar(&jsonn, "json", false, "when true returns only json data")
+	rootCmd.PersistentFlags().BoolVar(&basic, "basic", false, "when true, renders the table as simple ascii with no color")
 
 	// Note: Not sure if this flag is useful.
 	rootCmd.PersistentFlags().DurationVarP(&cliTimeout, "cli_timeout", "", time.Second*5, "timeout duration for the Tailscale cli")
@@ -176,8 +178,14 @@ var rootCmd = &cobra.Command{
 					log.Fatal("problem generating ips output", "error", err)
 				}
 			} else {
-				if err = pkg.RenderTableView(ctx, view, os.Stdout); err != nil {
-					log.Fatal("problem rendering table view", "error", err)
+				if cfgCtx.Basic {
+					if err = pkg.RenderASCIITableView(ctx, view, os.Stdout); err != nil {
+						log.Fatal("problem rendering basic table view", "error", err)
+					}
+				} else {
+					if err = pkg.RenderTableView(ctx, view, os.Stdout); err != nil {
+						log.Fatal("problem rendering fancy table view", "error", err)
+					}
 				}
 			}
 		}
@@ -219,6 +227,7 @@ func packageCfg(args []string) *pkg.ConfigCtx {
 	}
 
 	cfgCtx := pkg.NewConfigCtx()
+	cfgCtx.Basic = basic
 	cfgCtx.CacheTimeout = cacheTimeout
 	cfgCtx.IPsOutput = ips
 	cfgCtx.IPsDelimiter = ips_delimiter
