@@ -60,20 +60,27 @@ var (
 	}
 )
 
+type RemoteCmdHost struct {
+	Original string
+	Alias    string
+}
+
 type hostLine struct {
 	hostname string
+	alias    string
 	idx      int
 	line     string
 }
 
 type chanCompletions struct {
-	host      string
+	hostname  string
+	alias     string
 	idx       int
 	completed bool
 	ch        chan hostLine
 }
 
-func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []string, remoteCmd string) {
+func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []RemoteCmdHost, remoteCmd string) {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 	startTime := time.Now()
 
@@ -99,21 +106,22 @@ func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []string, r
 
 		allCompletions = append(allCompletions, &chanCompletions{
 			ch:        resultsChan,
-			host:      host,
+			hostname:  host.Original,
+			alias:     host.Alias,
 			idx:       idx,
 			completed: false,
 		})
 
-		go func(i int, hn string, rch chan hostLine) {
+		go func(i int, hn, alias string, rch chan hostLine) {
 			sem <- struct{}{}
 			defer wg.Done()
-			if err := executeRemoteCmd(ctx, i, hn, remoteCmd, rch); err != nil {
+			if err := executeRemoteCmd(ctx, i, hn, alias, remoteCmd, rch); err != nil {
 				totalErrors.Add(1)
 				log.Error("error executing remote command for", "host", hn, "cmd", remoteCmd, "error", err)
 				return
 			}
 			totalSuccess.Add(1)
-		}(idx, host, resultsChan)
+		}(idx, host.Original, host.Alias, resultsChan)
 	}
 
 	// This blocks until all completions have shutdown.
@@ -129,7 +137,7 @@ func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []string, r
 	}
 }
 
-func executeRemoteCmd(ctx context.Context, idx int, host string, remoteCmd string, outputChan chan<- hostLine) error {
+func executeRemoteCmd(ctx context.Context, idx int, host string, alias string, remoteCmd string, outputChan chan<- hostLine) error {
 	binPath, err := utils.SelectBinaryPath(binarySearchPathCandidates)
 	if err != nil {
 		return err
@@ -155,6 +163,7 @@ func executeRemoteCmd(ctx context.Context, idx int, host string, remoteCmd strin
 		outputChan <- hostLine{
 			idx:      idx,
 			hostname: host,
+			alias:    alias,
 			line:     scanner.Text(),
 		}
 	}
@@ -210,7 +219,7 @@ func poll(ctx context.Context, w io.Writer, sem <-chan struct{}, allCompletions 
 						break nextCompletion
 					}
 
-					RenderLogLine(ctx, w, stream.idx, stream.hostname, stream.line)
+					RenderLogLine(ctx, w, stream.idx, stream.hostname, stream.alias, stream.line)
 				case <-time.After(maxCompletionTimeout):
 					// We've waited long enough maybe another completion is ready.
 					break nextCompletion

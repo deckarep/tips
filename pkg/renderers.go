@@ -137,8 +137,12 @@ func RenderRemoteSummary(ctx context.Context, w io.Writer, success, errors uint3
 	return nil
 }
 
-func RenderLogLine(ctx context.Context, w io.Writer, idx int, hostname, line string) {
+func RenderLogLine(ctx context.Context, w io.Writer, idx int, hostname, alias, line string) {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
+
+	if len(alias) > 0 {
+		hostname = alias
+	}
 
 	if !cfg.NoColor {
 		// Apply regex coloring/filtering.

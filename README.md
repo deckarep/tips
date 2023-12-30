@@ -136,7 +136,7 @@ nodes?.**
 
 **A:** Yes, with *robust caching and indexing built-in*, this tool ensures fast queries amongst even the largest 
 clusters. One of the primary goals of this project is that it can help you manage a `tailnet` from *5 to 50,000 
-nodes*. Perhaps even more so stay tuned!
+nodes*. It all boils down to the indexing/caching strategies, and it largely depends on query use cases.
 
 **Q: How can I execute remote commands with a greater degree of `parallelism` or `concurrency`?**
 
@@ -145,6 +145,12 @@ nodes*. Perhaps even more so stay tuned!
 **Q: How can I disable colored output?**
 
 **A:** See the `--nocolor` flag.
+
+**Q: But why u no have unit-tests?**
+
+**A:** Because this is a prototype! I am rapidly designing what I think this software should look like and in this
+phase, unit-tests will slow me down. I've already gone through several major refactors and will likely have more coming
+up but this will change. Eventually the design will be nailed down and unit-tests **will be a must**!
 
 ### Alpha
 This code is currently being developed in a **rapid prototyping** mode. Therefore you will not see much unit-testing as
