@@ -59,6 +59,7 @@ var (
 	ips           bool
 	ips_delimiter string
 	jsonn         bool
+	page          int
 
 	foo string
 )
@@ -85,6 +86,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&ips_delimiter, "delimiter", "d", "\n", "delimiter to use when the --ips flag is provided")
 	rootCmd.PersistentFlags().BoolVar(&jsonn, "json", false, "when true returns only json data")
 	rootCmd.PersistentFlags().BoolVar(&basic, "basic", false, "when true, renders the table as simple ascii with no color")
+	rootCmd.PersistentFlags().IntVarP(&page, "page", "p", 1, "use with slicing to get the next page of results, paging is 1-based")
 
 	// Note: Not sure if this flag is useful.
 	rootCmd.PersistentFlags().DurationVarP(&cliTimeout, "cli_timeout", "", time.Second*5, "timeout duration for the Tailscale cli")
@@ -147,9 +149,12 @@ var rootCmd = &cobra.Command{
 
 		cachedDevRepo := pkg.NewCachedRepo(pkg.NewRemoteDeviceRepo(client))
 		var devicesResourceFunc = cachedDevRepo.DevicesResource
+
+		// In test mode, indirect to mocked test data.
 		if cfgCtx.TestMode {
-			// In test mode, indirect to mocked test data.
-			//devicesResourceFunc = pkg.DevicesResourceTest
+			mockDevRepo := pkg.NewMockedDeviceRepo()
+			cachedDevRepo = pkg.NewCachedRepo(mockDevRepo)
+			devicesResourceFunc = cachedDevRepo.DevicesResource
 		}
 
 		devList, err := devicesResourceFunc(ctx)
@@ -234,12 +239,13 @@ func packageCfg(args []string) *pkg.ConfigCtx {
 	cfgCtx.JsonOutput = jsonn
 	cfgCtx.NoCache = nocache
 	cfgCtx.NoColor = nocolor
-	cfgCtx.Slice = pkg.ParseSlice(slice)
+	cfgCtx.Slice = pkg.ParseSlice(slice, page)
 	cfgCtx.SortOrder = pkg.ParseSortString(sortOrder)
 	cfgCtx.Filters = pkg.ParseFilter(filter)
 	cfgCtx.Columns = pkg.ParseColumns(columns)
 	cfgCtx.Concurrency = concurrency
 	cfgCtx.TestMode = test
+	cfgCtx.Page = page
 
 	// The 0th arg is the Primary filter, if nothing was specified we consider it to represent: @ for all
 	if len(args) > 0 {

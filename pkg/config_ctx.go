@@ -50,7 +50,7 @@ func (s *SliceCfg) IsDefined() bool {
 	return s != nil && (s.From != nil || s.To != nil)
 }
 
-func ParseSlice(s string) *SliceCfg {
+func ParseSlice(s string, page int) *SliceCfg {
 	if strings.TrimSpace(s) == "" {
 		return nil
 	}
@@ -123,6 +123,7 @@ type ConfigCtx struct {
 	CachedElapsed time.Duration
 	TailscaleAPI  TailscaleAPICfgCtx
 	TailscaleCLI  TailscaleCLICfgCtx
+	Page          int
 
 	TestMode bool
 }

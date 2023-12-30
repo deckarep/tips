@@ -32,13 +32,17 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-type CachedRepository struct {
-	remoteRepo *RemoteDeviceRepo
+type InnerRepo interface {
+	DevicesResource(ctx context.Context) ([]*WrappedDevice, error)
 }
 
-func NewCachedRepo(remoteRepo *RemoteDeviceRepo) *CachedRepository {
+type CachedRepository struct {
+	innerRepo InnerRepo
+}
+
+func NewCachedRepo(innerRepo InnerRepo) *CachedRepository {
 	return &CachedRepository{
-		remoteRepo: remoteRepo,
+		innerRepo: innerRepo,
 	}
 }
 
@@ -87,7 +91,7 @@ func (c *CachedRepository) DevicesResource(ctx context.Context) ([]*WrappedDevic
 
 	// 2. Do remote lookup if we got here.
 	repoStartTime := time.Now()
-	devList, err := c.remoteRepo.DevicesResource(ctx)
+	devList, err := c.innerRepo.DevicesResource(ctx)
 	if err != nil {
 		return nil, err
 	}

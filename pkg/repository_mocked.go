@@ -42,7 +42,14 @@ const (
 	testDevicesFile = "testmode/devices.json"
 )
 
-func DevicesResourceTest(ctx context.Context, client *tailscale.Client) ([]tailscale.Device, map[string]tailscale_cli.DeviceInfo, error) {
+type MockedDeviceRepo struct {
+}
+
+func NewMockedDeviceRepo() *MockedDeviceRepo {
+	return &MockedDeviceRepo{}
+}
+
+func (r *MockedDeviceRepo) DevicesResource(ctx context.Context) ([]*WrappedDevice, error) {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 	startTime := time.Now()
 	defer func() {
@@ -64,9 +71,10 @@ func DevicesResourceTest(ctx context.Context, client *tailscale.Client) ([]tails
 		log.Fatal("failed to Unmarshal file", "error", err)
 	}
 
+	wrappedDevs := make([]*WrappedDevice, 0, len(devs))
+
 	// Total shameful hack in the interest of testing.
 	// Enrich the data for now with this made up data so that must boxes appear online.
-	enrichedDevices := make(map[string]tailscale_cli.DeviceInfo, len(devs))
 	var counter int
 	for _, dev := range devs {
 		isSelf := counter == 0
@@ -78,15 +86,19 @@ func DevicesResourceTest(ctx context.Context, client *tailscale.Client) ([]tails
 		if rand.Float32() < 0.05 {
 			offersExitNode = true
 		}
-		enrichedDevices[dev.NodeKey] = tailscale_cli.DeviceInfo{
-			DNSName:           "", // currently unused
-			HasExitNodeOption: offersExitNode,
-			IsSelf:            isSelf,
-			Online:            isOnline,
-			Tags:              nil, // currently unused
-		}
-		counter++
+
+		wrappedDevs = append(wrappedDevs, &WrappedDevice{
+			Device: dev,
+			EnrichedInfo: &tailscale_cli.DeviceInfo{
+				DNSName:           "", // currently unused
+				HasExitNodeOption: offersExitNode,
+				IsSelf:            isSelf,
+				Online:            isOnline,
+				Tags:              nil, // currently unused
+			},
+		})
+		counter += 1
 	}
 
-	return devs, enrichedDevices, nil
+	return wrappedDevs, nil
 }
