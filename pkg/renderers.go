@@ -30,7 +30,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -41,80 +40,6 @@ import (
 	"github.com/charmbracelet/log"
 	jsoniter "github.com/json-iterator/go"
 )
-
-var (
-	// Colorization Rules regex (order matters, last one wins)
-	colorRules = []regWithColor{
-		// Keyword match: sudo|closed
-		{reg: regexp.MustCompile(`\b(sudo|closed)\b`), color: ui.Styles.Red},
-		// Any size int regex (no decimals, boundaries don't matter)
-		{reg: regexp.MustCompile(`\b\d+\b`), color: ui.Styles.Blue},
-		// IPV4 regex
-		{reg: regexp.MustCompile(`\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b`), color: ui.Styles.Blue},
-	}
-)
-
-type regWithColor struct {
-	reg   *regexp.Regexp
-	color lipgloss.Style
-}
-
-type segment struct {
-	text      string
-	colorized bool
-}
-
-func applyColorRule(rule regWithColor, segments []segment) []segment {
-	var newSegments []segment
-
-	for _, seg := range segments {
-		if seg.colorized {
-			newSegments = append(newSegments, seg)
-			continue
-		}
-
-		locs := rule.reg.FindAllStringIndex(seg.text, -1)
-		lastEnd := 0
-		for _, loc := range locs {
-			// Before the match
-			if loc[0] > lastEnd {
-				newSegments = append(newSegments, segment{text: seg.text[lastEnd:loc[0]]})
-			}
-			// The match itself
-			newSegments = append(newSegments, segment{
-				text:      rule.color.Render(seg.text[loc[0]:loc[1]]),
-				colorized: true,
-			})
-			lastEnd = loc[1]
-		}
-		// After the last match
-		if lastEnd < len(seg.text) {
-			newSegments = append(newSegments, segment{text: seg.text[lastEnd:]})
-		}
-	}
-
-	return newSegments
-}
-
-func applyColorRules(line string) string {
-	segments := []segment{{text: line}}
-
-	for _, rule := range colorRules {
-		segments = applyColorRule(rule, segments)
-	}
-
-	// Reconstruct the line with default coloring for non-matching segments
-	var sb strings.Builder
-	for _, seg := range segments {
-		if seg.colorized {
-			sb.WriteString(seg.text)
-		} else {
-			sb.WriteString(ui.Styles.Faint.Render(seg.text))
-		}
-	}
-
-	return sb.String()
-}
 
 func RenderRemoteSummary(ctx context.Context, w io.Writer, success, errors uint32, elapsed time.Duration) error {
 	succStr := ui.Styles.Green.Render(fmt.Sprintf("%d", success))
