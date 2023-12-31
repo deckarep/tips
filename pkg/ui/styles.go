@@ -36,14 +36,16 @@ type styleTypes struct {
 	Bold  lipgloss.Style
 	Faint lipgloss.Style
 
-	Black   lipgloss.Style
-	Blue    lipgloss.Style
-	Cyan    lipgloss.Style
-	Green   lipgloss.Style
-	Magenta lipgloss.Style
-	Red     lipgloss.Style
-	White   lipgloss.Style
-	Yellow  lipgloss.Style
+	Black    lipgloss.Style
+	Blue     lipgloss.Style
+	Cyan     lipgloss.Style
+	Green    lipgloss.Style
+	LightRed lipgloss.Style
+	Magenta  lipgloss.Style
+	Red      lipgloss.Style
+	White    lipgloss.Style
+	Yellow   lipgloss.Style
+	Purple   lipgloss.Style
 }
 
 type colorTypes struct {
@@ -53,6 +55,7 @@ type colorTypes struct {
 	Gray      lipgloss.Color
 	Green     lipgloss.Color
 	LightGray lipgloss.Color
+	LightRed  lipgloss.Color
 	Magenta   lipgloss.Color
 	Purple    lipgloss.Color
 	Red       lipgloss.Color
@@ -75,6 +78,7 @@ var (
 		LightGray: "241",
 		Magenta:   "5",
 		Purple:    "99",
+		LightRed:  "1",
 		Red:       "9",
 		White:     "15",
 		Yellow:    "11",
@@ -110,6 +114,12 @@ var (
 		Red: lipgloss.NewStyle().
 			Bold(true).
 			Foreground(Colors.Red),
+		LightRed: lipgloss.NewStyle().
+			Bold(true).
+			Foreground(Colors.LightRed),
+		Purple: lipgloss.NewStyle().
+			Bold(true).
+			Foreground(Colors.Purple),
 		Black: lipgloss.NewStyle().
 			Bold(true).
 			Foreground(Colors.Black),

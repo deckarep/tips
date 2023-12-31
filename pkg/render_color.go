@@ -95,9 +95,9 @@ func applyColorRules(line string) string {
 		} else if m[filepathIdx*2] != -1 {
 			style = &ui.Styles.Green
 		} else if m[ipv4Idx*2] != -1 {
-			style = &ui.Styles.Bold
+			style = &ui.Styles.Purple
 		} else if m[ipv6Idx*2] != -1 {
-			style = &ui.Styles.Bold
+			style = &ui.Styles.Purple
 		}
 
 		// Segment of the match itself, when we have a non-nil style.

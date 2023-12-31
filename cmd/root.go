@@ -117,6 +117,11 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
+		//if true {
+		//	dumpColors()
+		//	//return
+		//}
+
 		// 0. Package all configuration logic.
 		cfgCtx := packageCfg(args)
 		ctx = context.WithValue(ctx, pkg.CtxKeyConfig, cfgCtx)
