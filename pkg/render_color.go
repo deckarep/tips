@@ -41,12 +41,13 @@ var (
 	tokenPattern     = "(?P<token>true|false|nil)"
 	unixProcPattern  = "(?P<unixproc>\\w+\\[\\d+\\])"
 	ipv4Pattern      = `(?P<ipv4>\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)`
-	//ipv6Pattern      = ""
+	ipv6Pattern      = `(?P<ipv6>(?:[a-f0-9:]+:+)+[a-f0-9]+)`
 
 	// combinedPattern joins all regexes with the alternation | symbol.
 	combinedPattern = strings.Join([]string{
 		// WARNING: Order matters on how things get matched when there one pattern can be interpreted as a submatch
 		// within a larger pattern.
+		ipv6Pattern,
 		ipv4Pattern,
 		quotedStrPattern,
 		tokenPattern,
@@ -65,6 +66,7 @@ var (
 	tokenIdx    = superRegex.SubexpIndex("token")
 	numIdx      = superRegex.SubexpIndex("number")
 	ipv4Idx     = superRegex.SubexpIndex("ipv4")
+	ipv6Idx     = superRegex.SubexpIndex("ipv6")
 )
 
 // applyColorRules is responsible for colorizing matching segments in linear time after all regex sub-matches were
@@ -93,6 +95,8 @@ func applyColorRules(line string) string {
 		} else if m[filepathIdx*2] != -1 {
 			style = &ui.Styles.Green
 		} else if m[ipv4Idx*2] != -1 {
+			style = &ui.Styles.Bold
+		} else if m[ipv6Idx*2] != -1 {
 			style = &ui.Styles.Bold
 		}
 
