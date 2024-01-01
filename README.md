@@ -1,7 +1,14 @@
 [![Go](https://github.com/deckarep/tips/actions/workflows/go.yml/badge.svg)](https://github.com/deckarep/tips/actions/workflows/go.yml)
 
-# tips OR tailtop OR topsntails
+<p align="center">
+  <img src="assets/tips_logo.png" width="1024"/>
+</p>
+
+#                                                                                                                                                                                                                         
+
+<p align="center">
 The command-line tool to wrangle your Tailscale tailnet cluster whether large or small.
+</p>
 
 ### Definitions
 * **[Tailscale](https://tailscale.com/)**: makes creating software-defined networks easy: securely connecting users, services, and devices
