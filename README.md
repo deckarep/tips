@@ -10,6 +10,10 @@
 The command-line tool to wrangle your Tailscale tailnet cluster whether large or small.
 </p>
 
+<p align="center">
+  <img src="assets/main.png" width="700"/>
+</p>
+
 ### Definitions
 * **[Tailscale](https://tailscale.com/)**: makes creating software-defined networks easy: securely connecting users, services, and devices
 * **[tailnet](https://tailscale.com/kb/1136/tailnet)**: a single private network built from one or more nodes using Tailscale
