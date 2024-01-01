@@ -1,7 +1,7 @@
 [![Go](https://github.com/deckarep/tips/actions/workflows/go.yml/badge.svg)](https://github.com/deckarep/tips/actions/workflows/go.yml)
 
 <p align="center">
-  <img src="assets/tips_logo.png" width="1024"/>
+  <img src="assets/tips_logo.png" width="512"/>
 </p>
 
 #                                                                                                                                                                                                                         
