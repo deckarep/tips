@@ -49,12 +49,14 @@ var (
 	// This should ultimately be overridable within the config settings.
 	binarySearchPathCandidates = map[string][]string{
 		"linux": {
+			// These are currently untested
 			"/usr/bin/Tailscale ssh",
 			"/usr/bin/ssh",
 		},
 		"darwin": {
-			// When installed via Mac App Store.
+			// When installed as tailscaled open-source version
 			"/Applications/Tailscale.app/Contents/MacOS/Tailscale ssh",
+			// When installed as sandboxed (Mac App Store | System Extension version)
 			"/usr/bin/ssh",
 		},
 	}
