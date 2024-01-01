@@ -60,51 +60,43 @@ var (
 	ips_delimiter string
 	jsonn         bool
 	page          int
-
-	foo string
 )
 
 func init() {
 	//cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().BoolVar(&basic, "basic", false, "when true, renders the table as simple ascii with no color")
 	rootCmd.PersistentFlags().DurationVarP(&cacheTimeout, "cache_timeout", "", time.Minute*5, "timeout duration for local db (db.bolt) cache file")
-	rootCmd.PersistentFlags().StringVarP(&foo, "foo", "", "blah", "foo is a test flag")
-	rootCmd.PersistentFlags().StringVarP(&slice, "slice", "", "", "slices the results after filtering followed by sorting")
-	rootCmd.PersistentFlags().StringVarP(&sortOrder, "sort", "s", "",
-		"overrides the default/configured sort order --sort 'machine,address:dsc' the default order is always ascending (asc) for each column")
-	rootCmd.PersistentFlags().StringVarP(&tailnet, "tailnet", "t", "", "the tailnet to operate on")
-	rootCmd.PersistentFlags().IntVarP(&concurrency, "concurrency", "c", 5, "concurrency level when executing requests")
-	rootCmd.PersistentFlags().StringVarP(&columns, "columns", "", "", "columns limits which columns to return")
-	rootCmd.PersistentFlags().StringVarP(&filter, "filter", "f", "", "if provided, applies filtering logic: --filter 'tag:tunnel'")
-	rootCmd.PersistentFlags().BoolVar(&useCSSHX, "csshx", false, "if csshx is installed, opens a multi-window session over all matching hosts")
-	rootCmd.PersistentFlags().BoolVar(&useSSH, "ssh", false, "ssh into a matching single host")
-	rootCmd.PersistentFlags().BoolVar(&useOauth, "oauth", false, "use oauth when flag is provided.")
 	rootCmd.PersistentFlags().DurationVarP(&clientTimeout, "client_timeout", "", time.Second*5, "timeout duration for the Tailscale api")
-	rootCmd.PersistentFlags().BoolVarP(&nocache, "nocache", "n", false, "forces the cache to be expunged")
-	rootCmd.PersistentFlags().BoolVarP(&nocolor, "nocolor", "", false, "when --nocolor is provided disables log color highlighting")
-	rootCmd.PersistentFlags().BoolVar(&test, "test", false, "when true runs the tool in test mode with mocked data")
+	rootCmd.PersistentFlags().StringVarP(&columns, "columns", "", "", "columns limits which columns to return")
+	rootCmd.PersistentFlags().IntVarP(&concurrency, "concurrency", "c", 5, "concurrency level when executing requests")
+	rootCmd.PersistentFlags().StringVarP(&filter, "filter", "f", "", "if provided, applies filtering logic: --filter 'tag:tunnel'")
 	rootCmd.PersistentFlags().BoolVarP(&ips, "ips", "", false, "when provided returns ips comma-delimited")
 	rootCmd.PersistentFlags().StringVarP(&ips_delimiter, "delimiter", "d", "\n", "delimiter to use when the --ips flag is provided")
 	rootCmd.PersistentFlags().BoolVar(&jsonn, "json", false, "when true returns only json data")
-	rootCmd.PersistentFlags().BoolVar(&basic, "basic", false, "when true, renders the table as simple ascii with no color")
+	rootCmd.PersistentFlags().BoolVarP(&nocache, "nocache", "n", false, "forces the cache to be expunged")
+	rootCmd.PersistentFlags().BoolVarP(&nocolor, "nocolor", "", false, "when --nocolor is provided disables log color highlighting")
 	rootCmd.PersistentFlags().IntVarP(&page, "page", "p", 1, "use with slicing to get the next page of results, paging is 1-based")
+	rootCmd.PersistentFlags().StringVarP(&slice, "slice", "", "", "slices the results after filtering followed by sorting")
+	rootCmd.PersistentFlags().StringVarP(&sortOrder, "sort", "s", "",
+		"overrides the default/configured sort order --sort 'machine,address:dsc' the default order is always ascending (asc) for each column")
+	rootCmd.PersistentFlags().StringVarP(&tailnet, "tailnet", "t", "", "the tailnet to operate on (required)")
+	rootCmd.PersistentFlags().BoolVar(&test, "test", false, "when true runs the tool in test mode with mocked data")
+	rootCmd.PersistentFlags().BoolVar(&useCSSHX, "csshx", false, "if csshx is installed, opens a multi-window session over all matching hosts")
+	rootCmd.PersistentFlags().BoolVar(&useSSH, "ssh", false, "ssh into a matching single host")
+	rootCmd.PersistentFlags().BoolVar(&useOauth, "oauth", false, "use oauth when flag is provided.")
 
 	// Note: Not sure if this flag is useful.
 	rootCmd.PersistentFlags().DurationVarP(&cliTimeout, "cli_timeout", "", time.Second*5, "timeout duration for the Tailscale cli")
 	//rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
-	//rootCmd.PersistentFlags().StringVarP(&projectBase, "projectbase", "b", "", "base project directory eg. github.com/spf13/")
 	//rootCmd.PersistentFlags().StringP("author", "a", "Ralph Caraveo <deckarep@gmail.com>", "Author name for copyright attribution")
-	//rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "Name of license for the project (can provide `licensetext` in config)")
 	//rootCmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
-
 	// TODO: look at bindPflag and how it works.
 	//viper.BindPFlag("foo", rootCmd.PersistentFlags().Lookup("foo"))
-
 	//viper.SetDefault("foo", "barf")
-	//viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
-	//viper.BindPFlag("projectbase", rootCmd.PersistentFlags().Lookup("projectbase"))
 	//viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
-	//viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
-	//viper.SetDefault("license", "apache")
+
+	// Required flags are set here.
+	rootCmd.MarkPersistentFlagRequired("tailnet")
 }
 
 var rootCmd = &cobra.Command{
@@ -156,6 +148,7 @@ var rootCmd = &cobra.Command{
 		var devicesResourceFunc = cachedDevRepo.DevicesResource
 
 		// In test mode, indirect to mocked test data.
+		// TODO: refactor this out as it doesn't belong here.
 		if cfgCtx.TestMode {
 			mockDevRepo := pkg.NewMockedDeviceRepo()
 			cachedDevRepo = pkg.NewCachedRepo(mockDevRepo)
@@ -279,7 +272,8 @@ func packageCfg(args []string) *pkg.ConfigCtx {
 	}
 
 	cfgCtx.TailscaleAPI.ApiKey = os.Getenv("tips_api_key")
-	cfgCtx.Tailnet = "deckarep@gmail.com"
+
+	cfgCtx.Tailnet = tailnet
 	cfgCtx.TailscaleAPI.Timeout = time.Second * 5
 
 	return cfgCtx
