@@ -69,6 +69,7 @@ type RemoteCmdHost struct {
 
 type hostLine struct {
 	hostname string
+	stderr   bool
 	alias    string
 	idx      int
 	line     string
@@ -155,23 +156,41 @@ func executeRemoteCmd(ctx context.Context, idx int, host string, alias string, r
 		return err
 	}
 
+	stderr, err := sshCmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+
 	// Start the command
 	if err := sshCmd.Start(); err != nil {
 		return err
 	}
 
-	scanner := bufio.NewScanner(stdout)
-	for scanner.Scan() {
-		outputChan <- hostLine{
-			idx:      idx,
-			hostname: host,
-			alias:    alias,
-			line:     scanner.Text(),
+	// Read from the pipes
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	var emitStream = func(r io.Reader, isStdErr bool) {
+		defer wg.Done()
+		scanner := bufio.NewScanner(r)
+		for scanner.Scan() {
+			outputChan <- hostLine{
+				idx:      idx,
+				hostname: host,
+				alias:    alias,
+				line:     scanner.Text(),
+				stderr:   isStdErr,
+			}
+		}
+		if scanErr := scanner.Err(); scanErr != nil {
+			log.Error(scanErr.Error())
 		}
 	}
-	if err := scanner.Err(); err != nil {
-		return err
-	}
+
+	emitStream(stderr, true)
+	emitStream(stdout, false)
+
+	wg.Wait()
 
 	// Wait for the command to finish
 	if err := sshCmd.Wait(); err != nil {
@@ -221,7 +240,7 @@ func poll(ctx context.Context, w io.Writer, sem <-chan struct{}, allCompletions 
 						break nextCompletion
 					}
 
-					RenderLogLine(ctx, w, stream.idx, stream.hostname, stream.alias, stream.line)
+					RenderLogLine(ctx, w, stream.idx, stream.stderr, stream.hostname, stream.alias, stream.line)
 				case <-time.After(maxCompletionTimeout):
 					// We've waited long enough maybe another completion is ready.
 					break nextCompletion
