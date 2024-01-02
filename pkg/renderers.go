@@ -75,14 +75,14 @@ func RenderLogLine(ctx context.Context, w io.Writer, idx int, isStdErr bool, hos
 		line = applyColorRules(line)
 	}
 
-	var descripterSuffix string
+	var descriptorSuffix string
 	if isStdErr {
-		descripterSuffix = ui.Styles.Yellow.Render(fmt.Sprintf(" >%d", 2))
+		descriptorSuffix = ui.Styles.Yellow.Render(fmt.Sprintf(" >%d", 2))
 	} else {
-		descripterSuffix = ui.Styles.Cyan.Render(fmt.Sprintf(" >%d", 1))
+		descriptorSuffix = ui.Styles.Cyan.Render(fmt.Sprintf(" >%d", 1))
 	}
 
-	hostPrefix := ui.Styles.Cyan.Render(fmt.Sprintf("%s%s (%d): ", hostname, descripterSuffix, idx))
+	hostPrefix := ui.Styles.Cyan.Render(fmt.Sprintf("%s%s (%d): ", hostname, descriptorSuffix, idx))
 	if _, err := fmt.Fprintln(w, hostPrefix+ui.Styles.Faint.Render(line)); err != nil {
 		log.Error("error occurred during `Fprintln` to the local io.Writer", "error", err)
 	}
