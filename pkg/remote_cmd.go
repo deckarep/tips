@@ -28,10 +28,15 @@ package pkg
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"io"
+	"os"
 	"os/exec"
+	"os/signal"
+	"strings"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"time"
 	"tips/pkg/utils"
 
@@ -147,7 +152,10 @@ func executeRemoteCmd(ctx context.Context, idx int, host string, alias string, r
 	}
 
 	// Construct the SSH command
-	sshCmd := exec.Command(binPath, host, remoteCmd)
+	// The double -t indicate we want to force ssh to use a terminal session (forced) this way
+	// it can propagate signals to the child process correctly and shut them down upon early
+	// termination. YOLO!
+	sshCmd := exec.Command(binPath, host, "-t", "-t", remoteCmd)
 	defer close(outputChan)
 
 	// Get the output pipe
@@ -172,28 +180,59 @@ func executeRemoteCmd(ctx context.Context, idx int, host string, alias string, r
 
 	var emitStream = func(r io.Reader, isStdErr bool) {
 		defer wg.Done()
-		scanner := bufio.NewScanner(r)
-		for scanner.Scan() {
+
+		rdr := bufio.NewReader(r)
+		for {
+			line, err := rdr.ReadString('\n')
+			if err != nil {
+				if err != io.EOF {
+					log.Error("error occurred on reading from the stream", "error", err)
+				}
+				break
+			}
+
 			outputChan <- hostLine{
 				idx:      idx,
 				hostname: host,
 				alias:    alias,
-				line:     scanner.Text(),
+				line:     strings.TrimSuffix(line, "\n"),
 				stderr:   isStdErr,
 			}
 		}
-		if scanErr := scanner.Err(); scanErr != nil {
-			log.Error(scanErr.Error())
-		}
 	}
 
-	emitStream(stderr, true)
-	emitStream(stdout, false)
+	// Ensure each stream is consumed via the magical goroutines.
+	go emitStream(stderr, true)
+	go emitStream(stdout, false)
+
+	// Ensure proper shutdown on an early signal. (Such as when tail -f is used to follow a log file)
+	var sigKilled atomic.Bool
+	go func(remoteCmd *exec.Cmd) {
+		// Channel to receive OS signals
+		signals := make(chan os.Signal, 1)
+
+		// Register the channel to receive interrupt signal
+		signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
+
+		<-signals
+
+		fmt.Println()
+		log.Warn("SIGTERM received, closing remote command...")
+
+		// Send the interrupt signal to the SSH process
+		if err := remoteCmd.Process.Signal(os.Interrupt); err != nil {
+			log.Error("error sending interrupt signal to remote command", "error", err)
+		}
+
+		// Indicate we were killed via a signal.
+		sigKilled.Store(true)
+	}(sshCmd)
 
 	wg.Wait()
 
-	// Wait for the command to finish
-	if err := sshCmd.Wait(); err != nil {
+	// Wait for the command to finish, if we were killed prematurely via a signal, that's not an error
+	// we care to report to the user.
+	if err := sshCmd.Wait(); err != nil && !sigKilled.Load() {
 		return err
 	}
 
