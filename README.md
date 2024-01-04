@@ -20,6 +20,21 @@ production nodes can benefit from this tool. `tips` is the go-to tool to quickly
 cluster of any size. It allows you to confidently slice and dice nodes, filter/nodes, remotely execute 
 commands and manage your nodes collectively using an effective pattern modeled after cloud automation software.
 
+### Installation
+
+First, grab the `tips` binary by doing a typical install from source:
+```console
+$ go install github.com/deckarep/tips/@latest
+```
+Next, log into your Tailscale account and create an `API Access` token.
+1. [Link to create API Access token](https://login.tailscale.com/admin/settings/keys)
+2. Under `API Access Tokens` click: `Generate access token...`
+3. Provide a `Description` like `tips-cli` and choose an expiry time or keep the `90` days default.
+4. After clicking the Generate button copy the key that looks like:
+`tskey-api-xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` and save it in the `tips` config file.
+5. Follow security best-practices by not sharing this key or copying it into a public repo!
+6. `tips` uses this key to remotely access the Tailscale Web API.
+
 ### Definitions
 * **[Tailscale](https://tailscale.com/)**: makes creating software-defined networks easy: securely connecting users, services, and devices
 * **[tailnet](https://tailscale.com/kb/1136/tailnet)**: a single private network built from one or more nodes using Tailscale
