@@ -24,7 +24,7 @@ commands and manage your nodes collectively using an effective pattern modeled a
 
 First, grab the `tips` binary by doing a typical install from source:
 ```console
-$ go install github.com/deckarep/tips/@latest
+$ go install github.com/deckarep/tips@latest
 ```
 Next, log into your Tailscale account and create an `API Access` token.
 1. [Link to create API Access token](https://login.tailscale.com/admin/settings/keys)
