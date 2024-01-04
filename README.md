@@ -81,11 +81,13 @@ However, it's better to query by a `full name` or `prefix` especially if you hav
 
 How do I get more details?
 ```sh
-./tips --details
+# Not yet supported
+# ./tips --details
 ```
 
 How do I sort the output?
 ```sh
+# Partially working (some fields not supported)
 # To sort by one column ascending (default)
 ./tips --sort 'name'
 
@@ -104,7 +106,8 @@ How do I slice/partition nodes?
 
 How do I limit which columns to show?
 ```sh
-./tips --columns 'name,address'
+# Not yet supported
+# ./tips --columns 'name,address'
 ```
 
 How do I generate a JSON-based result
@@ -133,13 +136,14 @@ How do run a remote command on all returned nodes?
 How do I rebuild the index? Running this forces a full rebuild (fetch all remote data) and builds the index
 for speedy queries. Normally you don't have to do this manually.
 ```sh
-./tips --reindex
+# Not yet supported
+# ./tips --reindex
 ```
 
 ### Supported/Tested OS's
-- [x] MacOS (tested, actively developed)
-- [ ] Linux (planned soon)
-- [ ] PC (future planned: contributions welcome)
+- [x] MacOS (actively developed, tested)
+- [ ] Linux (planned soon, untested, may work to some degree)
+- [ ] PC (future planned, untested, contributions welcome)
 
 ### Built with ❤️
 * by deckarep
