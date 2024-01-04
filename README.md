@@ -26,7 +26,8 @@ commands and manage your nodes collectively using an effective pattern modeled a
 * 🔎 - Filtering, sorting, slicing and dicing built-in
 * 👩‍💻‍ - Developer focused tooling
 * ✅ - Remote command execution and ssh tooling built-in
-* 🫦 - Beautifully rendered thanks to [Charmbracelet's lipgloss](https://github.com/charmbracelet/lipgloss) 
+* 🫦 - Beautifully rendered terminal output thanks to [Charmbracelet's lipgloss](https://github.com/charmbracelet/lipgloss)
+* 👍🏼 - No deployable dependencies, single binary thanks to the [Go programming language](https://go.dev/)
 
 ### Installation
 
