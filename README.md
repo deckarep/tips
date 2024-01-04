@@ -20,6 +20,14 @@ production nodes can benefit from this tool. `tips` is the go-to tool to quickly
 cluster of any size. It allows you to confidently slice and dice nodes, filter/nodes, remotely execute 
 commands and manage your nodes collectively using an effective pattern modeled after cloud automation software.
 
+### Features
+* 📝 - Nearly zero-config managed via [Viper](https://github.com/spf13/viper) and [Cobra](https://github.com/spf13/cobra), with sane defaults
+* ⚡️ - Caching and indexed via [BBolt](https://github.com/etcd-io/bbolt) key-value store for fast queries
+* 🔎 - Filtering, sorting, slicing and dicing built-in
+* 👩‍💻‍ - Developer focused tooling
+* ✅ - Remote command execution and ssh tooling built-in
+* 🫦 - Beautifully rendered thanks to [Charmbracelet's lipgloss](https://github.com/charmbracelet/lipgloss) 
+
 ### Installation
 
 First, grab the `tips` binary by doing a typical install from source:
@@ -175,6 +183,10 @@ nodes*. It all boils down to the indexing/caching strategies, and it largely dep
 **Q: How can I disable colored output?**
 
 **A:** See the `--nocolor` flag.
+
+**Q: Isn't caching with BBolt overkill?**
+
+**A:** Probably, but integration is easy and some users are expected to be managing thousands of nodes via Tailscale.
 
 **Q: But why u no have unit-tests?**
 
