@@ -27,7 +27,38 @@ package main
 
 import (
 	"tips/cmd"
+
+	"github.com/charmbracelet/log"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+const (
+	tipsConfigFileName = ".tips.cfg"
+)
+
+func init() {
+	cobra.OnInitialize(initConfig)
+}
+
+func initConfig() {
+	// Set the base name of the config file, without the file extension
+	viper.SetConfigName(tipsConfigFileName)
+	viper.SetConfigType("json")
+
+	// Set the path to look for the configurations file
+	viper.AddConfigPath("$HOME/") // Call multiple times to add many search paths
+	viper.AddConfigPath(".")      // Optionally look for config in the working directory
+
+	// Read in environment variables that match
+	viper.AutomaticEnv()
+
+	// If a config file is found, read it in
+	if err := viper.ReadInConfig(); err == nil {
+		log.Info("Using config file:", "file", viper.ConfigFileUsed())
+	}
+}
 
 func main() {
 	cmd.Execute()

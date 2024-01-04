@@ -26,6 +26,9 @@ go.work
 # Binaries
 tips
 
+# Config files
+.tips.cfg
+
 .DS_Store
 
 vhs_demos/*.gif

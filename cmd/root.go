@@ -34,6 +34,8 @@ import (
 	"time"
 	"tips/pkg"
 
+	"github.com/spf13/viper"
+
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
@@ -52,6 +54,7 @@ var (
 	slice         string
 	sortOrder     string
 	tailnet       string
+	tipsAPIKey    string
 	useCSSHX      bool
 	useOauth      bool
 	useSSH        bool
@@ -62,41 +65,59 @@ var (
 	page          int
 )
 
-func init() {
-	//cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().BoolVar(&basic, "basic", false, "when true, renders the table as simple ascii with no color")
-	rootCmd.PersistentFlags().DurationVarP(&cacheTimeout, "cache_timeout", "", time.Minute*5, "timeout duration for local db (db.bolt) cache file")
-	rootCmd.PersistentFlags().DurationVarP(&clientTimeout, "client_timeout", "", time.Second*5, "timeout duration for the Tailscale api")
-	rootCmd.PersistentFlags().StringVarP(&columns, "columns", "", "", "columns limits which columns to return")
-	rootCmd.PersistentFlags().IntVarP(&concurrency, "concurrency", "c", 5, "concurrency level when executing requests")
-	rootCmd.PersistentFlags().StringVarP(&filter, "filter", "f", "", "if provided, applies filtering logic: --filter 'tag:tunnel'")
-	rootCmd.PersistentFlags().BoolVarP(&ips, "ips", "", false, "when provided returns ips comma-delimited")
-	rootCmd.PersistentFlags().StringVarP(&ips_delimiter, "delimiter", "d", "\n", "delimiter to use when the --ips flag is provided")
-	rootCmd.PersistentFlags().BoolVar(&jsonn, "json", false, "when true returns only json data")
-	rootCmd.PersistentFlags().BoolVarP(&nocache, "nocache", "n", false, "forces the cache to be expunged")
-	rootCmd.PersistentFlags().BoolVarP(&nocolor, "nocolor", "", false, "when --nocolor is provided disables log color highlighting")
-	rootCmd.PersistentFlags().IntVarP(&page, "page", "p", 1, "use with slicing to get the next page of results, paging is 1-based")
-	rootCmd.PersistentFlags().StringVarP(&slice, "slice", "", "", "slices the results after filtering followed by sorting")
-	rootCmd.PersistentFlags().StringVarP(&sortOrder, "sort", "s", "",
-		"overrides the default/configured sort order --sort 'machine,address:dsc' the default order is always ascending (asc) for each column")
-	rootCmd.PersistentFlags().StringVarP(&tailnet, "tailnet", "t", "", "the tailnet to operate on (required)")
-	rootCmd.PersistentFlags().BoolVar(&test, "test", false, "when true runs the tool in test mode with mocked data")
-	rootCmd.PersistentFlags().BoolVar(&useCSSHX, "csshx", false, "if csshx is installed, opens a multi-window session over all matching hosts")
-	rootCmd.PersistentFlags().BoolVar(&useSSH, "ssh", false, "ssh into a matching single host")
-	rootCmd.PersistentFlags().BoolVar(&useOauth, "oauth", false, "use oauth when flag is provided.")
+// bindRootBoolFlag binds a boolean cobra flag to a viper config flag.
+func bindRootBoolFlag(pBool *bool, name, description string, defaultVal bool) {
+	rootCmd.PersistentFlags().BoolVar(pBool, name, false, description)
+	viper.BindPFlag(name, rootCmd.PersistentFlags().Lookup(name))
+}
 
+// bindRootIntFlag binds an int cobra flag to a viper config flag.
+func bindRootIntFlag(pInt *int, name, shorthand string, defaultVal int, description string) {
+	rootCmd.PersistentFlags().IntVarP(pInt, name, shorthand, defaultVal, description)
+	viper.BindPFlag(name, rootCmd.PersistentFlags().Lookup(name))
+}
+
+// bindRootStringFlag binds a string cobra flag to a viper config flag.
+func bindRootStringFlag(pString *string, name, shorthand, value, description string) {
+	rootCmd.PersistentFlags().StringVarP(pString, name, shorthand, value, description)
+	viper.BindPFlag(name, rootCmd.PersistentFlags().Lookup(name))
+}
+
+// bindRootDurationFlag binds a string cobra flag to a viper config flag.
+func bindRootDurationFlag(pDuration *time.Duration, name, shorthand string, value time.Duration, description string) {
+	rootCmd.PersistentFlags().DurationVarP(pDuration, name, shorthand, value, description)
+	viper.BindPFlag(name, rootCmd.PersistentFlags().Lookup(name))
+}
+
+func init() {
+	bindRootBoolFlag(&basic, "basic", "when true, renders the table as simple ascii with no color", false)
+
+	bindRootDurationFlag(&cacheTimeout, "cache_timeout", "", time.Minute*5, "timeout duration for local db (db.bolt) cache file")
+	bindRootDurationFlag(&clientTimeout, "client_timeout", "", time.Second*5, "timeout duration for the Tailscale api")
+	bindRootStringFlag(&columns, "columns", "", "", "columns limits which columns to return")
+	bindRootIntFlag(&concurrency, "concurrency", "c", 5, "concurrency level when executing requests")
+	bindRootStringFlag(&filter, "filter", "f", "", "if provided, applies filtering logic: --filter 'tag:tunnel'")
+	bindRootBoolFlag(&ips, "ips", "when provided returns ips comma-delimited", false)
+	bindRootStringFlag(&ips_delimiter, "delimiter", "d", "\n", "delimiter to use when the --ips flag is provided")
+	bindRootBoolFlag(&jsonn, "json", "when true returns only json data", false)
+	bindRootBoolFlag(&nocache, "nocache", "forces the cache to be expunged", false)
+	bindRootBoolFlag(&nocolor, "nocolor", "when --nocolor is provided disables log color highlighting", false)
+	bindRootIntFlag(&page, "page", "p", 1, "use with slicing to get the next page of results, paging is 1-based")
+	bindRootStringFlag(&slice, "slice", "", "", "slices the results after filtering followed by sorting")
+	bindRootStringFlag(&sortOrder, "sort", "s", "",
+		"overrides the default/configured sort order --sort 'machine,address:dsc' the default order is always ascending (asc) for each column")
+	bindRootStringFlag(&tailnet, "tailnet", "t", "", "the tailnet to operate on (required)")
+	bindRootBoolFlag(&test, "test", "when true runs the tool in test mode with mocked data", false)
+	bindRootStringFlag(&tipsAPIKey, "tips_api_key", "", "", "tailscale api key for remote requests")
+	bindRootBoolFlag(&useCSSHX, "csshx", "if csshx is installed, opens a multi-window session over all matching hosts", false)
+	bindRootBoolFlag(&useSSH, "ssh", "ssh into a matching single host", false)
+	bindRootBoolFlag(&useOauth, "oauth", "use oauth when flag is provided.", false)
 	// Note: Not sure if this flag is useful.
-	rootCmd.PersistentFlags().DurationVarP(&cliTimeout, "cli_timeout", "", time.Second*5, "timeout duration for the Tailscale cli")
-	//rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
-	//rootCmd.PersistentFlags().StringP("author", "a", "Ralph Caraveo <deckarep@gmail.com>", "Author name for copyright attribution")
-	//rootCmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
-	// TODO: look at bindPflag and how it works.
-	//viper.BindPFlag("foo", rootCmd.PersistentFlags().Lookup("foo"))
-	//viper.SetDefault("foo", "barf")
-	//viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
+	bindRootDurationFlag(&cliTimeout, "cli_timeout", "", time.Second*5, "timeout duration for the Tailscale cli")
 
 	// Required flags are set here.
-	rootCmd.MarkPersistentFlagRequired("tailnet")
+	// This doesn't seem compatible with Viper.
+	//rootCmd.MarkPersistentFlagRequired("tailnet")
 }
 
 var rootCmd = &cobra.Command{
@@ -228,28 +249,44 @@ func getHosts(ctx context.Context, view *pkg.GeneralTableView) []pkg.RemoteCmdHo
 
 func packageCfg(args []string) *pkg.ConfigCtx {
 	// Populate context key/values as needed.
+	cfgCtx := pkg.NewConfigCtx()
 
 	// 0. Validate
-	if jsonn && ips {
+	if viper.GetBool("json") && viper.GetBool("ips") {
 		log.Fatal("the --ips and --json flag must not be used together. Choose one or the other.")
 	}
 
-	cfgCtx := pkg.NewConfigCtx()
-	cfgCtx.Basic = basic
-	cfgCtx.CacheTimeout = cacheTimeout
-	cfgCtx.IPsOutput = ips
-	cfgCtx.IPsDelimiter = ips_delimiter
-	cfgCtx.JsonOutput = jsonn
-	cfgCtx.NoCache = nocache
-	cfgCtx.NoColor = nocolor
-	cfgCtx.Slice = pkg.ParseSlice(slice, page)
-	cfgCtx.SortOrder = pkg.ParseSortString(sortOrder)
-	cfgCtx.Filters = pkg.ParseFilter(filter)
-	cfgCtx.Columns = pkg.ParseColumns(columns)
-	cfgCtx.Concurrency = concurrency
-	cfgCtx.TestMode = test
-	cfgCtx.Page = page
+	tak := viper.GetString("tips_api_key")
+	if strings.TrimSpace(tak) != "" {
+		cfgCtx.TailscaleAPI.ApiKey = tak
+	} else {
+		log.Fatal("a 'tips_api_key' must be defined either as an environment variable (uppercase), in a config or as a --tips_api_key flag")
+	}
 
+	tn := viper.GetString("tailnet")
+	if strings.TrimSpace(tn) != "" {
+		cfgCtx.Tailnet = tn
+	} else {
+		log.Fatal("at an absolute minimum a tailnet must be specified either in the config file or as flag --tailnet")
+	}
+
+	cfgCtx.Basic = viper.GetBool("basic") //basic
+	cfgCtx.CacheTimeout = viper.GetDuration("cache_timeout")
+	cfgCtx.Columns = pkg.ParseColumns(viper.GetString("columns"))
+	cfgCtx.Concurrency = viper.GetInt("concurrency")
+	cfgCtx.Filters = pkg.ParseFilter(viper.GetString("filter"))
+	cfgCtx.IPsOutput = viper.GetBool("ips")
+	cfgCtx.IPsDelimiter = viper.GetString("delimiter")
+	cfgCtx.JsonOutput = viper.GetBool("json")
+	cfgCtx.NoCache = viper.GetBool("nocache")
+	cfgCtx.NoColor = viper.GetBool("nocolor")
+	cfgCtx.Page = viper.GetInt("page")
+	cfgCtx.Slice = pkg.ParseSlice(viper.GetString("slice"), viper.GetInt("page"))
+	cfgCtx.SortOrder = pkg.ParseSortString(viper.GetString("sort"))
+	cfgCtx.TailscaleAPI.Timeout = viper.GetDuration("client_timeout")
+	cfgCtx.TestMode = viper.GetBool("test")
+
+	// Parse positional args here.
 	// The 0th arg is the Primary filter, if nothing was specified we consider it to represent: @ for all
 	if len(args) > 0 {
 		if strings.TrimSpace(args[0]) == "@" {
@@ -270,11 +307,6 @@ func packageCfg(args []string) *pkg.ConfigCtx {
 	if len(args) > 1 {
 		cfgCtx.RemoteCmd = strings.TrimSpace(strings.Join(args[1:], " "))
 	}
-
-	cfgCtx.TailscaleAPI.ApiKey = os.Getenv("tips_api_key")
-
-	cfgCtx.Tailnet = tailnet
-	cfgCtx.TailscaleAPI.Timeout = time.Second * 5
 
 	return cfgCtx
 }

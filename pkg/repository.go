@@ -53,7 +53,7 @@ func (r *RemoteDeviceRepo) DevicesResource(ctx context.Context) ([]*WrappedDevic
 	defer cancelTimeout()
 	devList, err := r.client.Devices(ctxTimeOut)
 	if err != nil {
-		log.Fatal("tailscale api failed during devices lookup: ", err)
+		log.Fatal("tailscale remote api failed during devices lookup - check your tailnet name", "tailnet", cfg.Tailnet, "error", err)
 	}
 
 	// 2. When available, enrich this data with data from the Tailscale cli, if this is run from a node within the
