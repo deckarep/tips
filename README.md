@@ -1,4 +1,6 @@
 [![Go](https://github.com/deckarep/tips/actions/workflows/go.yml/badge.svg)](https://github.com/deckarep/tips/actions/workflows/go.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/deckarep/tips)](https://goreportcard.com/report/github.com/deckarep/tips)
+[![GoDoc](https://godoc.org/github.com/deckarep/tips?status.svg)](http://godoc.org/github.com/deckarep/tips)
 
 <p align="center">
   <img src="assets/tips_logo.png" width="512"/>
