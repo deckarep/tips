@@ -26,7 +26,6 @@ SOFTWARE.
 package pkg
 
 import (
-	"regexp"
 	"strconv"
 
 	"github.com/charmbracelet/log"
@@ -114,8 +113,7 @@ type ConfigCtx struct {
 	JsonOutput    bool
 	NoCache       bool
 	NoColor       bool
-	PrefixFilter  string         // We'll do prefix filtering in Boltdb
-	PrimaryFilter *regexp.Regexp // This is to be deprecated.
+	PrefixFilter  string // We'll do prefix filtering in Boltdb
 	RemoteCmd     string
 	Slice         *SliceCfg
 	SortOrder     []SortSpec

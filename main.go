@@ -48,8 +48,8 @@ func initConfig() {
 	viper.SetConfigType("json")
 
 	// Set the path to look for the configurations file
-	viper.AddConfigPath("$HOME/") // Call multiple times to add many search paths
-	viper.AddConfigPath(".")      // Optionally look for config in the working directory
+	viper.AddConfigPath("$HOME/")
+	viper.AddConfigPath(".")
 
 	// Read in environment variables that match
 	viper.AutomaticEnv()

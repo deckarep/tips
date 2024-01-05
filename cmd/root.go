@@ -29,7 +29,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 	"tips/pkg"
@@ -138,7 +137,8 @@ var rootCmd = &cobra.Command{
 		// 0. Package all configuration logic.
 		cfgCtx := packageCfg(args)
 		ctx = context.WithValue(ctx, pkg.CtxKeyConfig, cfgCtx)
-		ctx = context.WithValue(ctx, pkg.CtxKeyUserQuery, fmt.Sprintf("%s %s", cfgCtx.PrimaryFilter, cfgCtx.RemoteCmd))
+		// CONSIDER: should this show all flags?
+		ctx = context.WithValue(ctx, pkg.CtxKeyUserQuery, fmt.Sprintf("%s %s", cfgCtx.PrefixFilter, cfgCtx.RemoteCmd))
 
 		//if false {
 		//	//myCmd := "sudo ls /var/log"
@@ -248,29 +248,33 @@ func getHosts(ctx context.Context, view *pkg.GeneralTableView) []pkg.RemoteCmdHo
 //}
 
 func packageCfg(args []string) *pkg.ConfigCtx {
-	// Populate context key/values as needed.
 	cfgCtx := pkg.NewConfigCtx()
 
-	// 0. Validate
-	if viper.GetBool("json") && viper.GetBool("ips") {
-		log.Fatal("the --ips and --json flag must not be used together. Choose one or the other.")
-	}
+	const (
+		allFilterCLI = "@" // User uses this on the CLI because * expands in the shell.
+		allFilter    = "*" // So bottom line, use this in the codebase.
+	)
 
-	tak := viper.GetString("tips_api_key")
-	if strings.TrimSpace(tak) != "" {
-		cfgCtx.TailscaleAPI.ApiKey = tak
+	// Parse positional args here
+	// The 0th arg is the Primary filter, if nothing was specified we consider it to represent: @ for all
+	if len(args) > 0 {
+		if strings.TrimSpace(args[0]) == allFilterCLI {
+			cfgCtx.PrefixFilter = allFilter
+		} else {
+			cfgCtx.PrefixFilter = args[0]
+		}
 	} else {
-		log.Fatal("a 'tips_api_key' must be defined either as an environment variable (uppercase), in a config or as a --tips_api_key flag")
+		cfgCtx.PrefixFilter = allFilter
 	}
 
-	tn := viper.GetString("tailnet")
-	if strings.TrimSpace(tn) != "" {
-		cfgCtx.Tailnet = tn
-	} else {
-		log.Fatal("at an absolute minimum a tailnet must be specified either in the config file or as flag --tailnet")
+	// The 1st arg along with the rest - [1:] when provided is a remote command to execute.
+	// So we join this up into a single string.
+	if len(args) > 1 {
+		cfgCtx.RemoteCmd = strings.TrimSpace(strings.Join(args[1:], " "))
 	}
 
-	cfgCtx.Basic = viper.GetBool("basic") //basic
+	// Populate flags
+	cfgCtx.Basic = viper.GetBool("basic")
 	cfgCtx.CacheTimeout = viper.GetDuration("cache_timeout")
 	cfgCtx.Columns = pkg.ParseColumns(viper.GetString("columns"))
 	cfgCtx.Concurrency = viper.GetInt("concurrency")
@@ -283,29 +287,22 @@ func packageCfg(args []string) *pkg.ConfigCtx {
 	cfgCtx.Page = viper.GetInt("page")
 	cfgCtx.Slice = pkg.ParseSlice(viper.GetString("slice"), viper.GetInt("page"))
 	cfgCtx.SortOrder = pkg.ParseSortString(viper.GetString("sort"))
+	cfgCtx.Tailnet = viper.GetString("tailnet")
+	cfgCtx.TailscaleAPI.ApiKey = viper.GetString("tips_api_key")
 	cfgCtx.TailscaleAPI.Timeout = viper.GetDuration("client_timeout")
 	cfgCtx.TestMode = viper.GetBool("test")
 
-	// Parse positional args here.
-	// The 0th arg is the Primary filter, if nothing was specified we consider it to represent: @ for all
-	if len(args) > 0 {
-		if strings.TrimSpace(args[0]) == "@" {
-			cfgCtx.PrefixFilter = "*"
-		} else {
-			cfgCtx.PrefixFilter = args[0]
-		}
-		// The regex filter to be deprecated.
-		cfgCtx.PrimaryFilter = regexp.MustCompile(args[0])
-	} else {
-		cfgCtx.PrefixFilter = "*"
-		// This one to be deprecated
-		cfgCtx.PrimaryFilter = nil
+	// Validate flags
+	if cfgCtx.JsonOutput && cfgCtx.IPsOutput {
+		log.Fatal("the --ips and --json flag must not be used together. Choose one or the other.")
 	}
 
-	// The 1st arg along with the rest - [1:] when provided is a remote command to execute.
-	// So we join this up into a single string.
-	if len(args) > 1 {
-		cfgCtx.RemoteCmd = strings.TrimSpace(strings.Join(args[1:], " "))
+	if strings.TrimSpace(cfgCtx.TailscaleAPI.ApiKey) == "" {
+		log.Fatal("a 'tips_api_key' must be defined either as an environment variable (uppercase), in a config or as a --tips_api_key flag")
+	}
+
+	if strings.TrimSpace(cfgCtx.Tailnet) == "" {
+		log.Fatal("at an absolute minimum a tailnet must be specified either in the config file or as flag --tailnet")
 	}
 
 	return cfgCtx
