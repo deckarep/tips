@@ -140,26 +140,6 @@ var rootCmd = &cobra.Command{
 		// CONSIDER: should this show all flags?
 		ctx = context.WithValue(ctx, pkg.CtxKeyUserQuery, fmt.Sprintf("%s %s", cfgCtx.PrefixFilter, cfgCtx.RemoteCmd))
 
-		//if false {
-		//	//myCmd := "sudo ls /var/log"
-		//	myCmd := "head -n100 /var/log/secure"
-		//	//myCmd := "while true; do echo 'hi'; sleep 1; done"
-		//	var hosts = []string{
-		//		"blade",
-		//		"blade",
-		//		//"blade",
-		//		//"blade",
-		//		//"blade",
-		//		//"blade",
-		//		//"blade",
-		//		//"blade",
-		//		//"blade",
-		//		//"blade",
-		//	}
-		//
-		//	app.ExecuteClusterRemoteCmd(ctx, os.Stdout, hosts, myCmd)
-		//}
-
 		client := pkg.NewClient(ctx)
 		if useOauth {
 			client = pkg.NewOauthClient(ctx)
