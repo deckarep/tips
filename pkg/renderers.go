@@ -33,7 +33,8 @@ import (
 	"strings"
 	"text/tabwriter"
 	"time"
-	"tips/pkg/ui"
+
+	"github.com/deckarep/tips/pkg/ui"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"

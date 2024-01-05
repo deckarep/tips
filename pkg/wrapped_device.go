@@ -1,7 +1,7 @@
 package pkg
 
 import (
-	"tips/pkg/tailscale_cli"
+	"github.com/deckarep/tips/pkg/tailscale_cli"
 
 	"github.com/tailscale/tailscale-client-go/tailscale"
 )

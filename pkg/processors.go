@@ -30,7 +30,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"tips/pkg/ui"
+
+	"github.com/deckarep/tips/pkg/ui"
 
 	"github.com/charmbracelet/log"
 

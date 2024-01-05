@@ -28,7 +28,8 @@ package tailscale_cli
 import (
 	"os/exec"
 	"strings"
-	"tips/pkg/utils"
+
+	"github.com/deckarep/tips/pkg/utils"
 
 	"github.com/tidwall/gjson"
 )

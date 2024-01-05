@@ -28,7 +28,8 @@ package pkg
 import (
 	"regexp"
 	"strings"
-	"tips/pkg/ui"
+
+	"github.com/deckarep/tips/pkg/ui"
 
 	"github.com/charmbracelet/lipgloss"
 )

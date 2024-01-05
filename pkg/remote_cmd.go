@@ -38,7 +38,8 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
-	"tips/pkg/utils"
+
+	"github.com/deckarep/tips/pkg/utils"
 
 	"github.com/charmbracelet/log"
 )

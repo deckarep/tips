@@ -26,7 +26,7 @@ SOFTWARE.
 package main
 
 import (
-	"tips/cmd"
+	"github.com/deckarep/tips/cmd"
 
 	"github.com/charmbracelet/log"
 

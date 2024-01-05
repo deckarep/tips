@@ -27,7 +27,8 @@ package pkg
 
 import (
 	"context"
-	"tips/pkg/tailscale_cli"
+
+	"github.com/deckarep/tips/pkg/tailscale_cli"
 
 	"github.com/charmbracelet/log"
 	"github.com/tailscale/tailscale-client-go/tailscale"
