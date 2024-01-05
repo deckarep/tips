@@ -32,7 +32,7 @@ commands and manage your nodes collectively using an effective pattern modeled a
 ### Installation
 
 First, grab the `tips` binary by doing a typical install from source:
-```console
+```sh
 $ go install github.com/deckarep/tips@latest
 ```
 Next, log into your Tailscale account and create an `API Access` token.
@@ -48,7 +48,7 @@ At an **absolute minimum** `tips` requires the `tips_api_key` and a `tailnet` to
 Here is how you can set this up.
 
 As an environment variable:
-```console
+```sh
 export TIPS_API_KEY=tskey-api-xxxxxxxxxxxx-xxx...
 export TAILNET=user@domain.com
 ```
@@ -62,7 +62,7 @@ Or, in the `~/.tips.cfg` `JSON` file placed in your homedir:
 ```
 
 Lastly, on-demand by using the relevant flags:
-```console
+```sh
 # This will get tedious and not recommended long term
 $ ./tips --tailnet user@domain.com --tips_api_key tskey-api-xxxxxxxxxxxx-xxx...
 ```
