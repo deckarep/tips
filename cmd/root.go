@@ -31,8 +31,8 @@ import (
 	"os"
 	"strings"
 	"time"
-	"tips/pkg"
 
+	"github.com/deckarep/tips/pkg"
 	"github.com/spf13/viper"
 
 	"github.com/charmbracelet/log"

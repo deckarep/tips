@@ -28,8 +28,9 @@ package cmd
 import (
 	"fmt"
 	"strings"
-	"tips/pkg"
-	"tips/pkg/tailscale_cli"
+
+	"github.com/deckarep/tips/pkg"
+	"github.com/deckarep/tips/pkg/tailscale_cli"
 
 	"github.com/spf13/cobra"
 )

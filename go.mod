@@ -1,4 +1,4 @@
-module tips
+module github.com/deckarep/tips
 
 go 1.21.3
 
