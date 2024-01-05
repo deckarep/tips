@@ -57,7 +57,7 @@ Or, in the `~/.tips.cfg` `JSON` file placed in your homedir:
 ```json
 {
     "tips_api_key": "tskey-api-xxxxxxxxxxxx-xxx...",
-    "tailnet": "deckarep@gmail.com"
+    "tailnet": "user@domain.com"
 }
 ```
 
