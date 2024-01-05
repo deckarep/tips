@@ -16,9 +16,9 @@ The command-line tool to wrangle your Tailscale tailnet cluster whether large or
 
 ### What is tips?
 Any Tailscale user whether a hobbyist with a 3 node cluster or a seasoned cloud professional managing thousands of 
-production nodes can benefit from this tool. `tips` is the go-to tool to quickly and effectively manage a `tailnet`
-cluster of any size. It allows you to confidently slice and dice nodes, filter/nodes, remotely execute 
-commands and manage your nodes collectively using an effective pattern modeled after cloud automation software.
+production nodes can benefit from this tool. `tips` is the go-to tool to quickly and effectively manage an ever growing
+`tailnet` cluster. It allows you to confidently slice | dice | filter nodes, remotely execute
+commands, and manage your nodes collectively using an effective pattern modeled after cloud automation software.
 
 ### Features
 * 📝 - Nearly zero-config managed via [Viper](https://github.com/spf13/viper) and [Cobra](https://github.com/spf13/cobra), with sane defaults
