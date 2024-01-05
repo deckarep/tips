@@ -1,4 +1,4 @@
-.PHONY: test build lint gen all clean update
+.PHONY: test build lint gen all clean update docker run
 
 # Define the default goal. When you run "make" without argument, it will run the "all" target.
 default: all
@@ -24,6 +24,12 @@ lint:
 # Run any code generation on this step.
 gen:
 	go run testmode/gen_mock/main.go > testmode/devices.json
+
+docker:
+	docker build -t docker-tips .
+
+run:
+	docker run -v .:/home/tipsuser docker-tips:latest
 
 # Build the project: run the linter and then build.
 build: lint
