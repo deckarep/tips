@@ -44,6 +44,29 @@ Next, log into your Tailscale account and create an `API Access` token.
 5. Follow security best-practices by not sharing this key or copying it into a public repo!
 6. `tips` uses this key to remotely access the Tailscale Web API.
 
+At an **absolute minimum** `tips` requires the `tips_api_key` and a `tailnet` to be specified in order to use this app. 
+Here is how you can set this up.
+
+As an environment variable:
+```console
+export TIPS_API_KEY=tskey-api-xxxxxxxxxxxx-xxx...
+export TAILNET=user@domain.com
+```
+
+Or, in the `~/.tips.cfg` `JSON` file placed in your homedir:
+```json
+{
+    "tips_api_key": "tskey-api-xxxxxxxxxxxx-xxx...",
+    "tailnet": "deckarep@gmail.com"
+}
+```
+
+Lastly, on-demand by using the relevant flags:
+```console
+# This will get tedious and not recommended long term
+$ ./tips --tailnet user@domain.com --tips_api_key tskey-api-xxxxxxxxxxxx-xxx...
+```
+
 ### Definitions
 * **[Tailscale](https://tailscale.com/)**: makes creating software-defined networks easy: securely connecting users, services, and devices
 * **[tailnet](https://tailscale.com/kb/1136/tailnet)**: a single private network built from one or more nodes using Tailscale
