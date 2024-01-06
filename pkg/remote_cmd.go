@@ -33,6 +33,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"runtime"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -147,7 +148,7 @@ func ExecuteClusterRemoteCmd(ctx context.Context, w io.Writer, hosts []RemoteCmd
 }
 
 func executeRemoteCmd(ctx context.Context, idx int, host string, alias string, remoteCmd string, outputChan chan<- hostLine) error {
-	binPath, err := utils.SelectBinaryPath(binarySearchPathCandidates)
+	binPath, err := utils.SelectBinaryPath(runtime.GOOS, binarySearchPathCandidates)
 	if err != nil {
 		return err
 	}

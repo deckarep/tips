@@ -32,9 +32,9 @@ import (
 	"runtime"
 )
 
-func SelectBinaryPath(candidates map[string][]string) (string, error) {
+func SelectBinaryPath(platform string, candidates map[string][]string) (string, error) {
 	osSelected := runtime.GOOS
-	if paths, exists := candidates[runtime.GOOS]; exists {
+	if paths, exists := candidates[platform]; exists {
 		for _, p := range paths {
 			if confirmedPath, err := exec.LookPath(p); err == nil {
 				return confirmedPath, nil

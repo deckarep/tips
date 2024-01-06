@@ -27,6 +27,7 @@ package tailscale_cli
 
 import (
 	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/deckarep/tips/pkg/utils"
@@ -58,7 +59,7 @@ type DeviceInfo struct {
 }
 
 func GetVersion() (string, error) {
-	confirmedPath, err := utils.SelectBinaryPath(binarySearchPathCandidates)
+	confirmedPath, err := utils.SelectBinaryPath(runtime.GOOS, binarySearchPathCandidates)
 	if err != nil {
 		return "", err
 	}
@@ -73,7 +74,7 @@ func GetVersion() (string, error) {
 }
 
 func GetDevicesState() (map[string]DeviceInfo, error) {
-	confirmedPath, err := utils.SelectBinaryPath(binarySearchPathCandidates)
+	confirmedPath, err := utils.SelectBinaryPath(runtime.GOOS, binarySearchPathCandidates)
 	if err != nil {
 		return nil, err
 	}

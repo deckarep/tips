@@ -6,18 +6,19 @@ import (
 )
 
 func TestSelectBinaryPath(t *testing.T) {
-	// TODO: this will fail on other platforms.
 	const (
+		tsPathBogus  = "/Applications/Something/That/Does/Not/Exist"
 		tsPathDarwin = "/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 	)
 
 	c := map[string][]string{
 		"darwin": {
+			tsPathBogus,
 			tsPathDarwin,
 		},
 	}
 
-	result, err := SelectBinaryPath(c)
+	result, err := SelectBinaryPath("darwin", c)
 	if err != nil {
 		t.Errorf("expected nil err, got: %s", err.Error())
 	}
