@@ -1,10 +1,13 @@
-.PHONY: test build lint gen all clean update docker run
+.PHONY: test build lint gen all clean update docker run format
+
+PKG=github.com/deckarep/tips
+VERSION := `git fetch --tags && git tag | sort -V | tail -1`
+#VERSION := $(shell git describe --tags --abbrev=0)
+LDFLAGS=-ldflags "-X=github.com/deckarep/tips/pkg.AppVersion=$(VERSION)"
+COVER=--cover --coverprofile=cover.out
 
 # Define the default goal. When you run "make" without argument, it will run the "all" target.
 default: all
-
-# Version info
-VERSION := $(shell git describe --tags --abbrev=0)
 
 # Capture additional arguments which can optionally be passed in.
 ARGS ?=
@@ -16,9 +19,13 @@ update:
 clean:
 	rm -f *db.bolt
 
+format:
+	go fmt ./...
+
 # Test the code.
 test:
-	go test -v ./...
+	go test -v ./... --race $(COVER) $(PKG)
+	go tool cover -html=cover.out
 
 # Lint the code.
 lint:
@@ -36,7 +43,7 @@ run:
 
 # Build the project: run the linter and then build.
 build: lint
-	go build -ldflags "-X 'github.com/deckarep/tips/pkg.AppVersion=$(VERSION)'"
+	go build $(LDFLAGS)
 	@echo "Build: Successful"
 
 # Run all steps: build and then run the application.
