@@ -9,14 +9,14 @@ func TestSelectBinaryPath(t *testing.T) {
 	const (
 		pathDarwinBogus     = "/Applications/Something/That/Does/Not/Exist"
 		pathDarwinTailscale = "/Applications/Tailscale.app/Contents/MacOS/Tailscale"
-		pathLinuxBogus      = "/usr/bin/nothingburger"
-		pathLinuxPython3    = "/usr/bin/python"
+		pathLinuxBogus      = "nothingburger"
+		pathLinuxPython     = "python"
 	)
 
 	c := map[string][]string{
 		"linux": {
 			pathLinuxBogus,
-			pathLinuxPython3,
+			pathLinuxPython,
 		},
 		"darwin": {
 			pathDarwinBogus,
@@ -41,8 +41,8 @@ func TestSelectBinaryPath(t *testing.T) {
 			t.Errorf("expected nil err, got: %s", err.Error())
 		}
 
-		if result != pathDarwinTailscale {
-			t.Errorf("expected binary to be: %s for os: %s", pathLinuxPython3, platform)
+		if result != "/usr/bin/python" {
+			t.Errorf("expected binary to be: %s for os: %s", pathLinuxPython, platform)
 		}
 	}
 

@@ -36,11 +36,11 @@ import (
 func SelectBinaryPath(platform string, candidates map[string][]string) (string, error) {
 	osSelected := runtime.GOOS
 
-	r, err := exec.LookPath("python")
-	log.Warn("first LookPath: ", "val", r, "err", err)
-
-	r, err = exec.LookPath("python3")
-	log.Warn("second LookPath: ", "val", r, "err", err)
+	//r, err := exec.LookPath("python")
+	//log.Warn("first LookPath: ", "val", r, "err", err)
+	//
+	//r, err = exec.LookPath("python3")
+	//log.Warn("second LookPath: ", "val", r, "err", err)
 
 	if paths, exists := candidates[platform]; exists {
 		for _, p := range paths {
