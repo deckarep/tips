@@ -10,7 +10,7 @@ func TestSelectBinaryPath(t *testing.T) {
 		pathDarwinBogus     = "/Applications/Something/That/Does/Not/Exist"
 		pathDarwinTailscale = "/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 		pathLinuxBogus      = "/usr/bin/nothingburger"
-		pathLinuxPython3    = "/usr/bin/python3"
+		pathLinuxPython3    = "/usr/bin/Python3"
 	)
 
 	c := map[string][]string{
