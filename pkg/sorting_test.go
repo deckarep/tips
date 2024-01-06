@@ -2,6 +2,9 @@ package pkg
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/tailscale/tailscale-client-go/tailscale"
 )
 
 func TestParseSortString(t *testing.T) {
@@ -30,4 +33,49 @@ func TestParseSortString(t *testing.T) {
 				er.field, er.dir, parsedResult[i].Field, parsedResult[i].Direction)
 		}
 	}
+}
+
+func TestDynamicSortDevices(t *testing.T) {
+	inputDevs := []*WrappedDevice{
+		{
+			Device: tailscale.Device{
+				Name: "b-foo",
+			},
+			EnrichedInfo: nil,
+		},
+		{
+			Device: tailscale.Device{
+				Name: "a-foo",
+			},
+			EnrichedInfo: nil,
+		},
+		{
+			Device: tailscale.Device{
+				Name: "c-foo",
+			},
+			EnrichedInfo: nil,
+		},
+	}
+
+	specs := []SortSpec{{
+		Field:     "NAME",
+		Direction: Ascending,
+	}}
+
+	dynamicSortDevices(inputDevs, specs)
+
+	assert.Equal(t, inputDevs[0].Name, "a-foo")
+	assert.Equal(t, inputDevs[1].Name, "b-foo")
+	assert.Equal(t, inputDevs[2].Name, "c-foo")
+
+	specs = []SortSpec{{
+		Field:     "NAME",
+		Direction: Descending,
+	}}
+
+	dynamicSortDevices(inputDevs, specs)
+
+	assert.Equal(t, inputDevs[0].Name, "c-foo")
+	assert.Equal(t, inputDevs[1].Name, "b-foo")
+	assert.Equal(t, inputDevs[2].Name, "a-foo")
 }
