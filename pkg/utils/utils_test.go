@@ -9,8 +9,11 @@ func TestSelectBinaryPath(t *testing.T) {
 	const (
 		pathDarwinBogus     = "/Applications/Something/That/Does/Not/Exist"
 		pathDarwinTailscale = "/Applications/Tailscale.app/Contents/MacOS/Tailscale"
-		pathLinuxBogus      = "nothingburger"
-		pathLinuxPython     = "python"
+
+		// TODO: On linux, it doesn't work with the full path, it only wants the binary name given.
+		// This runs on the CI build server.
+		pathLinuxBogus  = "nothingburger"
+		pathLinuxPython = "python"
 	)
 
 	c := map[string][]string{
