@@ -30,9 +30,9 @@ import "fmt"
 const (
 	AppLongName  = "Tailscale IPs"
 	AppShortName = "tips"
-	AppVersion   = "0.0.1"
 )
 
 var (
-	UserAgent = fmt.Sprintf("%s/%s", AppShortName, AppVersion)
+	AppVersion = "0.0.1"
+	UserAgent  = fmt.Sprintf("%s/%s", AppShortName, AppVersion)
 )

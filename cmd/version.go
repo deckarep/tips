@@ -44,7 +44,7 @@ var versionCmd = &cobra.Command{
 	Short: pkg.AppShortName + " empowers you to wrangle your Tailnet",
 	Long:  pkg.AppLongName + " empowers you to manage your Tailscale cluster like a pro",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s (%s) v%s\n", pkg.AppLongName, pkg.AppShortName, pkg.AppVersion)
+		fmt.Printf("%s (%s) %s\n", pkg.AppLongName, pkg.AppShortName, pkg.AppVersion)
 		fmt.Println()
 
 		cliVersion, err := tailscale_cli.GetVersion()

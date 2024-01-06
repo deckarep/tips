@@ -3,6 +3,9 @@
 # Define the default goal. When you run "make" without argument, it will run the "all" target.
 default: all
 
+# Version info
+VERSION := $(shell git describe --tags --abbrev=0)
+
 # Capture additional arguments which can optionally be passed in.
 ARGS ?=
 
@@ -33,7 +36,7 @@ run:
 
 # Build the project: run the linter and then build.
 build: lint
-	go build
+	go build -ldflags "-X 'github.com/deckarep/tips/pkg.AppVersion=$(VERSION)'"
 	@echo "Build: Successful"
 
 # Run all steps: build and then run the application.
