@@ -40,18 +40,21 @@ func TestDynamicSortDevices(t *testing.T) {
 		{
 			Device: tailscale.Device{
 				Name: "b-foo",
+				User: "chestnut@foo.com",
 			},
 			EnrichedInfo: nil,
 		},
 		{
 			Device: tailscale.Device{
 				Name: "a-foo",
+				User: "peanut@foo.com",
 			},
 			EnrichedInfo: nil,
 		},
 		{
 			Device: tailscale.Device{
 				Name: "c-foo",
+				User: "walnut@foo.com",
 			},
 			EnrichedInfo: nil,
 		},
@@ -69,13 +72,13 @@ func TestDynamicSortDevices(t *testing.T) {
 	assert.Equal(t, inputDevs[2].Name, "c-foo")
 
 	specs = []SortSpec{{
-		Field:     "NAME",
+		Field:     "USER",
 		Direction: Descending,
 	}}
 
 	dynamicSortDevices(inputDevs, specs)
 
-	assert.Equal(t, inputDevs[0].Name, "c-foo")
-	assert.Equal(t, inputDevs[1].Name, "b-foo")
-	assert.Equal(t, inputDevs[2].Name, "a-foo")
+	assert.Equal(t, inputDevs[0].User, "walnut@foo.com")
+	assert.Equal(t, inputDevs[1].User, "peanut@foo.com")
+	assert.Equal(t, inputDevs[2].User, "chestnut@foo.com")
 }
