@@ -4,10 +4,33 @@ import (
 	"context"
 	"testing"
 
+	"github.com/spf13/viper"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/deckarep/tips/pkg"
 )
+
+func TestPackageCfg(t *testing.T) {
+	// Test error cases first.
+	args := []string{"@"}
+
+	cfg, err := packageCfg(args)
+	assert.Error(t, err, "it has an api_key_error")
+
+	// Test non-error case.
+	args = []string{"@", "echo 'hello world' && sleep 0.5 && ps aux | grep foo"}
+
+	viper.Set("tips_api_key", "foo")
+	viper.Set("tailnet", "bar")
+	cfg, err = packageCfg(args)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, cfg)
+
+	assert.Equal(t, cfg.PrefixFilter, "*")
+	assert.Equal(t, cfg.RemoteCmd, "echo 'hello world' && sleep 0.5 && ps aux | grep foo")
+}
 
 func TestGetHosts(t *testing.T) {
 	ctx := context.Background()
