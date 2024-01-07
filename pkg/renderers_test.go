@@ -49,6 +49,34 @@ func TestRenderIPs(t *testing.T) {
 	assert.Equal(t, b.String(), "127.0.0.1\n127.0.0.2\n127.0.0.3\n127.0.0.4\n")
 }
 
+func TestRenderJson(t *testing.T) {
+	var b bytes.Buffer
+	ctx := context.Background()
+	cfgCtx := NewConfigCtx()
+	ctx = context.WithValue(ctx, CtxKeyConfig, cfgCtx)
+
+	tv := &GeneralTableView{
+		ContextView: ContextView{},
+		TailnetView: TailnetView{},
+		SelfView:    SelfView{},
+		Headers: []string{
+			"MY", "HEADER", "HERE",
+		},
+		Rows: [][]string{
+			{"foo", "bar", "127.0.0.1"},
+			{"coo", "car", "127.0.0.2"},
+			{"soo", "sar", "127.0.0.3"},
+			{"too", "tar", "127.0.0.4"},
+		},
+	}
+
+	err := RenderJson(ctx, tv, &b)
+	// TODO: At a minimum, assert no error but I don't want to test JSON encoding really, its already well tested.
+	// TODO: But this test should be a little more flushed out.
+	assert.NoError(t, err, "RenderJson should have returned no error")
+	// assert.Equal(t, b.String(), "blah, blah")
+}
+
 func TestRenderLogLine(t *testing.T) {
 	var b bytes.Buffer
 	ctx := context.Background()
