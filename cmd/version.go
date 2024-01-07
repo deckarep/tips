@@ -27,10 +27,13 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
-	"github.com/deckarep/tips/pkg"
 	"github.com/deckarep/tips/pkg/tailscale_cli"
+
+	"github.com/deckarep/tips/pkg"
 
 	"github.com/spf13/cobra"
 )
@@ -44,14 +47,20 @@ var versionCmd = &cobra.Command{
 	Short: pkg.AppShortName + " empowers you to wrangle your Tailnet",
 	Long:  pkg.AppLongName + " empowers you to manage your Tailscale cluster like a pro",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s (%s) %s\n", pkg.AppLongName, pkg.AppShortName, pkg.AppVersion)
-		fmt.Println()
-
-		cliVersion, err := tailscale_cli.GetVersion()
-		if err == nil {
-			fmt.Println("Tailscale CLI")
-			fmt.Println(strings.Repeat("*", 32))
-			fmt.Println(cliVersion)
-		}
+		printVersion(os.Stdout, tailscale_cli.GetVersion)
 	},
+}
+
+type versionGetter func() (string, error)
+
+func printVersion(w io.Writer, getVersion versionGetter) {
+	fmt.Fprintf(w, "%s (%s) %s\n", pkg.AppLongName, pkg.AppShortName, pkg.AppVersion)
+	fmt.Fprintln(w)
+
+	cliVersion, err := getVersion()
+	if err == nil {
+		fmt.Fprintln(w, "Tailscale CLI")
+		fmt.Fprintln(w, strings.Repeat("*", 32))
+		fmt.Fprintln(w, cliVersion)
+	}
 }
