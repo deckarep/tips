@@ -48,3 +48,24 @@ func TestRenderIPs(t *testing.T) {
 	assert.NoError(t, err, "RenderIPs should have returned no error")
 	assert.Equal(t, b.String(), "127.0.0.1\n127.0.0.2\n127.0.0.3\n127.0.0.4\n")
 }
+
+func TestRenderLogLine(t *testing.T) {
+	var b bytes.Buffer
+	ctx := context.Background()
+	cfgCtx := NewConfigCtx()
+	ctx = context.WithValue(ctx, CtxKeyConfig, cfgCtx)
+
+	scroll := []string{
+		"restarting server...",
+		"file not found: foo.txt",
+		"hello world!",
+	}
+
+	// Just simulate a few lines being scrolled on by.
+	for i := 0; i < 3; i++ {
+		RenderLogLine(ctx, &b, i, false, "blade", "dinky", scroll[i])
+	}
+
+	assert.Equal(t, b.String(),
+		"dinky >1 (0): restarting server...\ndinky >1 (1): file not found: foo.txt\ndinky >1 (2): hello world!\n")
+}
