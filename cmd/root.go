@@ -126,11 +126,6 @@ var rootCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
-		//if true {
-		//	dumpColors()
-		//	//return
-		//}
-
 		// 0. Package all configuration logic.
 		cfgCtx, err := packageCfg(args)
 		if err != nil {
