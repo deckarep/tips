@@ -28,7 +28,7 @@ func TestPackageCfg(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, cfg)
 
-	assert.Equal(t, cfg.PrefixFilter, "*")
+	assert.True(t, cfg.PrefixFilter.IsAll())
 	assert.Equal(t, cfg.RemoteCmd, "echo 'hello world' && sleep 0.5 && ps aux | grep foo")
 }
 

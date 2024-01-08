@@ -145,9 +145,9 @@ func (d *DB2[T]) IndexOpaqueItems(ctx context.Context, bucketName string, items 
 	return nil
 }
 
-type DBQuery2 struct {
-	PrefixFilter string
-	PrimaryKeys  []string
+type DBQuery struct {
+	PrefixFilters *PrefixFilter
+	PrimaryKeys   []string
 }
 
 func (d *DB2[T]) LookupOpaqueItem(ctx context.Context, bucketName, primaryKey string) (*T, error) {
@@ -181,10 +181,10 @@ func (d *DB2[T]) lookupOpaqueItem(bucket *bolt.Bucket, primaryKey string) (*T, e
 // 1. Using one or more primary keys, in which case this is a direct lookup (not technically a search)
 // 2. Using the * (all/everything) construct, this is just a full table scan really.
 // 3. Using a prefix scan, this is a seek to a segment of the index and should be fast assuming good selectivity.
-func (d *DB2[T]) SearchOpaqueItems(ctx context.Context, bucketName string, query DBQuery2) ([]T, error) {
+func (d *DB2[T]) SearchOpaqueItems(ctx context.Context, bucketName string, query DBQuery) ([]T, error) {
 	//cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
-	if strings.TrimSpace(query.PrefixFilter) == "" {
+	if query.PrefixFilters.Count() == 0 {
 		panic("query.PrefixFilter must never be empty, in the case of all it must be: *")
 	}
 
@@ -196,7 +196,6 @@ func (d *DB2[T]) SearchOpaqueItems(ctx context.Context, bucketName string, query
 			return errors.New("bucket is unknown: " + bucketName)
 		}
 
-		c := b.Cursor()
 		// Search by primary keys, this a direct lookup, the fastest.
 		if len(query.PrimaryKeys) > 0 {
 			for _, pk := range query.PrimaryKeys {
@@ -206,7 +205,8 @@ func (d *DB2[T]) SearchOpaqueItems(ctx context.Context, bucketName string, query
 				}
 				items = append(items, *item)
 			}
-		} else if query.PrefixFilter == "*" {
+		} else if query.PrefixFilters.IsAll() {
+			c := b.Cursor()
 			// Search by everything, linear (full-table scan)
 			for k, v := c.First(); k != nil; k, v = c.Next() {
 				var item T
@@ -216,14 +216,18 @@ func (d *DB2[T]) SearchOpaqueItems(ctx context.Context, bucketName string, query
 				items = append(items, item)
 			}
 		} else {
-			// Prefix scan (much faster) when a prefix is present.
-			prefix := []byte(query.PrefixFilter)
-			for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
-				var item T
-				if err := json.Unmarshal(v, &item); err != nil {
-					return err
+			// Since Prefix Filters support OR filters: "foo|bar" we do this in a loop with a new cursor for each prefix.
+			// Most of the time, just one iteration occurs.
+			for i := 0; i < query.PrefixFilters.Count(); i++ {
+				c := b.Cursor()
+				prefix := []byte(query.PrefixFilters.PrefixAt(i))
+				for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+					var item T
+					if err := json.Unmarshal(v, &item); err != nil {
+						return err
+					}
+					items = append(items, item)
 				}
-				items = append(items, item)
 			}
 		}
 

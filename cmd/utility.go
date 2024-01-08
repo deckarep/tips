@@ -22,12 +22,12 @@ func packageCfg(args []string) (*pkg.ConfigCtx, error) {
 	// The 0th arg is the Primary filter, if nothing was specified we consider it to represent: @ for all
 	if len(args) > 0 {
 		if strings.TrimSpace(args[0]) == allFilterCLI {
-			cfgCtx.PrefixFilter = allFilter
+			cfgCtx.PrefixFilter = pkg.ParsePrefixFilter("*")
 		} else {
-			cfgCtx.PrefixFilter = args[0]
+			cfgCtx.PrefixFilter = pkg.ParsePrefixFilter(args[0])
 		}
 	} else {
-		cfgCtx.PrefixFilter = allFilter
+		cfgCtx.PrefixFilter = pkg.ParsePrefixFilter("*")
 	}
 
 	// The 1st arg along with the rest - [1:] when provided is a remote command to execute.

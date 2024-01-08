@@ -67,7 +67,7 @@ func (c *CachedRepository) DevicesResource(ctx context.Context) ([]*WrappedDevic
 
 		// Care is taken to measure just cache retrieval time.
 		cachedStartTime := time.Now()
-		devList, err := deviceIndexedRepo.SearchOpaqueItems(ctx, DevicesBucket, DBQuery2{PrefixFilter: cfg.PrefixFilter})
+		devList, err := deviceIndexedRepo.SearchOpaqueItems(ctx, DevicesBucket, DBQuery{PrefixFilters: cfg.PrefixFilter})
 		if err != nil {
 			return nil, err
 		}
@@ -105,7 +105,7 @@ func (c *CachedRepository) DevicesResource(ctx context.Context) ([]*WrappedDevic
 
 	// 4. Return the data from the db because the db can utilize the index on prefix filters.
 	// In the future it may also do other heavyweight filters that we don't have to do in "user space"
-	devList, err = deviceIndexedRepo.SearchOpaqueItems(ctx, DevicesBucket, DBQuery2{PrefixFilter: cfg.PrefixFilter})
+	devList, err = deviceIndexedRepo.SearchOpaqueItems(ctx, DevicesBucket, DBQuery{PrefixFilters: cfg.PrefixFilter})
 	if err != nil {
 		return nil, err
 	}
