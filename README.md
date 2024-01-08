@@ -106,11 +106,17 @@ How do I get a list of *all* `devices` or `nodes` in a `tailnet`?
 However, it's better to query by a `full name` or `prefix` especially if you have a large infrastructure
 ```sh
 # Simply provide a partial or full string name.
-./tips [prefix-filter]
+./tips [prefix]
 
 ./tips blade # Find all nodes with a machine name starting with 'blade'
 
 ./tips bla # Find all nodes with a machine name starting with 'bla'
+
+# Multiple are supported too, but must be in quotes.
+./tips "[prefix-0] | [prefix-1] ... | [prefix-n]"
+
+# Find all nodes starting with: 'foo' or 'bar' or 'baz'
+./tips "foo | bar | baz"
 ```
 
 How do I get more details?
