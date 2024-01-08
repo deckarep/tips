@@ -16,7 +16,8 @@ func TestPrintVersion(t *testing.T) {
 		return "whatever 2.0.1", nil
 	}
 
-	printVersion(&b, getVersion)
+	err := printVersion(&b, getVersion)
+	assert.NoError(t, err)
 
 	assert.Equal(t, b.String(),
 		"Tailscale IPs (tips) 0.0.1\n\nTailscale CLI\n********************************\nwhatever 2.0.1\n")
@@ -28,7 +29,8 @@ func TestPrintVersion(t *testing.T) {
 		return "", errors.New("couldn't get version cause some crazy reason!")
 	}
 
-	printVersion(&b, getVersion)
+	err = printVersion(&b, getVersion)
+	assert.NoError(t, err)
 
 	assert.Equal(t, b.String(),
 		"Tailscale IPs (tips) 0.0.1\n\n")

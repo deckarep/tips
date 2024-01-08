@@ -46,21 +46,32 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: pkg.AppShortName + " empowers you to wrangle your Tailnet",
 	Long:  pkg.AppLongName + " empowers you to manage your Tailscale cluster like a pro",
-	Run: func(cmd *cobra.Command, args []string) {
-		printVersion(os.Stdout, tailscale_cli.GetVersion)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return printVersion(os.Stdout, tailscale_cli.GetVersion)
 	},
 }
 
 type versionGetter func() (string, error)
 
-func printVersion(w io.Writer, getVersion versionGetter) {
-	fmt.Fprintf(w, "%s (%s) %s\n", pkg.AppLongName, pkg.AppShortName, pkg.AppVersion)
-	fmt.Fprintln(w)
+func printVersion(w io.Writer, getVersion versionGetter) error {
+	if _, err := fmt.Fprintf(w, "%s (%s) %s\n", pkg.AppLongName, pkg.AppShortName, pkg.AppVersion); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintln(w); err != nil {
+		return err
+	}
 
 	cliVersion, err := getVersion()
 	if err == nil {
-		fmt.Fprintln(w, "Tailscale CLI")
-		fmt.Fprintln(w, strings.Repeat("*", 32))
-		fmt.Fprintln(w, cliVersion)
+		if _, err := fmt.Fprintln(w, "Tailscale CLI"); err != nil {
+			return err
+		}
+		if _, err := fmt.Fprintln(w, strings.Repeat("*", 32)); err != nil {
+			return err
+		}
+		if _, err := fmt.Fprintln(w, cliVersion); err != nil {
+			return err
+		}
 	}
+	return nil
 }

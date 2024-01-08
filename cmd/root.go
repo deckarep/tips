@@ -123,7 +123,7 @@ var rootCmd = &cobra.Command{
 				tailnet cluster. Created by @deckarep.
                 Complete documentation is available at: github.com/deckarep/tips`,
 	Args: cobra.ArbitraryArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		//if true {
@@ -134,8 +134,9 @@ var rootCmd = &cobra.Command{
 		// 0. Package all configuration logic.
 		cfgCtx, err := packageCfg(args)
 		if err != nil {
-			log.Fatal("problem packaging config", "error", err)
+			return err
 		}
+
 		ctx = context.WithValue(ctx, pkg.CtxKeyConfig, cfgCtx)
 		// CONSIDER: should this show all flags?
 		ctx = context.WithValue(ctx, pkg.CtxKeyUserQuery, fmt.Sprintf("%s %s", cfgCtx.PrefixFilter, cfgCtx.RemoteCmd))
@@ -158,12 +159,12 @@ var rootCmd = &cobra.Command{
 
 		devList, err := devicesResourceFunc(ctx)
 		if err != nil {
-			log.Fatal("problem with resource lookup of devices", "error", err)
+			return err
 		}
 
 		view, err := pkg.ProcessDevicesTable(ctx, devList)
 		if err != nil {
-			log.Fatal("problem occurred processing devices data", "error", err)
+			return err
 		}
 
 		if cfgCtx.IsRemoteCommand() {
@@ -175,24 +176,26 @@ var rootCmd = &cobra.Command{
 		} else {
 			if cfgCtx.JsonOutput {
 				if err = pkg.RenderJson(ctx, view, os.Stdout); err != nil {
-					log.Fatal("problem encoding json output", "error", err)
+					return err
 				}
 			} else if cfgCtx.IPsOutput {
 				if err = pkg.RenderIPs(ctx, view, os.Stdout); err != nil {
-					log.Fatal("problem generating ips output", "error", err)
+					return err
 				}
 			} else {
 				if cfgCtx.Basic {
 					if err = pkg.RenderASCIITableView(ctx, view, os.Stdout); err != nil {
-						log.Fatal("problem rendering basic table view", "error", err)
+						return err
 					}
 				} else {
 					if err = pkg.RenderTableView(ctx, view, os.Stdout); err != nil {
-						log.Fatal("problem rendering fancy table view", "error", err)
+						return err
 					}
 				}
 			}
 		}
+
+		return nil
 	},
 }
 
@@ -207,7 +210,7 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		log.Print("root command failed", "error", err)
 		os.Exit(1)
 	}
 }

@@ -19,7 +19,7 @@ func TestPackageCfg(t *testing.T) {
 	assert.Error(t, err, "it has an api_key_error")
 
 	// Test non-error case.
-	args = []string{"@", "echo 'hello world' && sleep 0.5 && ps aux | grep foo"}
+	args = []string{"@", "echo 'hello world'", "&& sleep 0.5", "&& ps aux | grep foo"}
 
 	viper.Set("tips_api_key", "foo")
 	viper.Set("tailnet", "bar")
