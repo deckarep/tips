@@ -29,7 +29,6 @@ import "errors"
 
 /*
 // Possible TODO:
-// - support negation with a !(not) prefix or use a -(minus) (should be very obvious/easy to grok)
 // - support conditionals such as: lastseen > 2hr ago
 
 // Future TODO:

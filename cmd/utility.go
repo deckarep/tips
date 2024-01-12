@@ -67,13 +67,11 @@ func packageCfg(args []string) (*pkg.ConfigCtx, error) {
 	if strings.TrimSpace(cfgCtx.TailscaleAPI.ApiKey) == "" {
 		return nil,
 			errors.New("a 'tips_api_key' must be defined either as an environment variable (uppercase), in a config or as a --tips_api_key flag")
-
 	}
 
 	if strings.TrimSpace(cfgCtx.Tailnet) == "" {
 		return nil,
 			errors.New("at an absolute minimum a tailnet must be specified either in the config file or as flag --tailnet")
-
 	}
 
 	return cfgCtx, nil

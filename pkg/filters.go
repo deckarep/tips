@@ -66,8 +66,9 @@ func executeFilters(ctx context.Context, devList []*WrappedDevice) []*WrappedDev
 
 	for _, dev := range devList {
 
-		// FAT TODO: clean this up and standardize the set logic.
-		// TODO: figure out all items to add (everything to filter on).
+		// FAT TODO: clean this up and standardize the set logic
+		// TODO: figure out all items to add (everything to filter on)
+		// CONSIDER: Better to add this set to the cache once on initial loading?
 
 		// Tags
 		everything := normalizeTags(dev.Tags)
