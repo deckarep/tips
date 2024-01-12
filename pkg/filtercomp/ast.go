@@ -139,6 +139,9 @@ func DumpAST(node AST, indent int) {
 	case *ParenAST:
 		fmt.Printf("%s- Parentheses\n", indentStr)
 		DumpAST(n.exp, indent+1)
+	case *NegatedAST:
+		fmt.Printf("%s- Negated(!)\n", indentStr)
+		DumpAST(n.exp, indent+1)
 	default:
 		fmt.Printf("%s- Unknown AST Type\n", indentStr)
 	}
