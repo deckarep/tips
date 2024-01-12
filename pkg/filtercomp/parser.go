@@ -41,7 +41,7 @@ Guaranteed to be free of left recursion: https://bnfplayground.pauliankline.com/
 
 <expression> ::= <factor> <logexp>*
 <logexp> ::= ("|" | ",") <factor>
-<factor> ::= <name> | "(" <expression> ")"
+<factor> ::= "!"? (<name> | "(" <expression> ")")
 <name> ::= "*"? [a-z]+ "*"?
 */
 
@@ -183,6 +183,18 @@ func (p *Parser) parseLogexp(leftFactor AST) (AST, error) {
 
 func (p *Parser) parseFactor() (AST, error) {
 	t := p.peekToken()
+
+	var shouldNegate bool
+	if t.Name == "!" {
+		_, err := p.consumeToken() // ! - consume the negation which is optional.
+		if err != nil {
+			return nil, err
+		}
+		shouldNegate = true
+	}
+
+	t = p.peekToken()
+	var selectedNode AST
 	if t.Name == "(" {
 		_, err := p.consumeToken() // (
 		if err != nil {
@@ -199,10 +211,20 @@ func (p *Parser) parseFactor() (AST, error) {
 		if err != nil {
 			return nil, err
 		}
-		return parenAST, nil
+		selectedNode = parenAST
 	} else {
-		return p.parseName()
+		ast, err := p.parseName()
+		if err != nil {
+			return nil, err
+		}
+		selectedNode = ast
 	}
+
+	if shouldNegate {
+		return &NegatedAST{exp: selectedNode}, nil
+	}
+
+	return selectedNode, nil
 }
 
 func (p *Parser) parseName() (AST, error) {
@@ -223,7 +245,7 @@ func (p *Parser) parseName() (AST, error) {
 
 	t = p.peekToken()
 	if t.Kind != TokenKindName {
-		panic("expected to be a Name Token")
+		return nil, errors.New("expected to be a Name token")
 	}
 
 	nameToken, err := p.consumeToken() // Just consume the Name Token for now.

@@ -108,6 +108,14 @@ func (p *ParenAST) Eval(s mapset.Set[string]) bool {
 	return p.exp.Eval(s)
 }
 
+type NegatedAST struct {
+	exp AST
+}
+
+func (n *NegatedAST) Eval(s mapset.Set[string]) bool {
+	return !n.exp.Eval(s)
+}
+
 func DumpAST(node AST, indent int) {
 	if node == nil {
 		return

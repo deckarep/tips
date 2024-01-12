@@ -50,7 +50,7 @@ func Tokenize(data []byte) []Token {
 	for i := 0; i < len(data); i++ {
 		b := data[i]
 		switch b {
-		case '(', ')', ',', '|', '*':
+		case '(', ')', ',', '|', '*', '!':
 			// Flush any accumulated text as a Name Token
 			if current.Len() > 0 {
 				tokens = append(tokens, Token{Name: current.String(), Kind: TokenKindName})
