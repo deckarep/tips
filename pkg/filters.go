@@ -64,44 +64,41 @@ func executeFilters(ctx context.Context, devList []*WrappedDevice) []*WrappedDev
 		filteredDevList []*WrappedDevice
 	)
 
-	// Note: for better performance, filtering should be done by the most selective fields first.
 	for _, dev := range devList {
-		if cfg.Filters != nil {
 
-			// FAT TODO: clean this up and standardize the set logic.
-			// TODO: figure out all items to add (everything to filter on).
+		// FAT TODO: clean this up and standardize the set logic.
+		// TODO: figure out all items to add (everything to filter on).
 
-			// Tags
-			everything := normalizeTags(dev.Tags)
+		// Tags
+		everything := normalizeTags(dev.Tags)
 
-			// User
-			everything.Add(strings.ToLower(dev.User))
+		// User
+		everything.Add(strings.ToLower(dev.User))
 
-			// OS
-			everything.Add(strings.ToLower(dev.OS))
+		// OS
+		everything.Add(strings.ToLower(dev.OS))
 
-			// Version
-			semanticVersion := strings.ToLower(strings.Split(dev.ClientVersion, "-")[0])
-			everything.Add(semanticVersion)
+		// Version
+		semanticVersion := strings.ToLower(strings.Split(dev.ClientVersion, "-")[0])
+		everything.Add(semanticVersion)
 
-			// ipv4/ipv6
-			for _, a := range dev.Addresses {
-				everything.Add(a)
-			}
+		// ipv4/ipv6
+		for _, a := range dev.Addresses {
+			everything.Add(a)
+		}
 
-			// Exit node status
-			// I'm somewhat happy with this approach. However, when the data is not enriched this will incorrectly
-			// flag everything as a non-exit node.
-			if dev.EnrichedInfo != nil && dev.EnrichedInfo.HasExitNodeOption {
-				everything.Add("+exit")
-			} else {
-				everything.Add("-exit")
-			}
+		// Exit node status
+		// I'm somewhat happy with this approach. However, when the data is not enriched this will incorrectly
+		// flag everything as a non-exit node.
+		if dev.EnrichedInfo != nil && dev.EnrichedInfo.HasExitNodeOption {
+			everything.Add("+exit")
+		} else {
+			everything.Add("-exit")
+		}
 
-			// Apply the single-shot filter: allows complex filter expressions.
-			if !cfg.Filters.Eval(everything) {
-				continue
-			}
+		// Apply the single-shot filter: allows complex filter expressions.
+		if !cfg.Filters.Eval(everything) {
+			continue
 		}
 
 		// TODO: a way to filter for NO TAGS => !tag

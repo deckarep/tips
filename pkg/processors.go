@@ -64,7 +64,12 @@ func ProcessDevicesTable(ctx context.Context, devList []*WrappedDevice) (*Genera
 	hasEnrichedInfo := len(devList) > 0 && devList[0].EnrichedInfo != nil
 
 	// 1. Filter - if user requested any with the --filter flag
-	filteredDevList := executeFilters(ctx, devList)
+	var filteredDevList []*WrappedDevice
+	if cfg.Filters != nil {
+		filteredDevList = executeFilters(ctx, devList)
+	} else {
+		filteredDevList = devList
+	}
 
 	// 2. Sort - based on user's configured setting or --sort flag
 	// If at least one dynamic sort was defined, then apply it.
