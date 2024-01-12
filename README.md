@@ -103,7 +103,7 @@ How do I get a list of *all* `devices` or `nodes` in a `tailnet`?
 ./tips @ # This is equivalent as @ means all/everything.
 ```
 
-However, it's better to query by a `full name` or `prefix` especially if you have a large infrastructure
+#### However, it's better to query by a `full name` or `prefix` especially if you have a large infrastructure
 ```sh
 # Simply provide a partial or full string name.
 ./tips [prefix]
@@ -119,13 +119,28 @@ However, it's better to query by a `full name` or `prefix` especially if you hav
 ./tips "foo | bar | baz"
 ```
 
-How do I get more details?
+#### How can I further filter?
+```sh
+# Comma delimited filtering is an AND-type conditional: this returns all devices that match both linux AND user@foo.com 
+./tips --filter 'linux, user@foo.com'
+
+# Pipe delimited is an OR-type conditional: this returns all devices that match both linux OR user@foo.com 
+./tips --filter 'linux | user@foo.com'
+
+# Complex/nested filtering is supported with parentheses having precedence.
+./tips --filter '(linux, (peanuts | walnuts), (user@foo.com | them@website.com))'
+
+# Glob-style filtering as prefix, suffix or a combination of both works too!
+./tips --filter '1.54*, *foo.com, *dog*'
+```
+
+#### How do I get more details?
 ```sh
 # Not yet supported
 # ./tips --details
 ```
 
-How do I sort the output?
+#### How do I sort the output?
 ```sh
 # Partially working (some fields not supported)
 # To sort by one column ascending (default)
@@ -135,7 +150,7 @@ How do I sort the output?
 ./tips --sort 'name:dsc,email:asc'
 ```
 
-How do I slice/partition nodes?
+#### How do I slice/partition nodes?
 ```sh
 # Shows the top 5 nodes
 ./tips --slice 0:5
