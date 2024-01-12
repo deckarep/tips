@@ -25,11 +25,26 @@ commands, and manage your nodes collectively using an effective pattern modeled 
 ### Features
 * 📝 - Nearly zero-config managed via [Viper](https://github.com/spf13/viper) and [Cobra](https://github.com/spf13/cobra), with sane defaults
 * ⚡️ - Caching and indexed via [BBolt](https://github.com/etcd-io/bbolt) key-value store for fast queries
-* 🔎 - Filtering, sorting, slicing and dicing built-in
+* 🔎 - Powerful complex filtering expression, sorting, slicing and dicing built-in
 * 👩‍💻‍ - Developer focused tooling
 * ✅ - Remote command execution and ssh tooling built-in
 * 🫦 - Beautifully rendered terminal output thanks to [Charmbracelet's lipgloss](https://github.com/charmbracelet/lipgloss)
 * 👍🏼 - No deployable dependencies, single binary thanks to the [Go programming language](https://go.dev/)
+
+***
+
+### Table of Contents
+
+* [Installation](#installation)
+* [Definitions](#definitions)
+* [Why the name?](#why-the-name)
+* [How to Guide](#how-to-guide)
+* [Built with ❤️](#built-with-)
+* [F.A.Q.](#faq)
+* [Alpha Status](#alpha)
+* [Disclaimer](#disclaimer-independent-project)
+
+***
 
 ### Installation
 
@@ -94,7 +109,7 @@ $ ./tips --tailnet user@domain.com --tips_api_key tskey-api-xxxxxxxxxxxx-xxx...
 * Lastly, what better way to show appreciation for software than to **leave a tip** especially if used in a
 professional or commercial setting?
 
-### How To
+### How To Guide
 Here is a list of common commands from easy to more advanced.
 
 How do I get a list of *all* `devices` or `nodes` in a `tailnet`?
