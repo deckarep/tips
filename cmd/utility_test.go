@@ -15,7 +15,7 @@ func TestPackageCfg(t *testing.T) {
 	// Test error cases first.
 	args := []string{"@"}
 
-	cfg, err := packageCfg(args)
+	_, err := packageCfg(args)
 	assert.Error(t, err, "it has an api_key_error")
 
 	// Test non-error case.
@@ -23,7 +23,7 @@ func TestPackageCfg(t *testing.T) {
 
 	viper.Set("tips_api_key", "foo")
 	viper.Set("tailnet", "bar")
-	cfg, err = packageCfg(args)
+	cfg, err := packageCfg(args)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, cfg)
