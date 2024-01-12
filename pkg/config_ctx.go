@@ -31,6 +31,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/deckarep/tips/pkg/filtercomp"
 
 	"strings"
 	"time"
@@ -108,7 +109,7 @@ type ConfigCtx struct {
 	CacheTimeout  time.Duration
 	Columns       mapset.Set[string]
 	Concurrency   int
-	Filters       map[string]mapset.Set[string]
+	Filters       filtercomp.AST
 	IPsOutput     bool
 	IPsDelimiter  string
 	JsonOutput    bool

@@ -41,7 +41,11 @@ func packageCfg(args []string) (*pkg.ConfigCtx, error) {
 	cfgCtx.CacheTimeout = viper.GetDuration("cache_timeout")
 	cfgCtx.Columns = pkg.ParseColumns(viper.GetString("columns"))
 	cfgCtx.Concurrency = viper.GetInt("concurrency")
-	cfgCtx.Filters = pkg.ParseFilter(viper.GetString("filter"))
+	ast, err := pkg.ParseFilter(viper.GetString("filter"))
+	if err != nil {
+		return nil, err
+	}
+	cfgCtx.Filters = ast
 	cfgCtx.IPsOutput = viper.GetBool("ips")
 	cfgCtx.IPsDelimiter = viper.GetString("delimiter")
 	cfgCtx.JsonOutput = viper.GetBool("json")
