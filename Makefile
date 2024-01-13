@@ -26,6 +26,7 @@ format:
 test:
 	go test -v ./... --race $(COVER) $(PKG)
 	go tool cover -html=cover.out
+	go tool cover -func cover.out | grep statements
 
 # Lint the code.
 lint:
