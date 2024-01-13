@@ -99,3 +99,18 @@ func TestNegatedAST_Eval(t *testing.T) {
 	s := mapset.NewSet[string]("foo")
 	assert.False(t, node.Eval(s))
 }
+
+func TestDumpAST(t *testing.T) {
+	filter := "(foo | bar), !baz"
+	tokens := Tokenize([]byte(filter))
+	p := NewParser(tokens)
+	ast, err := p.Parse()
+
+	assert.NoError(t, err)
+	assert.NotNil(t, ast)
+
+	DumpAST(ast, 4)
+
+	// This should be ok too and just do nothing.
+	DumpAST(nil, 4)
+}

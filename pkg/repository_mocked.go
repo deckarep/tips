@@ -44,10 +44,19 @@ const (
 )
 
 type MockedDeviceRepo struct {
+	testDevicesFile string
 }
 
 func NewMockedDeviceRepo() *MockedDeviceRepo {
-	return &MockedDeviceRepo{}
+	return &MockedDeviceRepo{
+		testDevicesFile: testDevicesFile,
+	}
+}
+
+func NewMockedDeviceRepoWithPath(filePath string) *MockedDeviceRepo {
+	return &MockedDeviceRepo{
+		testDevicesFile: filePath,
+	}
 }
 
 func (r *MockedDeviceRepo) DevicesResource(ctx context.Context) ([]*WrappedDevice, error) {
@@ -57,7 +66,7 @@ func (r *MockedDeviceRepo) DevicesResource(ctx context.Context) ([]*WrappedDevic
 		cfg.TailscaleAPI.ElapsedTime = time.Since(startTime)
 	}()
 
-	f, err := os.Open(testDevicesFile)
+	f, err := os.Open(r.testDevicesFile)
 	if err != nil {
 		log.Fatal("failed to read file", "error", err)
 	}
