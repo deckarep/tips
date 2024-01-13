@@ -1,4 +1,4 @@
-.PHONY: test build lint gen all clean update docker run format
+.PHONY: test build lint gen all clean update docker run format stats
 
 PKG=github.com/deckarep/tips
 VERSION := `git fetch --tags && git tag | sort -V | tail -1`
@@ -11,6 +11,9 @@ default: all
 
 # Capture additional arguments which can optionally be passed in.
 ARGS ?=
+
+stats:
+	git diff --stat HEAD~$(ARGS) HEAD
 
 update:
 	go get -u
