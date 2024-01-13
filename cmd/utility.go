@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/deckarep/tips/pkg/slicecomp"
+
 	"github.com/spf13/viper"
 
 	"github.com/deckarep/tips/pkg"
@@ -52,7 +54,13 @@ func packageCfg(args []string) (*pkg.ConfigCtx, error) {
 	cfgCtx.NoCache = viper.GetBool("nocache")
 	cfgCtx.NoColor = viper.GetBool("nocolor")
 	cfgCtx.Page = viper.GetInt("page")
-	cfgCtx.Slice = pkg.ParseSlice(viper.GetString("slice"), viper.GetInt("page"))
+
+	slice, err := slicecomp.ParseSlice(viper.GetString("slice"), viper.GetInt("page"))
+	if err != nil {
+		return nil, err
+	}
+
+	cfgCtx.Slice = slice
 	cfgCtx.SortOrder = pkg.ParseSortString(viper.GetString("sort"))
 	cfgCtx.Tailnet = viper.GetString("tailnet")
 	cfgCtx.TailscaleAPI.ApiKey = viper.GetString("tips_api_key")

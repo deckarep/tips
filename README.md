@@ -168,10 +168,10 @@ How do I get a list of *all* `devices` or `nodes` in a `tailnet`?
 #### How do I slice/partition nodes?
 ```sh
 # Shows the top 5 nodes
-./tips --slice 0:5
+./tips --slice '[0:5]'
 
 # Shows the nodes between 5-10
-./tips --slice 5:10
+./tips --slice '[5:10]'
 ```
 
 How do I limit which columns to show?

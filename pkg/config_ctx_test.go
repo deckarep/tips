@@ -3,12 +3,15 @@ package pkg
 import (
 	"testing"
 
+	"github.com/deckarep/tips/pkg/slicecomp"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestParseSlice(t *testing.T) {
 	// Neither defined
-	s := ParseSlice(":", 0)
+	s, err := slicecomp.ParseSlice("[:]", 0)
+	assert.NoError(t, err)
 	if s == nil {
 		t.Error("expected slice to be non-nil")
 	}
@@ -22,7 +25,8 @@ func TestParseSlice(t *testing.T) {
 	}
 
 	// Only lower bound
-	s = ParseSlice("0:", 0)
+	s, err = slicecomp.ParseSlice("[0:]", 0)
+	assert.NoError(t, err)
 
 	if s.From != nil && *s.From != 0 {
 		t.Errorf("expected from to be: %d, got: %d", 0, *s.From)
@@ -37,7 +41,8 @@ func TestParseSlice(t *testing.T) {
 	}
 
 	// Only upper bound
-	s = ParseSlice(":5", 0)
+	s, err = slicecomp.ParseSlice("[:5]", 0)
+	assert.NoError(t, err)
 
 	if s.From != nil {
 		t.Error("expected from as nil but was not")
@@ -52,7 +57,8 @@ func TestParseSlice(t *testing.T) {
 	}
 
 	// Both lower and upper bound.
-	s = ParseSlice("0:5", 0)
+	s, err = slicecomp.ParseSlice("[0:5]", 0)
+	assert.NoError(t, err)
 
 	if s.From != nil && *s.From != 0 {
 		t.Errorf("expected from to be: %d, got: %d", 0, *s.From)
