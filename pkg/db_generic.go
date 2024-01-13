@@ -53,27 +53,27 @@ type Indexer interface {
 	Key() string
 }
 
-type DB2Stats struct {
+type DbStats struct {
 	DevicesCount  int `json:"devices_count"`
 	EnrichedCount int `json:"enriched_count"`
 }
 
-type DB2[T Indexer] struct {
+type Db[T Indexer] struct {
 	tailnetScope string
 	hdl          *bolt.DB
 }
 
-func NewDB2[T Indexer](tailnetScope string) *DB2[T] {
-	return &DB2[T]{
+func NewDB2[T Indexer](tailnetScope string) *Db[T] {
+	return &Db[T]{
 		tailnetScope: tailnetScope,
 	}
 }
 
-func (d *DB2[T]) TailnetScope() string {
+func (d *Db[T]) TailnetScope() string {
 	return d.tailnetScope
 }
 
-func (d *DB2[T]) File() string {
+func (d *Db[T]) File() string {
 	u, err := user.Current()
 	if err != nil {
 		log.Fatal("failed to get current user; aborting", "error", err)
@@ -82,7 +82,7 @@ func (d *DB2[T]) File() string {
 	return path.Join(u.HomeDir, fmt.Sprintf("%s.db.bolt", d.tailnetScope))
 }
 
-func (d *DB2[T]) Open() error {
+func (d *Db[T]) Open() error {
 	// Already opened, it's a no-op.
 	if d.hdl != nil {
 		return nil
@@ -96,14 +96,14 @@ func (d *DB2[T]) Open() error {
 	return nil
 }
 
-func (d *DB2[T]) Close() error {
+func (d *Db[T]) Close() error {
 	if d.hdl != nil {
 		return d.hdl.Close()
 	}
 	return nil
 }
 
-func (d *DB2[T]) Erase() error {
+func (d *Db[T]) Erase() error {
 	fileToDelete := d.File()
 	if !strings.HasSuffix(fileToDelete, "db.bolt") {
 		return nil
@@ -112,12 +112,12 @@ func (d *DB2[T]) Erase() error {
 	return deleteFileIfExists(fileToDelete)
 }
 
-func (d *DB2[T]) Exists(ctx context.Context) (bool, error) {
+func (d *Db[T]) Exists(ctx context.Context) (bool, error) {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 	return fileExistsAndIsRecent(d.File(), cfg.CacheTimeout)
 }
 
-func (d *DB2[T]) IndexOpaqueItems(ctx context.Context, bucketName string, items []T) error {
+func (d *Db[T]) IndexOpaqueItems(ctx context.Context, bucketName string, items []T) error {
 	if d.hdl == nil {
 		return errors.New("trying to index db when handle to db is nil")
 	}
@@ -150,7 +150,7 @@ type DBQuery struct {
 	PrimaryKeys   []string
 }
 
-func (d *DB2[T]) LookupOpaqueItem(ctx context.Context, bucketName, primaryKey string) (*T, error) {
+func (d *Db[T]) LookupOpaqueItem(ctx context.Context, bucketName, primaryKey string) (*T, error) {
 	var item *T
 	err := d.hdl.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketName))
@@ -169,7 +169,7 @@ func (d *DB2[T]) LookupOpaqueItem(ctx context.Context, bucketName, primaryKey st
 	return item, nil
 }
 
-func (d *DB2[T]) lookupOpaqueItem(bucket *bolt.Bucket, primaryKey string) (*T, error) {
+func (d *Db[T]) lookupOpaqueItem(bucket *bolt.Bucket, primaryKey string) (*T, error) {
 	item, err := d.get(bucket, primaryKey)
 	if err != nil {
 		return nil, err
@@ -181,7 +181,7 @@ func (d *DB2[T]) lookupOpaqueItem(bucket *bolt.Bucket, primaryKey string) (*T, e
 // 1. Using one or more primary keys, in which case this is a direct lookup (not technically a search)
 // 2. Using the * (all/everything) construct, this is just a full table scan really.
 // 3. Using a prefix scan, this is a seek to a segment of the index and should be fast assuming good selectivity.
-func (d *DB2[T]) SearchOpaqueItems(ctx context.Context, bucketName string, query DBQuery) ([]T, error) {
+func (d *Db[T]) SearchOpaqueItems(ctx context.Context, bucketName string, query DBQuery) ([]T, error) {
 	//cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
 	if query.PrefixFilters.Count() == 0 {
@@ -239,7 +239,7 @@ func (d *DB2[T]) SearchOpaqueItems(ctx context.Context, bucketName string, query
 	return items, nil
 }
 
-func (d *DB2[T]) put(bucket *bolt.Bucket, key string, data T) error {
+func (d *Db[T]) put(bucket *bolt.Bucket, key string, data T) error {
 	// Encode as JSON: in the future encode as Proto/more compact form.
 	encoded, err := json.Marshal(data)
 	if err != nil {
@@ -251,7 +251,7 @@ func (d *DB2[T]) put(bucket *bolt.Bucket, key string, data T) error {
 	return bucket.Put([]byte(key), encoded)
 }
 
-func (d *DB2[T]) get(bucket *bolt.Bucket, key string) (T, error) {
+func (d *Db[T]) get(bucket *bolt.Bucket, key string) (T, error) {
 	var obj T
 	v := bucket.Get([]byte(key))
 	err := json.Unmarshal(v, &obj)
