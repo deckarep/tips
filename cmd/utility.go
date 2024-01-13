@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/deckarep/tips/pkg/prefixcomp"
+
 	"github.com/deckarep/tips/pkg/slicecomp"
 
 	"github.com/spf13/viper"
@@ -24,12 +26,30 @@ func packageCfg(args []string) (*pkg.ConfigCtx, error) {
 	// The 0th arg is the Primary filter, if nothing was specified we consider it to represent: @ for all
 	if len(args) > 0 {
 		if strings.TrimSpace(args[0]) == allFilterCLI {
-			cfgCtx.PrefixFilter = pkg.ParsePrefixFilter("*")
+			ast, err := prefixcomp.ParsePrimaryFilter("*")
+			if err != nil {
+				return nil, err
+			}
+			cfgCtx.PrefixFilter = ast
+			// Old parser.
+			//cfgCtx.PrefixFilter = pkg.ParsePrefixFilter("*")
 		} else {
-			cfgCtx.PrefixFilter = pkg.ParsePrefixFilter(args[0])
+			ast, err := prefixcomp.ParsePrimaryFilter(args[0])
+			if err != nil {
+				return nil, err
+			}
+			cfgCtx.PrefixFilter = ast
+			// Old parser.
+			//cfgCtx.PrefixFilter = pkg.ParsePrefixFilter(args[0])
 		}
 	} else {
-		cfgCtx.PrefixFilter = pkg.ParsePrefixFilter("*")
+		ast, err := prefixcomp.ParsePrimaryFilter("*")
+		if err != nil {
+			return nil, err
+		}
+		cfgCtx.PrefixFilter = ast
+		// Old parser.
+		//cfgCtx.PrefixFilter = pkg.ParsePrefixFilter("*")
 	}
 
 	// The 1st arg along with the rest - [1:] when provided is a remote command to execute.
@@ -55,12 +75,21 @@ func packageCfg(args []string) (*pkg.ConfigCtx, error) {
 	cfgCtx.NoColor = viper.GetBool("nocolor")
 	cfgCtx.Page = viper.GetInt("page")
 
+	// When slice was provided in the prefix filter use that.
+	// But the --slice flag will override it.
+	prefixSlice := cfgCtx.PrefixFilter.Slice
+
+	// Override occurs here.
 	slice, err := slicecomp.ParseSlice(viper.GetString("slice"), viper.GetInt("page"))
 	if err != nil {
 		return nil, err
 	}
-
 	cfgCtx.Slice = slice
+
+	if slice == nil {
+		cfgCtx.Slice = prefixSlice
+	}
+
 	cfgCtx.SortOrder = pkg.ParseSortString(viper.GetString("sort"))
 	cfgCtx.Tailnet = viper.GetString("tailnet")
 	cfgCtx.TailscaleAPI.ApiKey = viper.GetString("tips_api_key")

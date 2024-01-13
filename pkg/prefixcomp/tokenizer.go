@@ -14,6 +14,7 @@ const (
 	TokenLeftBracket
 	TokenRightBracket
 	TokenColon
+	TokenAll
 )
 
 // Token represents a lexical token.
@@ -53,6 +54,10 @@ func (t *Tokenizer) Next() Token {
 	}
 
 	switch t.input[t.pos] {
+	case '*', '@':
+		t.pos++
+		// normalize(@) -> *
+		return Token{Type: TokenAll, Value: "*"}
 	case '[':
 		t.pos++
 		return Token{Type: TokenLeftBracket, Value: "["}

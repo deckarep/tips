@@ -72,27 +72,3 @@ func TestParseSlice(t *testing.T) {
 		t.Error("expected slice to be defined")
 	}
 }
-
-func TestParsePrefixFilter(t *testing.T) {
-	// The prefix for everything prefix
-	pf := ParsePrefixFilter("*")
-	assert.NotNil(t, pf)
-	assert.True(t, pf.IsAll())
-
-	// The prefix for everything prefix (the same thing)
-	pf = ParsePrefixFilter("@")
-	assert.NotNil(t, pf)
-	assert.True(t, pf.IsAll())
-
-	// The prefix with multiple OR conditions
-	pf = ParsePrefixFilter("foo|bar | baz")
-	assert.NotNil(t, pf)
-	assert.False(t, pf.IsAll())
-
-	assert.Equal(t, pf.Count(), 3)
-
-	expectedPrefixOrder := []string{"bar", "baz", "foo"}
-	for i := 0; i < pf.Count(); i++ {
-		assert.Equal(t, pf.PrefixAt(i), expectedPrefixOrder[i])
-	}
-}

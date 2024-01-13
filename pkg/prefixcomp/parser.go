@@ -18,7 +18,21 @@ https://bnfplayground.pauliankline.com/
 <integer> ::= [0-9]+
 */
 
-func ParsePrimaryFilter(input string) (ASTNode, error) {
+/*
+https://bnfplayground.pauliankline.com/
+WARN: This should always match the parser.
+
+<primaryfilter> ::= (<all> | <filter>) <ws> <slice>?
+<all> ::= "*" | "@" | E
+<filter> ::= <word> (<ws> <or> <ws> <word> <ws>)*
+<slice> ::= "[" <integer>? ":" <integer>? "]"
+<ws> ::= " "+ | E
+<or> ::= "|"
+<word> ::= ([a-z] | [A-Z])+
+<integer> ::= [0-9]+
+*/
+
+func ParsePrimaryFilter(input string) (*PrimaryFilterAST, error) {
 	tokens, err := Tokenize(input)
 	if err != nil {
 		return nil, err
@@ -33,19 +47,37 @@ func ParsePrimaryFilter(input string) (ASTNode, error) {
 	return ast, nil
 }
 
-// ASTNode represents a node in the AST.
-type ASTNode interface {
-	String() string
-}
+//// ASTNode represents a node in the AST.
+//type ASTNode interface {
+//	String() string
+//}
 
 // PrimaryFilterAST represents the primary filter syntax.
 type PrimaryFilterAST struct {
+	// When All is true, it represents the '*' and it means ignore the Words entirely.
+	All   bool
 	Words []string
 	Slice *slicecomp.Slice
 }
 
 func (p *PrimaryFilterAST) String() string {
-	return fmt.Sprintf("PrimaryFilter(Words: %v, Slice: %s)", p.Words, sliceToString(p.Slice))
+	var filterOn = "*"
+	if !p.All {
+		filterOn = fmt.Sprintf("%v", p.Words)
+	}
+	return fmt.Sprintf("PrimaryFilter(Words: %v, Slice: %s)", filterOn, sliceToString(p.Slice))
+}
+
+func (p *PrimaryFilterAST) IsAll() bool {
+	return p.All
+}
+
+func (p *PrimaryFilterAST) Count() int {
+	return len(p.Words)
+}
+
+func (p *PrimaryFilterAST) PrefixAt(idx int) string {
+	return p.Words[idx]
 }
 
 func sliceToString(s *slicecomp.Slice) string {
@@ -92,7 +124,7 @@ func NewParser(tokens []Token) *Parser {
 }
 
 // Parse parses the tokens into an AST.
-func (p *Parser) Parse() (ASTNode, error) {
+func (p *Parser) Parse() (*PrimaryFilterAST, error) {
 	return p.parsePrimaryFilter()
 }
 
@@ -102,10 +134,14 @@ func (p *Parser) parsePrimaryFilter() (*PrimaryFilterAST, error) {
 	var slice *slicecomp.Slice
 	var err error
 
+	useAll := true
 	for {
 		if p.isAtEnd() {
 			break
+		} else if p.match(TokenAll) {
+			useAll = true
 		} else if p.match(TokenWord) {
+			useAll = false
 			words = append(words, p.previous().Value)
 		} else if p.match(TokenOr) {
 			if !p.match(TokenWord) {
@@ -123,7 +159,16 @@ func (p *Parser) parsePrimaryFilter() (*PrimaryFilterAST, error) {
 		}
 	}
 
-	return &PrimaryFilterAST{Words: words, Slice: slice}, nil
+	if useAll && len(words) > 0 {
+		return nil, fmt.Errorf("A filter must use either '@' or prefixes but not both")
+	}
+
+	// When no words, assume * was provided.
+	if len(words) == 0 {
+		useAll = true
+	}
+
+	return &PrimaryFilterAST{All: useAll, Words: words, Slice: slice}, nil
 }
 
 // parseSlice parses a slice.

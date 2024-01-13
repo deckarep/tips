@@ -91,6 +91,8 @@ func executeFilters(ctx context.Context, devList []*WrappedDevice) []*WrappedDev
 		// Exit node status
 		// I'm somewhat happy with this approach. However, when the data is not enriched this will incorrectly
 		// flag everything as a non-exit node.
+
+		// TODO: internal tags should look like this instead: ':exit', if you want to exclude: hmmmm?
 		if dev.EnrichedInfo != nil && dev.EnrichedInfo.HasExitNodeOption {
 			everything.Add("+exit")
 		} else {
@@ -104,7 +106,8 @@ func executeFilters(ctx context.Context, devList []*WrappedDevice) []*WrappedDev
 
 		// TODO: a way to filter for NO TAGS => !tag
 		// TODO: additional filters like lastSeen and conditional filtering: >, >=, <, <=
-		// TODO: meta-filters on things like exit node status => +exit
+		// TODO: meta-filters on things like exit node status => :exit
+		// TODO: support humanized compares like: lastSeen > 2hrs, or lastSeen < 1m or range: lastSeen > 2hrs, lastSeen < 3hrs
 
 		filteredDevList = append(filteredDevList, dev)
 	}

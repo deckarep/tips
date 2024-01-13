@@ -26,7 +26,7 @@ SOFTWARE.
 package pkg
 
 import (
-	"slices"
+	"github.com/deckarep/tips/pkg/prefixcomp"
 
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/deckarep/tips/pkg/filtercomp"
@@ -70,7 +70,7 @@ type ConfigCtx struct {
 	JsonOutput    bool
 	NoCache       bool
 	NoColor       bool
-	PrefixFilter  *PrefixFilter
+	PrefixFilter  *prefixcomp.PrimaryFilterAST
 	RemoteCmd     string
 	Slice         *slicecomp.Slice
 	SortOrder     []SortSpec
@@ -106,35 +106,35 @@ func ParseColumns(s string) mapset.Set[string] {
 	return m
 }
 
-type PrefixFilter struct {
-	originalQuery string
-	orPrefixes    []string
-}
+//type PrefixFilter struct {
+//	originalQuery string
+//	orPrefixes    []string
+//}
+//
+//func (p *PrefixFilter) IsAll() bool {
+//	return len(p.orPrefixes) == 1 && (p.orPrefixes[0] == "*" || p.orPrefixes[0] == "@")
+//}
+//
+//func (p *PrefixFilter) Count() int {
+//	return len(p.orPrefixes)
+//}
+//
+//func (p *PrefixFilter) PrefixAt(idx int) string {
+//	return p.orPrefixes[idx]
+//}
 
-func (p *PrefixFilter) IsAll() bool {
-	return len(p.orPrefixes) == 1 && (p.orPrefixes[0] == "*" || p.orPrefixes[0] == "@")
-}
-
-func (p *PrefixFilter) Count() int {
-	return len(p.orPrefixes)
-}
-
-func (p *PrefixFilter) PrefixAt(idx int) string {
-	return p.orPrefixes[idx]
-}
-
-func ParsePrefixFilter(s string) *PrefixFilter {
-	var prefixes []string
-	parts := strings.Split(s, "|")
-	for _, p := range parts {
-		prefixes = append(prefixes, strings.TrimSpace(p))
-	}
-
-	slices.Sort(prefixes)
-
-	pf := &PrefixFilter{
-		originalQuery: s,
-		orPrefixes:    prefixes,
-	}
-	return pf
-}
+//func ParsePrefixFilter(s string) *PrefixFilter {
+//	var prefixes []string
+//	parts := strings.Split(s, "|")
+//	for _, p := range parts {
+//		prefixes = append(prefixes, strings.TrimSpace(p))
+//	}
+//
+//	slices.Sort(prefixes)
+//
+//	pf := &PrefixFilter{
+//		originalQuery: s,
+//		orPrefixes:    prefixes,
+//	}
+//	return pf
+//}

@@ -37,6 +37,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/deckarep/tips/pkg/prefixcomp"
+
 	"github.com/charmbracelet/log"
 	bolt "go.etcd.io/bbolt"
 )
@@ -146,7 +148,7 @@ func (d *Db[T]) IndexOpaqueItems(ctx context.Context, bucketName string, items [
 }
 
 type DBQuery struct {
-	PrefixFilters *PrefixFilter
+	PrefixFilters *prefixcomp.PrimaryFilterAST
 	PrimaryKeys   []string
 }
 
@@ -184,9 +186,9 @@ func (d *Db[T]) lookupOpaqueItem(bucket *bolt.Bucket, primaryKey string) (*T, er
 func (d *Db[T]) SearchOpaqueItems(ctx context.Context, bucketName string, query DBQuery) ([]T, error) {
 	//cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
-	if query.PrefixFilters.Count() == 0 {
-		panic("query.PrefixFilter must never be empty, in the case of all it must be: *")
-	}
+	//if query.PrefixFilters.Count() == 0 {
+	//	panic("query.PrefixFilter must never be empty, in the case of all it must be: *")
+	//}
 
 	var items []T
 
