@@ -66,9 +66,30 @@ func TestProcessDevicesTable(t *testing.T) {
 		},
 	}
 
+	// Single slice - 0:1
 	tv, err := ProcessDevicesTable(ctx, devList)
 	assert.NoError(t, err)
 
-	// TODO: more robust assertions on the output.
-	assert.Equal(t, len(tv.Rows), 1, "the general table view should have two rows")
+	assert.Equal(t, len(tv.Rows), 1, "the general table view should have a single row")
+
+	// slice from 0:(everything else)
+	cfgCtx.Slice = ParseSlice("0:", 0)
+	tv, err = ProcessDevicesTable(ctx, devList)
+	assert.NoError(t, err)
+
+	assert.Equal(t, len(tv.Rows), 2, "the general table view should have a single row")
+
+	// slice from :1
+	cfgCtx.Slice = ParseSlice(":1", 0)
+	tv, err = ProcessDevicesTable(ctx, devList)
+	assert.NoError(t, err)
+
+	assert.Equal(t, len(tv.Rows), 1, "the general table view should have a single row")
+
+	// slice from 0:50 - overly large slice.
+	cfgCtx.Slice = ParseSlice("0:50", 0)
+	tv, err = ProcessDevicesTable(ctx, devList)
+	assert.NoError(t, err)
+
+	assert.Equal(t, len(tv.Rows), 2, "the general table view should have a single row")
 }
