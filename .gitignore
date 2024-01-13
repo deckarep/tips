@@ -33,6 +33,7 @@ tips
 
 vhs_demos/*.gif
 
-testmode/*.json
+# Unit tests need this file.
+#testmode/*.json
 
 *.db.bolt
