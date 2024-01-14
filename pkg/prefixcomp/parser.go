@@ -5,18 +5,7 @@ import (
 	"strconv"
 
 	"github.com/deckarep/tips/pkg/slicecomp"
-) /*
-
-https://bnfplayground.pauliankline.com/
-
-<primaryfilter> ::= <word> (<ws> <or> <ws> <word> <ws>)* <slice>?
-<slice> ::= "[" <integer>? ":" <integer>? "]"
-# <ws> is just a stand-in for testing on the site, the tokenizer will ignore whitespace completely.
-<ws> ::= " "+ | E
-<or> ::= "|"
-<word> ::= ([a-z] | [A-Z])+
-<integer> ::= [0-9]+
-*/
+)
 
 /*
 https://bnfplayground.pauliankline.com/
