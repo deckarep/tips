@@ -19,6 +19,8 @@ func TestParser_ParsePrefixFilterAll(t *testing.T) {
 	assert.Equal(t, *ast.Slice.From, 5)
 	assert.Equal(t, *ast.Slice.To, 10)
 
+	assert.Equal(t, ast.String(), "PrimaryFilter(Words: *, Slice: (from: 5, to: 10))")
+
 	// Implicit all
 	ast, err = ParsePrimaryFilter("[5:10]")
 	assert.NoError(t, err)
@@ -32,6 +34,8 @@ func TestParser_ParsePrefixFilterAll(t *testing.T) {
 	assert.Equal(t, *ast.Slice.From, 5)
 	assert.Equal(t, *ast.Slice.To, 10)
 
+	assert.Equal(t, ast.String(), "PrimaryFilter(Words: *, Slice: (from: 5, to: 10))")
+
 	// Implicit all NO slice.
 	ast, err = ParsePrimaryFilter("")
 	assert.NoError(t, err)
@@ -42,6 +46,7 @@ func TestParser_ParsePrefixFilterAll(t *testing.T) {
 
 	// Slice is created and correct.
 	assert.False(t, ast.Slice.IsDefined())
+	assert.Equal(t, ast.String(), "PrimaryFilter(Words: *, Slice: <nil-slice>)")
 }
 
 func TestParser_ParsePrefixFilterWords(t *testing.T) {
@@ -60,17 +65,21 @@ func TestParser_ParsePrefixFilterWords(t *testing.T) {
 	assert.Equal(t, *ast.Slice.From, 2)
 	assert.Equal(t, *ast.Slice.To, 19)
 
+	assert.Equal(t, ast.String(), "PrimaryFilter(Words: [foo bar baz], Slice: (from: 2, to: 19))")
+
 	// Words with no slice.
-	ast, err = ParsePrimaryFilter("foo | bar | baz")
+	ast, err = ParsePrimaryFilter("foo | bar")
 	assert.NoError(t, err)
 	assert.NotNil(t, ast)
 
 	// Words are correct.
-	assert.Equal(t, []string{"foo", "bar", "baz"}, ast.Words)
+	assert.Equal(t, []string{"foo", "bar"}, ast.Words)
 
 	// All is true
 	assert.False(t, ast.All)
 
 	// Slice is created and correct.
 	assert.False(t, ast.Slice.IsDefined())
+
+	assert.Equal(t, ast.String(), "PrimaryFilter(Words: [foo bar], Slice: <nil-slice>)")
 }
