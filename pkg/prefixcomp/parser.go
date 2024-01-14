@@ -47,11 +47,6 @@ func ParsePrimaryFilter(input string) (*PrimaryFilterAST, error) {
 	return ast, nil
 }
 
-//// ASTNode represents a node in the AST.
-//type ASTNode interface {
-//	String() string
-//}
-
 // PrimaryFilterAST represents the primary filter syntax.
 type PrimaryFilterAST struct {
 	// When All is true, it represents the '*' and it means ignore the Words entirely.
@@ -99,16 +94,6 @@ func sliceToString(s *slicecomp.Slice) string {
 	return fmt.Sprintf("(from: %s, to: %s)", fromVal, toVal)
 }
 
-//// SliceAST represents the slice syntax.
-//type SliceAST struct {
-//	Start int
-//	End   int
-//}
-
-//func (p *SliceAST) String() string {
-//	return fmt.Sprintf("Slice(Start: %d, End: %d)", p.Start, p.End)
-//}
-
 // Parser represents a parser.
 type Parser struct {
 	tokens  []Token
@@ -134,38 +119,53 @@ func (p *Parser) parsePrimaryFilter() (*PrimaryFilterAST, error) {
 	var slice *slicecomp.Slice
 	var err error
 
-	useAll := true
-	for {
+	// TODO: this logic isn't quite right. FIXME.
+
+	var useAll bool
+
+	if p.isAtEnd() {
+		// In this case, there was an empty token stream. Assume useAll=true!
+		useAll = true
+	} else if p.match(TokenAll) {
+		useAll = true
 		if p.isAtEnd() {
-			break
-		} else if p.match(TokenAll) {
-			useAll = true
-		} else if p.match(TokenWord) {
-			useAll = false
-			words = append(words, p.previous().Value)
-		} else if p.match(TokenOr) {
-			if !p.match(TokenWord) {
-				return nil, fmt.Errorf("expected word after '|' symbol")
-			}
-			words = append(words, p.previous().Value)
+			// Do nothing: the other branches are not taken on purpose.
 		} else if p.match(TokenLeftBracket) {
 			slice, err = p.parseSlice()
 			if err != nil {
 				return nil, err
 			}
-			break
 		} else {
 			return nil, fmt.Errorf("unexpected token: %v", p.peek())
 		}
-	}
-
-	if useAll && len(words) > 0 {
-		return nil, fmt.Errorf("A filter must use either '@' or prefixes but not both")
-	}
-
-	// When no words, assume * was provided.
-	if len(words) == 0 {
+	} else if p.match(TokenLeftBracket) {
+		// Only slice was provided, useAll=true.
 		useAll = true
+		slice, err = p.parseSlice()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		for {
+			if p.isAtEnd() {
+				break
+			} else if p.match(TokenWord) {
+				words = append(words, p.previous().Value)
+			} else if p.match(TokenOr) {
+				if !p.match(TokenWord) {
+					return nil, fmt.Errorf("expected word after '|' symbol")
+				}
+				words = append(words, p.previous().Value)
+			} else if p.match(TokenLeftBracket) {
+				slice, err = p.parseSlice()
+				if err != nil {
+					return nil, err
+				}
+				break
+			} else {
+				return nil, fmt.Errorf("unexpected token: %v", p.peek())
+			}
+		}
 	}
 
 	return &PrimaryFilterAST{All: useAll, Words: words, Slice: slice}, nil
