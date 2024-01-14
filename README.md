@@ -132,6 +132,13 @@ How do I get a list of *all* `devices` or `nodes` in a `tailnet`?
 
 # Find all nodes starting with: 'foo' or 'bar' or 'baz'
 ./tips "foo | bar | baz"
+
+# Lastly, you can also slice the result.
+./tips "[prefix-0] | [prefix-1] ... | [prefix-n] [optional-slice]"
+
+# Does a prefix search on foo OR bar and returns the results from 5 to 10.
+# NOTE: when more than one prefix is provided, this acts as multiple indexed searches.
+./tips "foo | bar [5:10]"
 ```
 
 #### How can I further filter?

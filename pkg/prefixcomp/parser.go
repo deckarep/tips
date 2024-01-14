@@ -118,9 +118,6 @@ func (p *Parser) parsePrimaryFilter() (*PrimaryFilterAST, error) {
 	var words []string
 	var slice *slicecomp.Slice
 	var err error
-
-	// TODO: this logic isn't quite right. FIXME.
-
 	var useAll bool
 
 	if p.isAtEnd() {
