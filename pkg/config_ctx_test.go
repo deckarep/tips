@@ -3,6 +3,8 @@ package pkg
 import (
 	"testing"
 
+	mapset "github.com/deckarep/golang-set/v2"
+
 	"github.com/deckarep/tips/pkg/slicecomp"
 
 	"github.com/stretchr/testify/assert"
@@ -71,4 +73,16 @@ func TestParseSlice(t *testing.T) {
 	if !s.IsDefined() {
 		t.Error("expected slice to be defined")
 	}
+}
+
+func TestParseColumns(t *testing.T) {
+	// Empty string results in nil.
+	s := ParseColumns("")
+	assert.Nil(t, s)
+
+	s = ParseColumns("foo,bar, baz")
+	assert.NotNil(t, s)
+
+	m := mapset.NewSet[string]("foo", "bar", "baz")
+	assert.True(t, m.Equal(s))
 }
