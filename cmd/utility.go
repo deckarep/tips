@@ -31,16 +31,12 @@ func packageCfg(args []string) (*pkg.ConfigCtx, error) {
 				return nil, err
 			}
 			cfgCtx.PrefixFilter = ast
-			// Old parser.
-			//cfgCtx.PrefixFilter = pkg.ParsePrefixFilter("*")
 		} else {
 			ast, err := prefixcomp.ParsePrimaryFilter(args[0])
 			if err != nil {
 				return nil, err
 			}
 			cfgCtx.PrefixFilter = ast
-			// Old parser.
-			//cfgCtx.PrefixFilter = pkg.ParsePrefixFilter(args[0])
 		}
 	} else {
 		ast, err := prefixcomp.ParsePrimaryFilter("*")
@@ -48,8 +44,6 @@ func packageCfg(args []string) (*pkg.ConfigCtx, error) {
 			return nil, err
 		}
 		cfgCtx.PrefixFilter = ast
-		// Old parser.
-		//cfgCtx.PrefixFilter = pkg.ParsePrefixFilter("*")
 	}
 
 	// The 1st arg along with the rest - [1:] when provided is a remote command to execute.
