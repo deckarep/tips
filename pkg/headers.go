@@ -48,9 +48,30 @@ var (
 	HdrTags        = Header{Title: "Tags", MatchName: MatchNameTags}
 	HdrUser        = Header{Title: "User", MatchName: MatchNameUser}
 	HdrVersion     = Header{Title: "Version", MatchName: MatchNameVersion}
-)
 
-var (
+	// AllHeadersList must contain the complete list of headers.
+	AllHeadersList = []Header{
+		HdrAddress,
+		HdrExitStatus,
+		HdrIpv4,
+		HdrIpv6,
+		HdrLastSeenAgo,
+		HdrMachine,
+		HdrNo,
+		HdrTags,
+		HdrUser,
+		HdrVersion,
+	}
+
+	// AllHeadersMap initializes a map of HeaderMatchName to Header.
+	AllHeadersMap = func() map[HeaderMatchName]Header {
+		a := make(map[HeaderMatchName]Header)
+		for _, hdr := range AllHeadersList {
+			a[hdr.MatchName] = hdr
+		}
+		return a
+	}()
+
 	// DefaultColumnSet is the column set that ships out of the box.
 	// Order matters which is why it's created as a slice.
 	DefaultColumnSet = []Header{

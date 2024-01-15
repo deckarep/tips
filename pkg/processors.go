@@ -120,16 +120,38 @@ func ProcessDevicesTable(ctx context.Context, devList []*WrappedDevice) (*Genera
 func getHeaders(ctx context.Context, hasEnrichedInfo bool) []Header {
 	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
-	// TODO: if user requested to INCLUDE it, we need to inject it.
-
+	uniqHeaders := make(map[HeaderMatchName]Header)
 	var headers []Header
-	for _, h := range DefaultColumnSet {
-		if (h.ReqEnriched && !hasEnrichedInfo) || cfg.ColumnsExclude != nil && cfg.ColumnsExclude.Contains(string(h.MatchName)) {
+
+	// addHdr ensures duplicate headers are not added needlessly.
+	var addHdr = func(hdr Header) {
+		// Only add what is uniq.
+		if _, exists := uniqHeaders[hdr.MatchName]; !exists {
+			headers = append(headers, hdr)
+
+			// Track headers to ensure there are no duplicate columns.
+			uniqHeaders[hdr.MatchName] = hdr
+		}
+	}
+
+	for _, hdr := range DefaultColumnSet {
+		if (hdr.ReqEnriched && !hasEnrichedInfo) || cfg.ColumnsExclude != nil && cfg.ColumnsExclude.Contains(string(hdr.MatchName)) {
 			// 1. Exclude this header if it requires enriched data and we don't have it.
 			// 2. Or when user requested to not include it.
 			continue
 		}
-		headers = append(headers, h)
+
+		addHdr(hdr)
+	}
+
+	// Any additionally requested headers append at the tail (for now).
+	if cfg.Columns != nil {
+		cfg.Columns.Each(func(matchName string) bool {
+			if hdr, exists := AllHeadersMap[HeaderMatchName(matchName)]; exists {
+				addHdr(hdr)
+			}
+			return false
+		})
 	}
 
 	return headers
