@@ -39,6 +39,7 @@ type (
 
 var (
 	HdrAddress     = Header{Title: "Address", MatchName: MatchNameAddress}
+	HdrAuthorized  = Header{Title: "Authorized", MatchName: MatchNameAuthorized}
 	HdrExitStatus  = Header{Title: "Exit Status", MatchName: MatchNameExitStatus}
 	HdrIpv4        = Header{Title: "Ipv4", MatchName: MatchNameIpv4}
 	HdrIpv6        = Header{Title: "Ipv6", MatchName: MatchNameIpv6}
@@ -52,6 +53,7 @@ var (
 	// AllHeadersList must contain the complete list of headers.
 	AllHeadersList = []Header{
 		HdrAddress,
+		HdrAuthorized,
 		HdrExitStatus,
 		HdrIpv4,
 		HdrIpv6,

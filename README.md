@@ -158,7 +158,7 @@ How do I get a list of *all* `devices` or `nodes` in a `tailnet`?
 
 #### How do I get more details?
 ```sh
-# Not yet supported
+# Not yet supported, need to think about what this even does.
 # ./tips --details
 ```
 
@@ -184,10 +184,16 @@ How do I get a list of *all* `devices` or `nodes` in a `tailnet`?
 ./tips --slice '[5:]'
 ```
 
-How do I limit which columns to show?
+How do I add/remove columns to be returned?
 ```sh
-# Not yet supported
-# ./tips --columns 'name,address'
+# List one or more columns to additionally include beyond the default
+# ./tips --columns 'ipv6, authorized'
+
+# By prefixing with a - (dash) you can exclude one or more columns
+# ./tips --columns '-ipv4,-user'
+
+# Or you can do a combination of include and exclude
+# ./tips --columns 'ipv6, -user'
 ```
 
 How do I generate a JSON-based result
