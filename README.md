@@ -190,7 +190,7 @@ How do I add/remove columns to be returned?
 # ./tips --columns 'ipv6, authorized'
 
 # By prefixing with a - (dash) you can exclude one or more columns
-# ./tips --columns '-ipv4,-user'
+# ./tips --columns '-ipv4, -user'
 
 # Or you can do a combination of include and exclude
 # ./tips --columns 'ipv6, -user'
