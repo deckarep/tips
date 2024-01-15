@@ -112,6 +112,12 @@ professional or commercial setting?
 ### How To Guide
 Here is a list of common commands from easy to more advanced.
 
+How do I use this command-line tool?
+```sh
+# Here is the general layout, how to use it as everything practically everything is optional by default.
+./tips [optional-primary-devices-filter] [optional-remote-command] --flags param0, param1, --moreflags
+```
+
 How do I get a list of *all* `devices` or `nodes` in a `tailnet`?
 ```sh
 ./tips
