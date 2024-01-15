@@ -23,6 +23,7 @@ production nodes can benefit from this tool. `tips` is the go-to tool to quickly
 commands, and manage your nodes collectively using an effective pattern modeled after cloud automation software.
 
 ### Features
+* 😎 - A richer experience when ran on a node *within* the tailnet network
 * 📝 - Nearly zero-config managed via [Viper](https://github.com/spf13/viper) and [Cobra](https://github.com/spf13/cobra), with sane defaults
 * ⚡️ - Caching and indexed via [BBolt](https://github.com/etcd-io/bbolt) key-value store for fast queries
 * 🔎 - Powerful complex filtering expression, sorting, slicing and dicing built-in
