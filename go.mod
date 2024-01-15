@@ -3,7 +3,7 @@ module github.com/deckarep/tips
 go 1.21.3
 
 require (
-	github.com/brianvoe/gofakeit/v6 v6.26.3
+	github.com/brianvoe/gofakeit/v6 v6.26.4
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/charmbracelet/log v0.3.1
 	github.com/deckarep/golang-set/v2 v2.6.0
