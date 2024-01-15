@@ -81,6 +81,7 @@ func TestParseColumns(t *testing.T) {
 	assert.NotNil(t, i)
 	assert.NotNil(t, e)
 
+	// Include set.
 	i, e = ParseColumns("foo,bar, baz")
 	assert.NotNil(t, i)
 	assert.NotNil(t, e)
@@ -88,4 +89,24 @@ func TestParseColumns(t *testing.T) {
 
 	m := mapset.NewSet[string]("foo", "bar", "baz")
 	assert.True(t, m.Equal(i))
+
+	// Exclude set.
+	i, e = ParseColumns("-foo,-bar, -baz")
+	assert.NotNil(t, i)
+	assert.NotNil(t, e)
+	assert.Equal(t, i.Cardinality(), 0)
+
+	m = mapset.NewSet[string]("foo", "bar", "baz")
+	assert.True(t, m.Equal(e))
+
+	// Both include and exclude set.
+	i, e = ParseColumns("-foo, bar, -baz, bon, -fee")
+	assert.NotNil(t, i)
+	assert.NotNil(t, e)
+
+	m = mapset.NewSet[string]("bar", "bon")
+	assert.True(t, m.Equal(i))
+
+	m = mapset.NewSet[string]("foo", "fee", "baz")
+	assert.True(t, m.Equal(e))
 }

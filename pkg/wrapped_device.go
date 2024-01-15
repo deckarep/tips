@@ -27,6 +27,9 @@ func (w *WrappedDevice) Key() string {
 	return w.Name
 }
 
+// EvalColumnField is invoked for each "column" requested per device field. This code was built purposely to be dynamic
+// and if it gets more complex it may be worthwhile to break the code up further into discreet functions per field.
+// One additional thing I've been considering is the memoize of any redundant "heavy" work but so far there is none here.
 func (w *WrappedDevice) EvalColumnField(ctx context.Context, idx int, headerMatchName HeaderMatchName) string {
 	//cfg := CtxAsConfig(ctx, CtxKeyConfig)
 	enriched := w.EnrichedInfo != nil
@@ -89,6 +92,7 @@ func (w *WrappedDevice) EvalColumnField(ctx context.Context, idx int, headerMatc
 		version := fmt.Sprintf("%s - %s", strings.Split(w.ClientVersion, "-")[0], w.OS)
 		return version
 	default:
-		panic("unknown MatchName provided: " + headerMatchName)
+		panic(`unknown MatchName column requested (a new MatchName filed was likely introduced but not 
+handled here): ` + headerMatchName)
 	}
 }
