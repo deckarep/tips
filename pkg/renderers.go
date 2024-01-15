@@ -158,9 +158,9 @@ func renderTableProlog(ctx context.Context, tableView *GeneralTableView, w io.Wr
 	fmt.Fprint(w, ui.Styles.Faint.Render("Query: "))
 	fmt.Fprintln(w, ui.Styles.Bold.Render(tableView.Query))
 
-	if len(tableView.DNSName) > 0 {
-		fmt.Fprint(w, ui.Styles.Faint.Render(fmt.Sprintf("Self (%d): ", tableView.SelfView.Index)))
-		fmt.Fprintln(w, ui.Styles.Bold.Render(tableView.SelfView.DNSName))
+	if tableView.Self != nil && len(tableView.Self.DNSName) > 0 {
+		fmt.Fprint(w, ui.Styles.Faint.Render(fmt.Sprintf("Self (%d): ", tableView.Self.Index)))
+		fmt.Fprintln(w, ui.Styles.Bold.Render(tableView.Self.DNSName))
 	}
 
 	return nil

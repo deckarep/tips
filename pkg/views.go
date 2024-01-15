@@ -56,7 +56,7 @@ type DevicesTable struct {
 type GeneralTableView struct {
 	ContextView
 	TailnetView
-	SelfView
+	Self    *SelfView
 	Headers []Header
 	Rows    [][]string
 }

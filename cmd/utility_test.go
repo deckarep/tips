@@ -41,7 +41,7 @@ func TestGetHosts(t *testing.T) {
 	tv := &pkg.GeneralTableView{
 		ContextView: pkg.ContextView{},
 		TailnetView: pkg.TailnetView{},
-		SelfView:    pkg.SelfView{},
+		Self:        &pkg.SelfView{},
 		Headers:     []pkg.Header{},
 		Rows: [][]string{
 			{"a", "a1", "a2", "a3", "a4", "a5"},

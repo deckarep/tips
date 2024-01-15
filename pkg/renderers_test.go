@@ -35,7 +35,7 @@ func TestRenderIPs(t *testing.T) {
 	tv := &GeneralTableView{
 		ContextView: ContextView{},
 		TailnetView: TailnetView{},
-		SelfView:    SelfView{},
+		Self:        &SelfView{},
 		Rows: [][]string{
 			{"foo", "bar", "127.0.0.1"},
 			{"coo", "car", "127.0.0.2"},
@@ -58,7 +58,7 @@ func TestRenderJson(t *testing.T) {
 	tv := &GeneralTableView{
 		ContextView: ContextView{},
 		TailnetView: TailnetView{},
-		SelfView:    SelfView{},
+		Self:        &SelfView{},
 		Headers: []Header{
 			HdrNo, HdrMachine, HdrIpv4,
 		},

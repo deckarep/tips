@@ -100,10 +100,10 @@ func ProcessDevicesTable(ctx context.Context, devList []*WrappedDevice) (*Genera
 			// This should represent the size of the entire result-set.
 			TotalMachines: len(devList),
 		},
-		SelfView: SelfView{
-			Index:   0,
-			DNSName: "foo.bar.3234.dns.name.",
-		},
+		//SelfView: SelfView{
+		//	Index:   0,
+		//	DNSName: "foo.bar.3234.dns.name.",
+		//},
 		Headers: hdrs,
 	}
 
@@ -111,6 +111,12 @@ func ProcessDevicesTable(ctx context.Context, devList []*WrappedDevice) (*Genera
 	tbl.Rows = make([][]string, 0, len(slicedDevList))
 
 	for idx, dev := range slicedDevList {
+		if dev.EnrichedInfo != nil && dev.EnrichedInfo.IsSelf {
+			tbl.Self = &SelfView{
+				Index:   idx,
+				DNSName: dev.Name,
+			}
+		}
 		tbl.Rows = append(tbl.Rows, getRow(ctx, idx, hdrs, dev))
 	}
 
