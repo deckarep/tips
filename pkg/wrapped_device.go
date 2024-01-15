@@ -31,12 +31,20 @@ func (w *WrappedDevice) EvalColumnField(ctx context.Context, idx int, headerMatc
 	//cfg := CtxAsConfig(ctx, CtxKeyConfig)
 	enriched := w.EnrichedInfo != nil
 
+	// Safely return an address at index.
+	var addrAtIndex = func(idx int) string {
+		if idx >= 0 && idx < len(w.Addresses) {
+			return w.Addresses[idx]
+		}
+		return "n/a"
+	}
+
 	switch headerMatchName {
 	case MatchNameAddress:
 		addrs := strings.Join(w.Addresses, ", ")
 		return addrs
 	case MatchNameIpv4:
-		return w.Addresses[0]
+		return addrAtIndex(0)
 	case MatchNameAuthorized:
 		return fmt.Sprintf("%t", w.Authorized)
 	case MatchNameBlocksIncomingConnections:
@@ -54,7 +62,7 @@ func (w *WrappedDevice) EvalColumnField(ctx context.Context, idx int, headerMatc
 	case MatchNameHostname:
 		return w.Hostname
 	case MatchNameIpv6:
-		return w.Addresses[1]
+		return addrAtIndex(1)
 	case MatchNameLastSeen:
 		return fmt.Sprintf("%s", w.LastSeen)
 	case MatchNameName, MatchNameMachine:

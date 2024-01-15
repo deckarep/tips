@@ -36,11 +36,6 @@ import (
 	"time"
 )
 
-const (
-	// PrimaryFilterAll basically means glob: *, but since this expands in the terminal we use @
-	PrimaryFilterAll = "@"
-)
-
 type TailscaleAPICfgCtx struct {
 	Timeout time.Duration
 
