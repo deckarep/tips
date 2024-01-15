@@ -77,12 +77,15 @@ func TestParseSlice(t *testing.T) {
 
 func TestParseColumns(t *testing.T) {
 	// Empty string results in nil.
-	s := ParseColumns("")
-	assert.Nil(t, s)
+	i, e := ParseColumns("")
+	assert.NotNil(t, i)
+	assert.NotNil(t, e)
 
-	s = ParseColumns("foo,bar, baz")
-	assert.NotNil(t, s)
+	i, e = ParseColumns("foo,bar, baz")
+	assert.NotNil(t, i)
+	assert.NotNil(t, e)
+	assert.Equal(t, e.Cardinality(), 0)
 
 	m := mapset.NewSet[string]("foo", "bar", "baz")
-	assert.True(t, m.Equal(s))
+	assert.True(t, m.Equal(i))
 }

@@ -57,6 +57,14 @@ type GeneralTableView struct {
 	ContextView
 	TailnetView
 	SelfView
-	Headers []string
+	Headers []Header
 	Rows    [][]string
+}
+
+func (g *GeneralTableView) HeaderTitles() []string {
+	var names []string
+	for _, hdr := range g.Headers {
+		names = append(names, hdr.Title)
+	}
+	return names
 }

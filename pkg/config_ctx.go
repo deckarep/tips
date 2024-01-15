@@ -60,25 +60,26 @@ type TailscaleCLICfgCtx struct {
 }
 
 type ConfigCtx struct {
-	Basic         bool
-	CacheTimeout  time.Duration
-	Columns       mapset.Set[string]
-	Concurrency   int
-	Filters       filtercomp.AST
-	IPsOutput     bool
-	IPsDelimiter  string
-	JsonOutput    bool
-	NoCache       bool
-	NoColor       bool
-	PrefixFilter  *prefixcomp.PrimaryFilterAST
-	RemoteCmd     string
-	Slice         *slicecomp.Slice
-	SortOrder     []SortSpec
-	Tailnet       string
-	CachedElapsed time.Duration
-	TailscaleAPI  TailscaleAPICfgCtx
-	TailscaleCLI  TailscaleCLICfgCtx
-	Page          int
+	Basic          bool
+	CacheTimeout   time.Duration
+	Columns        mapset.Set[string]
+	ColumnsExclude mapset.Set[string]
+	Concurrency    int
+	Filters        filtercomp.AST
+	IPsOutput      bool
+	IPsDelimiter   string
+	JsonOutput     bool
+	NoCache        bool
+	NoColor        bool
+	PrefixFilter   *prefixcomp.PrimaryFilterAST
+	RemoteCmd      string
+	Slice          *slicecomp.Slice
+	SortOrder      []SortSpec
+	Tailnet        string
+	CachedElapsed  time.Duration
+	TailscaleAPI   TailscaleAPICfgCtx
+	TailscaleCLI   TailscaleCLICfgCtx
+	Page           int
 
 	TestMode bool
 }
@@ -91,17 +92,23 @@ func (c *ConfigCtx) IsRemoteCommand() bool {
 	return len(c.RemoteCmd) > 0
 }
 
-func ParseColumns(s string) mapset.Set[string] {
-	if len(strings.TrimSpace(s)) == 0 {
-		return nil
-	}
+func ParseColumns(s string) (mapset.Set[string], mapset.Set[string]) {
+	i := mapset.NewSet[string]()
+	e := mapset.NewSet[string]()
 
-	m := mapset.NewSet[string]()
+	if len(strings.TrimSpace(s)) == 0 {
+		return i, e
+	}
 
 	parts := strings.Split(s, ",")
 	for _, p := range parts {
-		m.Add(strings.ToLower(strings.TrimSpace(p)))
+		colName := strings.ToLower(strings.TrimSpace(p))
+		if strings.HasPrefix(colName, "-") {
+			e.Add(colName[1:])
+		} else {
+			i.Add(colName)
+		}
 	}
 
-	return m
+	return i, e
 }

@@ -42,7 +42,7 @@ func TestGetHosts(t *testing.T) {
 		ContextView: pkg.ContextView{},
 		TailnetView: pkg.TailnetView{},
 		SelfView:    pkg.SelfView{},
-		Headers:     []string{},
+		Headers:     []pkg.Header{},
 		Rows: [][]string{
 			{"a", "a1", "a2", "a3", "a4", "a5"},
 			{"b", "b1", "b2", "b3", "b4", "b5"},

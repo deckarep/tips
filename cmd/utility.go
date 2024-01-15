@@ -55,7 +55,9 @@ func packageCfg(args []string) (*pkg.ConfigCtx, error) {
 	// Populate flags
 	cfgCtx.Basic = viper.GetBool("basic")
 	cfgCtx.CacheTimeout = viper.GetDuration("cache_timeout")
-	cfgCtx.Columns = pkg.ParseColumns(viper.GetString("columns"))
+	incCols, exCols := pkg.ParseColumns(viper.GetString("columns"))
+	cfgCtx.Columns = incCols
+	cfgCtx.ColumnsExclude = exCols
 	cfgCtx.Concurrency = viper.GetInt("concurrency")
 	ast, err := pkg.ParseFilter(viper.GetString("filter"))
 	if err != nil {

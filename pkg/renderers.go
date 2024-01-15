@@ -114,7 +114,7 @@ func RenderASCIITableView(ctx context.Context, tableView *GeneralTableView, w io
 
 	// Write the headers.
 	for _, h := range tableView.Headers {
-		fmt.Fprint(tw, h+"\t") // Use \t as the column delimiter
+		fmt.Fprint(tw, h.Title+"\t") // Use \t as the column delimiter
 	}
 	fmt.Fprintln(tw) // End of the header line
 
@@ -205,7 +205,7 @@ func renderTableBody(ctx context.Context, tableView *GeneralTableView, w io.Writ
 				return OddRowStyle
 			}
 		}).
-		Headers(tableView.Headers...).
+		Headers(tableView.HeaderTitles()...).
 		Rows(tableView.Rows...)
 
 	// Finally, render the table

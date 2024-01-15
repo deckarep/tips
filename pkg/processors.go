@@ -28,31 +28,16 @@ package pkg
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/deckarep/tips/pkg/ui"
 
 	"github.com/charmbracelet/log"
-
-	"github.com/dustin/go-humanize"
-)
-
-const (
-	NoHdr       = "No"
-	MachineHdr  = "Machine"
-	AddressHdr  = "Address"
-	TagsHdr     = "Tags"
-	UserHdr     = "User"
-	VersionHdr  = "Version"
-	LastSeenHdr = "LastSeen"
-	ExitNodeHdr = "Exit Node"
 )
 
 var (
-	DefaultHeader = []string{NoHdr, MachineHdr, AddressHdr, TagsHdr, UserHdr, VersionHdr, ExitNodeHdr, LastSeenHdr}
-	nowField      = fmt.Sprintf("%s now", ui.Styles.Green.Render(ui.Symbols.Dot))
-	checkField    = fmt.Sprintf("%s yes", ui.Styles.Green.Render(ui.Symbols.Checkmark))
+	nowField   = fmt.Sprintf("%s now", ui.Styles.Green.Render(ui.Symbols.Dot))
+	checkField = fmt.Sprintf("%s yes", ui.Styles.Green.Render(ui.Symbols.Checkmark))
 )
 
 // ProcessDevicesTable will apply sorting (if required), slicing (if required) and the massage/transformation of data to produce a final
@@ -101,6 +86,8 @@ func ProcessDevicesTable(ctx context.Context, devList []*WrappedDevice) (*Genera
 		}
 	}
 
+	hdrs := getHeaders(ctx, hasEnrichedInfo)
+
 	// 3. Massage/Transform - final transformations here.
 	tbl := &GeneralTableView{
 		ContextView: ContextView{
@@ -117,64 +104,43 @@ func ProcessDevicesTable(ctx context.Context, devList []*WrappedDevice) (*Genera
 			Index:   0,
 			DNSName: "foo.bar.3234.dns.name.",
 		},
-		Headers: getHeaders(hasEnrichedInfo),
+		Headers: hdrs,
 	}
 
 	// Pre-alloc size.
 	tbl.Rows = make([][]string, 0, len(slicedDevList))
 
 	for idx, dev := range slicedDevList {
-		tbl.Rows = append(tbl.Rows, getRow(idx, dev))
+		tbl.Rows = append(tbl.Rows, getRow(ctx, idx, hdrs, dev))
 	}
 
 	return tbl, nil
 }
 
-func getHeaders(hasEnrichedInfo bool) []string {
-	// TODO: I need to remove columns based on --columns flag.
+func getHeaders(ctx context.Context, hasEnrichedInfo bool) []Header {
+	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 
-	// Currently there's no difference on the headers returned when enrichedResults are present.
-	if hasEnrichedInfo {
-		return DefaultHeader
+	// TODO: if user requested to INCLUDE it, we need to inject it.
+
+	var headers []Header
+	for _, h := range DefaultColumnSet {
+		if (h.ReqEnriched && !hasEnrichedInfo) || cfg.ColumnsExclude != nil && cfg.ColumnsExclude.Contains(string(h.MatchName)) {
+			// 1. Exclude this header if it requires enriched data and we don't have it.
+			// 2. Or when user requested to not include it.
+			continue
+		}
+		headers = append(headers, h)
 	}
-	return DefaultHeader
+
+	return headers
 }
 
-func getRow(idx int, d *WrappedDevice) []string {
-	// TODO: I need to remove columns based on --columns flag.
+func getRow(ctx context.Context, idx int, headers []Header, d *WrappedDevice) []string {
+	var results []string
 
-	var (
-		hasExitNodeOption = "no"
-		version           = fmt.Sprintf("%s - %s", strings.Split(d.ClientVersion, "-")[0], d.OS)
-
-		timeAgo = humanize.Time(d.LastSeen.Time)
-		// Remove all tag: prefixes, and join the tags as a comma delimited string.
-		tags = strings.Replace(strings.Join(d.Tags, ", "), "tag:", "", -1)
-
-		// d.Name is the fully qualified DNS name, but we just shorten it and this is the name used
-		// that takes precedence when the user overrides the name.
-		easyName = strings.Split(d.Name, ".")[0]
-	)
-
-	seenAgo := timeAgo
-	//if strings.Contains(seenAgo, "seconds") {
-	//	// https://github.com/tailscale/tailscale/pull/3534/files
-	//	seenAgo = fmt.Sprintf("• %s", seenAgo)
-	//}
-
-	num := fmt.Sprintf("%04d", idx)
-
-	// Enriched results are only available when run from a node that is in the tailnet cluster itself.
-	// In other words, the external Tailscale API only provides so much data.
-
-	if enrichedDev := d.EnrichedInfo; enrichedDev != nil {
-		if enrichedDev.Online {
-			seenAgo = nowField
-		}
-		if enrichedDev.HasExitNodeOption {
-			hasExitNodeOption = checkField
-		}
+	for _, hdr := range headers {
+		results = append(results, d.EvalColumnField(ctx, idx, hdr.MatchName))
 	}
 
-	return []string{num, easyName, d.Addresses[0], tags, d.User, version, hasExitNodeOption, seenAgo}
+	return results
 }

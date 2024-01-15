@@ -59,8 +59,8 @@ func TestRenderJson(t *testing.T) {
 		ContextView: ContextView{},
 		TailnetView: TailnetView{},
 		SelfView:    SelfView{},
-		Headers: []string{
-			"MY", "HEADER", "HERE",
+		Headers: []Header{
+			HdrNo, HdrMachine, HdrIpv4,
 		},
 		Rows: [][]string{
 			{"foo", "bar", "127.0.0.1"},
