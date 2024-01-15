@@ -134,7 +134,7 @@ var rootCmd = &cobra.Command{
 
 		ctx = context.WithValue(ctx, pkg.CtxKeyConfig, cfgCtx)
 		// CONSIDER: should this show all flags?
-		ctx = context.WithValue(ctx, pkg.CtxKeyUserQuery, fmt.Sprintf("%s %s", cfgCtx.PrefixFilter, cfgCtx.RemoteCmd))
+		ctx = context.WithValue(ctx, pkg.CtxKeyUserQuery, fmt.Sprintf("%s %s", cfgCtx.PrefixFilter.Query(), cfgCtx.RemoteCmd))
 
 		client := pkg.NewClient(ctx)
 		if useOauth {

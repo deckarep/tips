@@ -1,8 +1,10 @@
 package prefixcomp
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/deckarep/tips/pkg/slicecomp"
 )
@@ -44,11 +46,36 @@ type PrimaryFilterAST struct {
 	Slice *slicecomp.Slice
 }
 
+func (p *PrimaryFilterAST) Query() string {
+	var filterOn = "*"
+	if !p.All {
+		filterOn = strings.Join(p.Words, " | ")
+	}
+
+	var buf bytes.Buffer
+	if p.Slice != nil {
+		buf.WriteString("[")
+		if p.Slice.From != nil {
+			buf.WriteString(fmt.Sprintf("%d", *p.Slice.From))
+		}
+		buf.WriteString(":")
+		if p.Slice.To != nil {
+			buf.WriteString(fmt.Sprintf("%d", *p.Slice.To))
+		}
+		buf.WriteString("]")
+	} else {
+		buf.WriteString("")
+	}
+
+	return fmt.Sprintf("%s%s", filterOn, buf.String())
+}
+
 func (p *PrimaryFilterAST) String() string {
 	var filterOn = "*"
 	if !p.All {
 		filterOn = fmt.Sprintf("%v", p.Words)
 	}
+
 	return fmt.Sprintf("PrimaryFilter(Words: %v, Slice: %s)", filterOn, sliceToString(p.Slice))
 }
 
