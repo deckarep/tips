@@ -100,10 +100,6 @@ func ProcessDevicesTable(ctx context.Context, devList []*WrappedDevice) (*Genera
 			// This should represent the size of the entire result-set.
 			TotalMachines: len(devList),
 		},
-		//SelfView: SelfView{
-		//	Index:   0,
-		//	DNSName: "foo.bar.3234.dns.name.",
-		//},
 		Headers: hdrs,
 	}
 

@@ -194,15 +194,6 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-//func dumpColors() {
-//	for i := 0; i < 256; i++ {
-//		s := lipgloss.NewStyle().
-//			Bold(true).
-//			Foreground(lipgloss.Color(fmt.Sprintf("%d", i)))
-//		fmt.Println(s.Render(fmt.Sprintf("Color: %d", i)))
-//	}
-//}
-
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		log.Print("root command failed", "error", err)

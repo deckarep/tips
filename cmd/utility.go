@@ -19,7 +19,6 @@ func packageCfg(args []string) (*pkg.ConfigCtx, error) {
 
 	const (
 		allFilterCLI = "@" // User uses this on the CLI because * expands in the shell.
-		allFilter    = "*" // So bottom line, use this in the codebase.
 	)
 
 	// Parse positional args here
