@@ -66,8 +66,10 @@ func packageCfg(args []string) (*pkg.ConfigCtx, error) {
 	cfgCtx.IPsOutput = viper.GetBool("ips")
 	cfgCtx.IPsDelimiter = viper.GetString("delimiter")
 	cfgCtx.JsonOutput = viper.GetBool("json")
+	cfgCtx.Stderr = viper.GetBool("stderr")
 	cfgCtx.NoCache = viper.GetBool("nocache")
-	cfgCtx.NoColor = viper.GetBool("nocolor")
+	// Disabling color for now, it's just not ready.
+	cfgCtx.NoColor = true //viper.GetBool("nocolor")
 	cfgCtx.Page = viper.GetInt("page")
 
 	// When slice was provided in the prefix filter use that.

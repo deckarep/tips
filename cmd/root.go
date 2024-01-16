@@ -51,6 +51,7 @@ var (
 	nocolor       bool
 	slice         string
 	sortOrder     string
+	stderr        bool
 	tailnet       string
 	tipsAPIKey    string
 	useCSSHX      bool
@@ -103,6 +104,8 @@ func init() {
 	bindRootStringFlag(&slice, "slice", "", "", "slices the results after filtering followed by sorting")
 	bindRootStringFlag(&sortOrder, "sort", "s", "",
 		"overrides the default/configured sort order --sort 'machine,address:dsc' the default order is always ascending (asc) for each column")
+	bindRootBoolFlag(&stderr, "stderr",
+		"for remotely execute commands asks tips to include stderr output", false)
 	bindRootStringFlag(&tailnet, "tailnet", "t", "", "the tailnet to operate on (required)")
 	bindRootBoolFlag(&test, "test", "when true runs the tool in test mode with mocked data", false)
 	bindRootStringFlag(&tipsAPIKey, "tips_api_key", "", "", "tailscale api key for remote requests")

@@ -242,6 +242,7 @@ func executeRemoteCmd(ctx context.Context, idx int, host string, alias string, r
 }
 
 func poll(ctx context.Context, w io.Writer, sem <-chan struct{}, allCompletions []*chanCompletions) {
+	cfg := CtxAsConfig(ctx, CtxKeyConfig)
 	var totalCompleted int
 
 	// Loop indefinitely until all totalCompleted are accounted for, then bail.
@@ -281,7 +282,15 @@ func poll(ctx context.Context, w io.Writer, sem <-chan struct{}, allCompletions 
 						break nextCompletion
 					}
 
-					RenderLogLine(ctx, w, stream.idx, stream.stderr, stream.hostname, stream.alias, stream.line)
+					if stream.stderr {
+						if cfg.Stderr {
+							// Optionally render stderr when requested.
+							RenderLogLine(ctx, w, stream.idx, stream.stderr, stream.hostname, stream.alias, stream.line)
+						}
+					} else {
+						// Always render stdout.
+						RenderLogLine(ctx, w, stream.idx, stream.stderr, stream.hostname, stream.alias, stream.line)
+					}
 				case <-time.After(maxCompletionTimeout):
 					// We've waited long enough maybe another completion is ready.
 					break nextCompletion

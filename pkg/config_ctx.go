@@ -70,6 +70,7 @@ type ConfigCtx struct {
 	RemoteCmd      string
 	Slice          *slicecomp.Slice
 	SortOrder      []SortSpec
+	Stderr         bool
 	Tailnet        string
 	CachedElapsed  time.Duration
 	TailscaleAPI   TailscaleAPICfgCtx

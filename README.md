@@ -265,6 +265,12 @@ nodes*. It all boils down to the indexing/caching strategies, and it largely dep
 
 **A:** We have you covered: see the `-c` or `--concurrency` flag.
 
+**Q: When executing remote commands how can I view `stderr` as well as `stdout`?**
+
+**A:** Use the `--stderr` flag.
+
+**A:** Use the `--nocolor` flag.
+
 **Q: How can I disable colored output?**
 
 **A:** See the `--nocolor` flag.
