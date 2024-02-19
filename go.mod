@@ -13,7 +13,7 @@ require (
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.8.4
 	github.com/tailscale/tailscale-client-go v1.15.0
-	github.com/tidwall/gjson v1.17.0
+	github.com/tidwall/gjson v1.17.1
 	go.etcd.io/bbolt v1.3.8
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
 )
