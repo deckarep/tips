@@ -1,7 +1,6 @@
 module github.com/deckarep/tips
 
 go 1.21.3
-
 require (
 	github.com/brianvoe/gofakeit/v6 v6.26.4
 	github.com/charmbracelet/lipgloss v0.9.1
@@ -12,7 +11,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.8.4
-	github.com/tailscale/tailscale-client-go v1.15.0
+	github.com/tailscale/tailscale-client-go v1.16.0
 	github.com/tidwall/gjson v1.17.0
 	go.etcd.io/bbolt v1.3.8
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
@@ -50,9 +49,9 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
-	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/oauth2 v0.15.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/oauth2 v0.17.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
