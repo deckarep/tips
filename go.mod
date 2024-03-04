@@ -11,7 +11,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/tailscale/tailscale-client-go v1.15.0
 	github.com/tidwall/gjson v1.17.0
 	go.etcd.io/bbolt v1.3.8
